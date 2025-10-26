@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HuertoHogar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/CSS/Estilo.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-sm navbar-huerto fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="./index.html">
+                  <img src="/Img/LogoHuerto.png" alt="logo huerto" width="45" height="45" class="me-2" />
+                <span class="brand-text">HuertoHogar</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mynavbar">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="./index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./Productos.html">Productos</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="./Recetas.html">Recetas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./Contacto.html">Contacto</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./Quienes_Somos.html">Quienes Somos</a></li>
+                </ul>
+
+                <form class="d-flex align-items-center">
+                    <input id="buscar-input" class="form-control me-2" type="text" placeholder="Buscar producto..." />
+                    <button id="btn-buscar" class="btn btn-huerto me-3" type="button">Buscar</button>
+
+                    <a href="./Carrito_Compra.html" class="icon-link me-3 position-relative" title="Carrito">
+                        <i class="bi bi-cart3 fs-4"></i>
+                        <span id="carrito-count" class="badge bg-success position-absolute">0</span>
+                    </a>
+
+                    <a href="./Mi_Cuenta.html" class="icon-link position-relative" title="Mi Cuenta">
+                        <i class="bi bi-person-circle fs-4"></i>
+                    </a>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <br>
+    <div>
+        <h1 class="text-center">Recetas Saludables</h1>
+        <br>
+        <p class="text-center">Descubre deliciosas recetas saludables que puedes preparar con los productos frescos de HuertoHogar.<br>
+            Desde ensaladas vibrantes hasta platos principales nutritivos, nuestras recetas están diseñadas para inspirarte a cocinar comidas sabrosas y equilibradas en casa.<br> ¡Explora, prueba y disfruta de la cocina saludable con nosotros!</p>
+    </div>
+
+    <div class="container my-5">
+        <div id="recetas-container" class="row"></div>
+    </div>
+
+    <footer class="footer-custom text-white pt-4 pb-2">
+        <div class="row px-5">
+            <div class="col-md-4 mb-3">
+                <h5>Contacto</h5>
+                <p>Email: contacto@huertohogar.cl</p>
+                <p>Tel: +56 9 1234 5678</p>
+                <p>Dirección: Calle Ejemplo 123, Concepción, Chile</p>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h5>Enlaces útiles</h5>
+                <ul class="list-unstyled">
+                    <li><a href="./index.html" class="text-white text-decoration-none">Inicio</a></li>
+                    <li><a href="./Productos.html" class="text-white text-decoration-none">Productos</a></li>
+                    <li><a href="./Recetas.html" class="text-white text-decoration-none">Recetas</a></li>
+                    <li><a href="https://github.com/xRaven28/HuertoHogar.git" class="text-white text-decoration-none">GitHub de esta página</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h5>Síguenos</h5>
+                <a href="#" class="text-white me-2"><i class="bi bi-facebook"></i> Facebook</a><br>
+                <a href="#" class="text-white me-2"><i class="bi bi-instagram"></i> Instagram</a><br>
+                <a href="#" class="text-white me-2"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+        <hr class="bg-white mx-5">
+        <p class="text-center mb-0">&copy; 2025 Huerto Hogar. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

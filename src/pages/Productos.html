@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productos - HuertoHogar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="/CSS/Estilo.css" rel="stylesheet" />
+    <style>
+        .card-producto {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .card-producto:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .producto-img {
+            height: 200px;
+            object-fit: cover;
+        }
+        .precio {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .sin-stock {
+            opacity: 0.6;
+        }
+        .badge-categoria {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-sm navbar-huerto fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="/index.html">
+                <img src="/Img/LogoHuerto.png" alt="Logo Huerto" width="45" height="45" class="d-inline-block align-text-top me-2" />
+                <span class="brand-text">HuertoHogar</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mynavbar">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/src/pages/Productos.html">Productos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/src/pages/Recetas.html">Recetas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/src/pages/Contacto.html">Contacto</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/src/pages/Quienes_Somos.html">Quienes Somos</a></li>
+                </ul>
+
+                <form class="d-flex align-items-center">
+                    <input id="buscar-input" class="form-control me-2" type="text" placeholder="Buscar producto..." />
+                    <button id="btn-buscar" class="btn btn-huerto me-3" type="button">Buscar</button>
+
+                    <a href="/src/pages/Carrito.html" class="icon-link me-3 position-relative" title="Carrito">
+                        <i class="bi bi-cart3 fs-4"></i>
+                        <span id="carrito-count" class="badge bg-success position-absolute top-0 start-100 translate-middle">0</span>
+                    </a>
+
+                    <a href="/src/pages/Mi_Cuenta.html" class="icon-link position-relative" title="Mi Cuenta">
+                        <i class="bi bi-person-circle fs-4"></i>
+                    </a>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5" style="margin-top: 100px;">
+        <h2 class="text-center mb-4">🛒 Todos los Productos</h2>
+
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6 col-sm-8">
+                <select id="categoria" class="form-select">
+                    <option value="todos">Todas las categorías</option>
+                    <option value="frutas">Frutas</option>
+                    <option value="verduras">Verduras</option>
+                    <option value="Legumbres-Cereales">Legumbres-Cereales</option>
+                    <option value="Lacteos">Lácteos</option>
+                    <option value="otros">Otros</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 col-sm-4 ms-auto">
+                <select id="orden" class="form-select form-select-sm">
+                    <option value="relevancia">Ordenar</option>
+                    <option value="precio-asc">Precio: Menor</option>
+                    <option value="precio-desc">Precio: Mayor</option>
+                    <option value="nombre-asc">Nombre: A - Z</option>
+                    <option value="nombre-desc">Nombre: Z - A</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="container my-5">
+            <div id="productos-container" class="row gy-4 mt-4">
+                <div class="text-center">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Cargando productos...</span>
+                    </div>
+                    <p class="mt-2">Cargando productos...</p>
+                </div>
+            </div>
+            
+            <div id="sin-resultados" class="text-center d-none">
+                <div class="alert alert-warning">
+                    <i class="bi bi-search me-2"></i>
+                    No se encontraron productos que coincidan con tu búsqueda.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer-custom text-white pt-4 pb-2">
+        <div class="container">
+            <div class="row px-5">
+                <div class="col-md-4 mb-3">
+                    <h5>Contacto</h5>
+                    <p>Email: contacto@huertohogar.cl</p>
+                    <p>Tel: +56 9 1234 5678</p>
+                    <p>Dirección: Calle Ejemplo 123, Concepción, Chile</p>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <h5>Enlaces útiles</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-white text-decoration-none">Inicio</a></li>
+                        <li><a href="/src/pages/Productos.html" class="text-white text-decoration-none">Productos</a></li>
+                        <li><a href="/src/pages/Recetas.html" class="text-white text-decoration-none">Recetas</a></li>
+                        <li><a href="https://github.com/xRaven28/HuertoHogar.git" class="text-white text-decoration-none">GitHub de esta página</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <h5>Síguenos</h5>
+                    <a href="#" class="text-white me-2"><i class="bi bi-facebook"></i> Facebook</a><br>
+                    <a href="#" class="text-white me-2"><i class="bi bi-instagram"></i> Instagram</a><br>
+                    <a href="#" class="text-white me-2"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+                </div>
+            </div>
+            <hr class="bg-white mx-5">
+            <p class="text-center mb-0">&copy; 2025 Huerto Hogar. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Datos de productos incluidos directamente
+        const productos = [
+            {
+                id: 1,
+                nombre: "Manzanas Frescas",
+                descripcion: "Manzanas rojas crujientes, perfectas para snacks saludables.",
+                precio: 2500,
+                categoria: "frutas",
+                stock: 15,
+                imagen: "/Img/manzanas.jpg"
+            },
+            {
+                id: 2,
+                nombre: "Zanahorias Orgánicas",
+                descripcion: "Zanahorias frescas cultivadas de forma orgánica.",
+                precio: 1800,
+                categoria: "verduras",
+                stock: 20,
+                imagen: "/Img/zanahorias.jpg"
+            },
+            {
+                id: 3,
+                nombre: "Leche Entera",
+                descripcion: "Leche fresca entera, rica en calcio y vitaminas.",
+                precio: 1200,
+                categoria: "Lacteos",
+                stock: 8,
+                imagen: "/Img/leche.jpg"
+            },
+            {
+                id: 4,
+                nombre: "Lentejas",
+                descripcion: "Lentejas secas, alta en proteína y fibra.",
+                precio: 2200,
+                categoria: "Legumbres-Cereales",
+                stock: 12,
+                imagen: "/Img/lentejas.jpg"
+            },
+            {
+                id: 5,
+                nombre: "Plátanos Maduros",
+                descripcion: "Plátanos perfectamente maduros, ideales para batidos.",
+                precio: 1900,
+                categoria: "frutas",
+                stock: 0,
+                imagen: "/Img/platanos.jpg"
+            },
+            {
+                id: 6,
+                nombre: "Tomates Cherry",
+                descripcion: "Tomates cherry dulces y jugosos, perfectos para ensaladas.",
+                precio: 2800,
+                categoria: "verduras",
+                stock: 18,
+                imagen: "/Img/tomates.jpg"
+            },
+            {
+                id: 7,
+                nombre: "Yogurt Natural",
+                descripcion: "Yogurt natural sin azúcar, probiótico y saludable.",
+                precio: 1500,
+                categoria: "Lacteos",
+                stock: 10,
+                imagen: "/Img/yogurt.jpg"
+            },
+            {
+                id: 8,
+                nombre: "Quinoa",
+                descripcion: "Quinoa orgánica, super alimento rico en proteínas.",
+                precio: 3500,
+                categoria: "Legumbres-Cereales",
+                stock: 6,
+                imagen: "/Img/quinoa.jpg"
+            },
+            {
+                id: 9,
+                nombre: "Naranjas Valencia",
+                descripcion: "Naranjas jugosas y dulces, ricas en vitamina C.",
+                precio: 2300,
+                categoria: "frutas",
+                stock: 14,
+                imagen: "/Img/naranjas.jpg"
+            },
+            {
+                id: 10,
+                nombre: "Espinacas Frescas",
+                descripcion: "Espinacas frescas, ideales para ensaladas y cocinar.",
+                precio: 1600,
+                categoria: "verduras",
+                stock: 16,
+                imagen: "/Img/espinacas.jpg"
+            },
+            {
+                id: 11,
+                nombre: "Queso Fresco",
+                descripcion: "Queso fresco bajo en grasa, perfecto para dietas.",
+                precio: 3200,
+                categoria: "Lacteos",
+                stock: 7,
+                imagen: "/Img/queso.jpg"
+            },
+            {
+                id: 12,
+                nombre: "Miel Pura",
+                descripcion: "Miel 100% pura de abejas, endulzante natural.",
+                precio: 4200,
+                categoria: "otros",
+                stock: 9,
+                imagen: "/Img/miel.jpg"
+            }
+        ];
+
+        let productosFiltrados = [];
+        let carrito = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Página de productos cargada');
+            
+            // Inicializar productos
+            productosFiltrados = [...productos];
+            renderizarProductos();
+            
+            // Funcionalidad de búsqueda
+            const buscarInput = document.getElementById('buscar-input');
+            const btnBuscar = document.getElementById('btn-buscar');
+            
+            function realizarBusqueda() {
+                const termino = buscarInput.value.trim().toLowerCase();
+                filtrarProductos(termino);
+            }
+            
+            btnBuscar.addEventListener('click', realizarBusqueda);
+            buscarInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    realizarBusqueda();
+                }
+            });
+            
+            // Funcionalidad de filtros
+            const categoriaSelect = document.getElementById('categoria');
+            const ordenSelect = document.getElementById('orden');
+            
+            categoriaSelect.addEventListener('change', function() {
+                filtrarPorCategoria(this.value);
+            });
+            
+            ordenSelect.addEventListener('change', function() {
+                ordenarProductos(this.value);
+            });
+
+            // Cargar carrito desde localStorage
+            cargarCarrito();
+        });
+        
+        function cargarCarrito() {
+            const carritoGuardado = localStorage.getItem('carritoHuertoHogar');
+            if (carritoGuardado) {
+                carrito = JSON.parse(carritoGuardado);
+                actualizarContadorCarrito();
+            }
+        }
+        
+        function guardarCarrito() {
+            localStorage.setItem('carritoHuertoHogar', JSON.stringify(carrito));
+        }
+        
+        function actualizarContadorCarrito() {
+            const carritoCount = document.getElementById('carrito-count');
+            const totalItems = carrito.reduce((total, item) => total + item.cantidad, 0);
+            carritoCount.textContent = totalItems;
+        }
+        
+        function filtrarProductos(termino) {
+            if (!termino) {
+                productosFiltrados = [...productos];
+            } else {
+                productosFiltrados = productos.filter(producto => 
+                    producto.nombre.toLowerCase().includes(termino) ||
+                    producto.descripcion.toLowerCase().includes(termino) ||
+                    producto.categoria.toLowerCase().includes(termino)
+                );
+            }
+            
+            const categoria = document.getElementById('categoria').value;
+            if (categoria !== 'todos') {
+                productosFiltrados = productosFiltrados.filter(producto => 
+                    producto.categoria === categoria
+                );
+            }
+            
+            renderizarProductos();
+        }
+        
+        function filtrarPorCategoria(categoria) {
+            if (categoria === 'todos') {
+                productosFiltrados = [...productos];
+            } else {
+                productosFiltrados = productos.filter(producto => 
+                    producto.categoria === categoria
+                );
+            }
+            
+            const termino = document.getElementById('buscar-input').value.trim().toLowerCase();
+            if (termino) {
+                productosFiltrados = productosFiltrados.filter(producto => 
+                    producto.nombre.toLowerCase().includes(termino) ||
+                    producto.descripcion.toLowerCase().includes(termino)
+                );
+            }
+            
+            renderizarProductos();
+        }
+        
+        function ordenarProductos(criterio) {
+            switch(criterio) {
+                case 'precio-asc':
+                    productosFiltrados.sort((a, b) => a.precio - b.precio);
+                    break;
+                case 'precio-desc':
+                    productosFiltrados.sort((a, b) => b.precio - a.precio);
+                    break;
+                case 'nombre-asc':
+                    productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                    break;
+                case 'nombre-desc':
+                    productosFiltrados.sort((a, b) => b.nombre.localeCompare(a.nombre));
+                    break;
+                default:
+                    // Orden por defecto (relevancia)
+                    productosFiltrados = [...productosFiltrados];
+            }
+            renderizarProductos();
+        }
+        
+        function renderizarProductos() {
+            const container = document.getElementById('productos-container');
+            const sinResultados = document.getElementById('sin-resultados');
+            
+            if (productosFiltrados.length === 0) {
+                container.innerHTML = '';
+                sinResultados.classList.remove('d-none');
+                return;
+            }
+            
+            sinResultados.classList.add('d-none');
+            
+            container.innerHTML = productosFiltrados.map(producto => `
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card card-producto ${producto.stock === 0 ? 'sin-stock' : ''}">
+                        <div class="position-relative">
+                            <img src="${producto.imagen}" class="card-img-top producto-img" alt="${producto.nombre}" 
+                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD48L3N2Zz4='">
+                            <span class="badge bg-success badge-categoria">${producto.categoria}</span>
+                            ${producto.stock === 0 ? '<span class="badge bg-danger position-absolute top-0 end-0 m-2">Agotado</span>' : ''}
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${producto.nombre}</h5>
+                            <p class="card-text flex-grow-1">${producto.descripcion}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="precio">$${producto.precio.toLocaleString('es-CL')}</span>
+                                <button class="btn btn-huerto btn-sm ${producto.stock === 0 ? 'disabled' : ''}" 
+                                        onclick="agregarAlCarrito(${producto.id})"
+                                        ${producto.stock === 0 ? 'disabled' : ''}>
+                                    <i class="bi bi-cart-plus"></i> Agregar
+                                </button>
+                            </div>
+                            <small class="text-muted mt-2">Stock: ${producto.stock} unidades</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function agregarAlCarrito(idProducto) {
+            const producto = productos.find(p => p.id === idProducto);
+            if (producto && producto.stock > 0) {
+                // Buscar si el producto ya está en el carrito
+                const itemExistente = carrito.find(item => item.id === idProducto);
+                
+                if (itemExistente) {
+                    itemExistente.cantidad += 1;
+                } else {
+                    carrito.push({
+                        id: producto.id,
+                        nombre: producto.nombre,
+                        precio: producto.precio,
+                        imagen: producto.imagen,
+                        cantidad: 1
+                    });
+                }
+                
+                // Guardar en localStorage y actualizar UI
+                guardarCarrito();
+                actualizarContadorCarrito();
+                
+                // Mostrar feedback visual
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check"></i> Agregado';
+                btn.classList.remove('btn-huerto');
+                btn.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-huerto');
+                }, 2000);
+                
+                console.log('Producto agregado al carrito:', producto.nombre);
+            }
+        }
+    </script>
+</body>
+</html>
