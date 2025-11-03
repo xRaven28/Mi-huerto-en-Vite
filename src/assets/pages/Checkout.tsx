@@ -28,6 +28,7 @@ const Checkout: React.FC = () => {
     const found = usuarios.find(
       (u: any) => u.correo === loginData.correo && u.password === loginData.password
     );
+
     if (found) {
       localStorage.setItem('usuarioActual', JSON.stringify(found));
       setForm((prev) => ({
@@ -36,7 +37,6 @@ const Checkout: React.FC = () => {
         direccion: found.direccion || '',
       }));
       setModo('checkout');
-      alert(`Bienvenido ${found.nombre}`);
     } else {
       alert('Credenciales incorrectas');
     }
@@ -44,17 +44,15 @@ const Checkout: React.FC = () => {
 
   const handleCheckoutSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!form.nombre || !form.direccion || !form.metodoPago) {
       alert('Por favor completa todos los campos');
-      return;
-    }
-    if (carrito.length === 0) {
-      alert('El carrito está vacío');
       return;
     }
 
     const fecha = new Date();
     const codigo = `HH-${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}-${fecha.getTime()}`;
+
     const nuevaBoleta = {
       codigo,
       cliente: form.nombre,
@@ -73,14 +71,13 @@ const Checkout: React.FC = () => {
     setCarrito([]);
     setBoleta(nuevaBoleta);
     setModo('boleta');
-    alert('¡Compra realizada con éxito!');
   };
 
   const descargarPDF = () => {
     if (!boleta) return;
     const contenido = `
       <h2>HuertoHogar - Boleta de Compra</h2>
-      <p><strong>Boleta N°:</strong> ${boleta.codigo}</p>
+      <p><strong>N° Boleta:</strong> ${boleta.codigo}</p>
       <p><strong>Cliente:</strong> ${boleta.cliente}</p>
       <p><strong>Dirección:</strong> ${boleta.direccion}</p>
       <p><strong>Método de pago:</strong> ${boleta.metodoPago}</p>
@@ -111,13 +108,13 @@ const Checkout: React.FC = () => {
 
   if (modo === 'boleta' && boleta) {
     return (
-      <div className="container py-5">
-        <div className="card p-4">
+      <main className="container py-5 checkout-page">
+        <div className="card p-4 shadow-sm">
           <h3 className="text-center text-success mb-3">✅ Compra realizada</h3>
           <p><strong>N° Boleta:</strong> {boleta.codigo}</p>
           <p><strong>Cliente:</strong> {boleta.cliente}</p>
           <p><strong>Total:</strong> ${boleta.total.toLocaleString('es-CL')}</p>
-          <div className="text-center">
+          <div className="text-center mt-3">
             <button className="btn btn-outline-primary me-2" onClick={descargarPDF}>
               Descargar Boleta (PDF)
             </button>
@@ -126,20 +123,20 @@ const Checkout: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (carrito.length === 0) {
     return (
-      <div className="container py-5">
-        <div className="alert alert-warning">Tu carrito está vacío</div>
-      </div>
+      <main className="container py-5 checkout-page">
+        <div className="alert alert-warning text-center">Tu carrito está vacío</div>
+      </main>
     );
   }
 
   return (
-    <div className="container py-5 mt-5">
+    <main className="container py-5 checkout-page">
       <h2 className="text-center mb-4">🧾 Finalizar Compra</h2>
 
       {modo === 'seleccion' && (
@@ -161,26 +158,20 @@ const Checkout: React.FC = () => {
             className="form-control w-50 mx-auto mb-2"
             placeholder="Correo"
             value={loginData.correo}
-            onChange={(e) => setLoginData((prev) => ({ ...prev, correo: e.target.value }))}
+            onChange={(e) => setLoginData({ ...loginData, correo: e.target.value })}
           />
           <input
             className="form-control w-50 mx-auto mb-3"
             type="password"
             placeholder="Contraseña"
             value={loginData.password}
-            onChange={(e) => setLoginData((prev) => ({ ...prev, password: e.target.value }))}
+            onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
           />
           <button className="btn btn-success" onClick={handleLogin}>
             Ingresar
           </button>
           <p className="mt-3">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setModo('seleccion');
-              }}
-            >
+            <a href="#" onClick={(e) => { e.preventDefault(); setModo('seleccion'); }}>
               Volver
             </a>
           </p>
@@ -198,7 +189,7 @@ const Checkout: React.FC = () => {
                   <input
                     className="form-control"
                     value={form.nombre}
-                    onChange={(e) => setForm((prev) => ({ ...prev, nombre: e.target.value }))}
+                    onChange={(e) => setForm({ ...form, nombre: e.target.value })}
                     required
                   />
                 </div>
@@ -207,7 +198,7 @@ const Checkout: React.FC = () => {
                   <input
                     className="form-control"
                     value={form.direccion}
-                    onChange={(e) => setForm((prev) => ({ ...prev, direccion: e.target.value }))}
+                    onChange={(e) => setForm({ ...form, direccion: e.target.value })}
                     required
                   />
                 </div>
@@ -216,7 +207,7 @@ const Checkout: React.FC = () => {
                   <select
                     className="form-select"
                     value={form.metodoPago}
-                    onChange={(e) => setForm((prev) => ({ ...prev, metodoPago: e.target.value }))}
+                    onChange={(e) => setForm({ ...form, metodoPago: e.target.value })}
                     required
                   >
                     <option value="">Seleccione...</option>
@@ -237,31 +228,20 @@ const Checkout: React.FC = () => {
               <h4>Resumen del pedido</h4>
               <div className="border rounded p-3 bg-light">
                 {carrito.map((producto) => (
-                  <div
-                    key={producto.id}
-                    className="d-flex justify-content-between border-bottom py-2"
-                  >
-                    <span>
-                      {producto.name} x{producto.cantidad || 1}
-                    </span>
-                    <span>
-                      $
-                      {(producto.precio * (producto.cantidad || 1)).toLocaleString('es-CL')}
-                    </span>
+                  <div key={producto.id} className="d-flex justify-content-between border-bottom py-2">
+                    <span>{producto.name} x{producto.cantidad || 1}</span>
+                    <span>${(producto.precio * (producto.cantidad || 1)).toLocaleString('es-CL')}</span>
                   </div>
                 ))}
               </div>
               <h4 className="mt-3 text-end text-success">
-                Total:{' '}
-                <span id="total-checkout">
-                  ${calcularTotal().toLocaleString('es-CL')}
-                </span>
+                Total: ${calcularTotal().toLocaleString('es-CL')}
               </h4>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

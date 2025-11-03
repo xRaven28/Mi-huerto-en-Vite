@@ -1,45 +1,146 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
-interface Props {
+interface NavbarProps {
   carritoCount?: number;
   usuario?: any;
+  onLogout?: () => void;
 }
 
-const Navbar: React.FC<Props> = ({ carritoCount = 0, usuario }) => {
+const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0, usuario, onLogout }) => {
+  const [busqueda, setBusqueda] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Guarda la búsqueda y actualiza Productos
+  const handleBuscar = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem("busqueda", busqueda);
+    window.dispatchEvent(new Event("storage"));
+    if (location.pathname !== "/productos") navigate("/productos");
+  };
+
+  // Mantener la búsqueda persistente
+  useEffect(() => {
+    const term = localStorage.getItem("busqueda") || "";
+    setBusqueda(term);
+  }, []);
+
   return (
-    <nav className="navbar navbar-expand-sm navbar-huerto fixed-top">
-      <div className="container-fluid">
-        <Link to="/" className="navbar-brand d-flex align-items-center text-white">
-          <img src="/Img/LogoHuerto.png" alt="logo huerto" width={45} height={45} className="me-2" />
+    <nav className="navbar navbar-expand-lg navbar-huerto fixed-top shadow-sm">
+      <div className="container-fluid px-4">
+        {/* LOGO */}
+        <Link className="navbar-brand d-flex align-items-center" to="/">
+          <img
+            src="/img/LogoHuerto.png"
+            alt="Logo HuertoHogar"
+            width="45"
+            height="45"
+            className="me-2 rounded-circle"
+          />
           <span className="brand-text">HuertoHogar</span>
         </Link>
 
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+        {/* BOTÓN RESPONSIVE */}
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className="collapse navbar-collapse" id="mynavbar">
-          <ul className="navbar-nav me-auto">
-            <li className="nav-item"><Link to="/" className="nav-link text-white">Inicio</Link></li>
-            <li className="nav-item"><Link to="/productos" className="nav-link text-white">Productos</Link></li>
-            <li className="nav-item"><Link to="/recetas" className="nav-link text-white">Recetas</Link></li>
-            <li className="nav-item"><Link to="/contacto" className="nav-link text-white">Contacto</Link></li>
-            <li className="nav-item"><Link to="/admin" className="nav-link text-white">Admin</Link></li>
-          </ul>
+        {/* LINKS */}
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto align-items-center">
+            <li className="nav-item">
+              <Link className="nav-link" to="/">Inicio</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/productos">Productos</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/recetas">Recetas</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/quienes-somos">Quiénes Somos</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/contacto">Contacto</Link>
+            </li>
 
-          <form className="d-flex align-items-center">
-            <input id="buscar-input" className="form-control me-2" type="text" placeholder="Buscar producto..." />
-            <Link to="/carrito" className="icon-link me-3 position-relative text-white">
-              <i className="bi bi-cart3 fs-4"></i>
-              <span className="badge bg-success position-absolute" style={{ top: -8, right: -10 }}>{carritoCount}</span>
-            </Link>
-            {usuario ? (
-              <div className="text-white ms-2">Hola, {usuario.nombre || usuario.correo}</div>
-            ) : (
-              <Link to="/login" className="text-white">Mi Cuenta</Link>
-            )}
-          </form>
+            {/* BUSCADOR */}
+            <li className="nav-item ms-3">
+              <form className="d-flex" onSubmit={handleBuscar}>
+                <input
+                  type="search"
+                  className="form-control"
+                  placeholder="Buscar producto..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  style={{ width: "200px" }}
+                />
+              </form>
+            </li>
+
+            {/* CARRITO */}
+            <li className="nav-item ms-3 position-relative">
+              <Link className="nav-link" to="/carrito">
+                <i className="bi bi-cart4 fs-5"></i>
+                {carritoCount > 0 && (
+                  <span
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
+                    style={{ fontSize: "0.75rem" }}
+                  >
+                    {carritoCount}
+                  </span>
+                )}
+              </Link>
+            </li>
+
+            {/* CUENTA */}
+            <li className="nav-item ms-2">
+              {usuario ? (
+                <div className="dropdown">
+                  <button
+                    className="btn btn-sm btn-outline-light dropdown-toggle"
+                    type="button"
+                    id="dropdownUser"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i className="bi bi-person-circle me-1"></i>
+                    {usuario.nombre.split(" ")[0]}
+                  </button>
+                  <ul className="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <Link className="dropdown-item" to="/mi-cuenta">
+                        Mi Cuenta
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item" to="/historial">
+                        Historial
+                      </Link>
+                    </li>
+                    <li>
+                      <hr className="dropdown-divider" />
+                    </li>
+                    <li>
+                      <button className="dropdown-item text-danger" onClick={onLogout}>
+                        <i className="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              ) : (
+                <Link className="nav-link" to="/mi-cuenta">
+                  <i className="bi bi-person-circle me-1"></i> Mi Cuenta
+                </Link>
+              )}
+            </li>
+          </ul>
         </div>
       </div>
     </nav>

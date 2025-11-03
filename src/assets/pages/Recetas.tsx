@@ -19,13 +19,12 @@ const Recetas: React.FC = () => {
     const [filtroCategoria, setFiltroCategoria] = useState('todas');
     const [busqueda, setBusqueda] = useState('');
 
-    // Datos de ejemplo para recetas
     const recetasEjemplo: Receta[] = [
         {
             id: 1,
             titulo: "Ensalada César con Pollo a la Parrilla",
             descripcion: "Una clásica ensalada César con crujientes lechugas, pollo a la parrilla y nuestro aderezo casero.",
-            imagen: "/img/recetas/ensalada-cesar.jpg",
+            imagen: "/img/ensalada-cesar.jpg",
             tiempoPreparacion: "25 min",
             dificultad: "Fácil",
             categoria: "ensaladas",
@@ -53,7 +52,7 @@ const Recetas: React.FC = () => {
             id: 2,
             titulo: "Sopa de Verduras de la Huerta",
             descripcion: "Sopa nutritiva cargada de verduras frescas de temporada, perfecta para días fríos.",
-            imagen: "/img/recetas/sopa-verduras.jpg",
+            imagen: "/img/sopa-verduras.jpg",
             tiempoPreparacion: "40 min",
             dificultad: "Fácil",
             categoria: "sopas",
@@ -81,7 +80,7 @@ const Recetas: React.FC = () => {
             id: 3,
             titulo: "Wok de Verduras con Tofu",
             descripcion: "Salteado asiático lleno de color y nutrientes, perfecto para una cena ligera y saludable.",
-            imagen: "/img/recetas/wok-verduras.jpg",
+            imagen: "/img/wok-verduras.jpg",
             tiempoPreparacion: "20 min",
             dificultad: "Media",
             categoria: "principales",
@@ -109,7 +108,7 @@ const Recetas: React.FC = () => {
             id: 4,
             titulo: "Batido Energético Verde",
             descripcion: "Batido revitalizante lleno de vitaminas y antioxidantes para empezar el día con energía.",
-            imagen: "/img/recetas/batido-verde.jpg",
+            imagen: "/img/batido-verde.jpg",
             tiempoPreparacion: "5 min",
             dificultad: "Fácil",
             categoria: "bebidas",
@@ -134,7 +133,7 @@ const Recetas: React.FC = () => {
             id: 5,
             titulo: "Hummus de Remolacha",
             descripcion: "Una versión colorida y nutritiva del clásico hummus, perfecta como dip o untable.",
-            imagen: "/img/recetas/hummus-remolacha.jpg",
+            imagen: "/img/hummus-remolacha.jpg",
             tiempoPreparacion: "15 min",
             dificultad: "Fácil",
             categoria: "aperitivos",
@@ -159,7 +158,7 @@ const Recetas: React.FC = () => {
             id: 6,
             titulo: "Ensalada de Quinoa con Aguacate",
             descripcion: "Ensalada completa y nutritiva con quinoa, aguacate y verduras frescas.",
-            imagen: "/img/recetas/ensalada-quinoa.jpg",
+            imagen: "/img/ensalada-quinoa.jpg",
             tiempoPreparacion: "30 min",
             dificultad: "Fácil",
             categoria: "ensaladas",

@@ -1,236 +1,459 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Playfair+Display:wght@700&family=Merriweather:wght@400;700&display=swap');
-
-/* 🎨 Paleta base */
+/* =========================================================
+   🎨 VARIABLES GLOBALES DE COLOR Y FUENTE
+   ========================================================= */
 :root {
-  --verde-oscuro: #2d362e;
-  --verde-claro: #3e4a3f;
-  --dorado: #D68910;
-  --dorado-oscuro: #B4720C;
-  --beige: #FAF5EE;
-  --texto: #3C3C3C;
+  --verde: #7cca33;
+  --verde-oscuro: #3A4137;
+  --verde-claro: #9fdc63;
+  --gris: #f8f9fa;
+  --texto: #333;
+  --dorado: #FFD700;
+  --blanco: #fff;
+  --rojo: #dc3545;
+  --transparente: rgba(0, 0, 0, 0.5);
 }
 
-/* 🧍GENERAL */
 body {
-  background-color: var(--beige);
-  font-family: 'Merriweather', serif;
+  font-family: 'Poppins', Arial, sans-serif;
+  background-color: var(--gris);
   color: var(--texto);
   padding-top: 70px;
-  margin: 0;
-  line-height: 1.6;
 }
 
-/* 🧭 NAVBAR */
-.navbar-huerto {
-  background: var(--verde-oscuro);
-  transition: background 0.3s ease;
-  padding: 12px 24px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-
+/* =========================================================
+   🌿 NAVBAR GENERAL
+   ========================================================= */
 .navbar-huerto.transparent {
-  background: rgba(45, 54, 46, 0.9);
-  backdrop-filter: blur(8px);
+  background: rgba(58, 65, 55, 0.8);
+  backdrop-filter: blur(5px);
 }
 
-.brand-text {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.5px;
+.navbar-huerto .navbar-brand {
+  color: var(--blanco);
+  font-weight: bold;
 }
 
 .navbar-huerto .nav-link {
-  color: #fff !important;
-  margin-right: 16px;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  color: var(--blanco) !important;
+  margin-right: 10px;
 }
 
 .navbar-huerto .nav-link:hover {
   color: var(--dorado) !important;
 }
 
-/* 🔘 BOTONES */
-.btn-huerto,
-.recipe-card button,
-.producto-overlay button {
-  background-color: var(--dorado) !important;
-  color: #fff !important;
+.btn-huerto {
+  background-color: var(--verde);
+  color: var(--blanco);
   border: none;
-  border-radius: 10px;
-  padding: 10px 22px;
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  font-size: 1rem;
-  transition: background 0.3s ease, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
 }
 
-.btn-huerto:hover,
-.recipe-card button:hover,
-.producto-overlay button:hover {
-  background-color: var(--dorado-oscuro) !important;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+.btn-huerto:hover {
+  background-color: var(--verde-claro);
+  transform: scale(1.05);
 }
 
-/* 🛒 ICONOS */
-.icon-link {
-  font-size: 1.4rem;
-  color: #fff;
-  position: relative;
-  transition: color 0.3s ease;
-}
-
-.icon-link:hover {
-  color: var(--dorado);
-}
-
-.badge {
-  font-size: 0.7rem;
-  position: absolute;
-  top: -8px;
-  right: -10px;
-  border-radius: 50%;
-  padding: 5px 7px;
-  background: var(--dorado);
-  color: #fff;
-}
-
-/* 🥕 PRODUCTOS */
-.producto-card {
-  background: #fff;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(214,137,16,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  font-family: 'Lora', serif;
-  overflow: hidden;
-}
-
-.producto-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 20px rgba(214,137,16,0.25);
-}
-
-.producto-img-container {
-  position: relative;
-  overflow: hidden;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-}
-
-.producto-img-container img {
-  width: 100%;
-  height: 220px;
+/* =========================================================
+   🏠 HOME
+   ========================================================= */
+.home-carousel img {
+  filter: brightness(0.85);
   object-fit: cover;
-  transition: transform 0.4s ease;
 }
 
-.producto-card:hover img {
-  transform: scale(1.08);
+.home-ofertas .card {
+  border-radius: 10px;
+  transition: transform 0.3s ease;
 }
 
-.producto-overlay {
+.home-ofertas .card:hover {
+  transform: translateY(-5px);
+}
+
+/* =========================================================
+   🛒 PRODUCTOS
+   ========================================================= */
+.prod-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.prod-card:hover {
+  transform: scale(1.03);
+}
+
+.prod-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.prod-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.25);
+  background: var(--transparente);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.producto-card:hover .producto-overlay {
+.prod-card:hover .prod-overlay {
   opacity: 1;
 }
 
-/* 🖼️ CARRUSEL */
-.carousel-item img {
-  width: 100%;
+/* =========================================================
+   🧾 CARRITO Y CHECKOUT
+   ========================================================= */
+.carrito-tabla img {
+  border-radius: 8px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
-  height: 90vh;
-  filter: brightness(0.9);
 }
 
-/* 📜 FOOTER */
+.table thead {
+  background-color: #d4edda;
+  color: #155724;
+}
+.navbar-huerto .form-control {
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  transition: all 0.2s ease;
+}
+
+.navbar-huerto .form-control:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 5px rgba(124, 202, 51, 0.5);
+}
+
+.navbar-huerto .badge {
+  border: 2px solid white;
+}
+
+
+/* =========================================================
+   💬 CONTACTO
+   ========================================================= */
+.contacto-card {
+  border: 2px solid var(--verde);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.contacto-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================================
+   🥗 RECETAS
+   ========================================================= */
+.receta-card {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.receta-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================================================
+   👨‍💼 ADMIN PANEL
+   ========================================================= */
+.admin-tabla th {
+  background-color: var(--verde);
+  color: white;
+}
+
+.admin-btn {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.admin-btn:hover {
+  transform: scale(1.05);
+}
+
+/* =========================================================
+   🧍‍♂️ MI CUENTA / CREAR CUENTA
+   ========================================================= */
+.cuenta-card {
+  border: 2px solid var(--verde);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.cuenta-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================================
+   🪴 QUIÉNES SOMOS
+   ========================================================= */
+.quienes-img {
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================================================
+   ⚙️ FOOTER
+   ========================================================= */
 .footer-custom {
-  background: linear-gradient(135deg, var(--verde-oscuro), var(--dorado-oscuro));
-  color: #fff;
-  padding: 50px 0 20px;
-  font-family: 'Lora', serif;
-}
-
-.footer-custom h5 {
-  font-weight: 700;
-  font-family: 'Playfair Display', serif;
-  color: var(--dorado);
+  background-color: var(--verde-oscuro);
+  color: var(--blanco);
 }
 
 .footer-custom a {
-  color: #fff;
+  color: var(--blanco);
   text-decoration: none;
-  transition: color 0.3s ease;
 }
 
 .footer-custom a:hover {
   color: var(--dorado);
-  text-decoration: underline;
 }
 
-/* 🍽️ RECETAS */
-.recipe-card {
-  perspective: 1000px;
-  height: 550px;
-  margin-bottom: 30px;
-  font-family: 'Lora', serif;
+.footer-custom hr {
+  border-color: var(--blanco);
+  opacity: 0.3;
 }
 
-.card:hover {
-  box-shadow: 0 4px 10px rgba(214,137,16,0.2);
-  transition: box-shadow 0.3s ease;
+/* =========================================================
+   📱 RESPONSIVE
+   ========================================================= */
+@media (max-width: 768px) {
+  .navbar-huerto .nav-link {
+    margin-right: 0;
+  }
+  .prod-card img {
+    height: 200px;
+  }
+  .footer-custom {
+    text-align: center;
+  }
+}
+/* ===== NAVBAR (HuertoHogar) ===== */
+.navbar-huerto {
+  background: #2f3a2f;        
+  backdrop-filter: saturate(120%) blur(2px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  z-index: 1040;   
+}
+.navbar-huerto .brand-text {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #fff;
+}
+.navbar-huerto .navbar-brand img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+.navbar-huerto .nav-link {
+  color: #e9f2e9 !important;
+  opacity: 0.95;
+  padding: 0.6rem 0.9rem;
+  transition: opacity .15s ease, color .15s ease;
+}
+.navbar-huerto .nav-link:hover {
+  color: #fff !important;
+  opacity: 1;
+  text-decoration: none;
+}
+.navbar-huerto .navbar-toggler {
+  border-color: rgba(255,255,255,0.25);
+}
+.navbar-huerto .navbar-toggler-icon {
+  filter: invert(1);
 }
 
-.recipe-card-inner {
+.navbar-huerto .form-control {
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(0,0,0,0.08);
+  height: 36px;
+  padding: 0 .75rem;
+}
+.navbar-huerto .form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(124,202,51,0.25);
+  border-color: #7cca33;
+}
+.navbar-huerto .btn-outline-light,
+.navbar-huerto .hh-pill {
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #fff;
+  border-radius: 999px;
+  padding: .35rem .9rem;
+  line-height: 1;
+}
+.navbar-huerto .btn-outline-light:hover,
+.navbar-huerto .hh-pill:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+.navbar-huerto .bi-cart4 {
+  color: #fff;
+}
+.navbar-huerto .badge.bg-success {
+  background-color: #7cca33 !important;  
+  border: 2px solid #2f3a2f;           
+}
+
+body { 
+  padding-top: 72px;    
+}
+@media (max-width: 991px) {
+  .navbar-huerto .form-control {
+    width: 100% !important;
+    margin-top: .5rem;
+  }
+  .navbar-huerto .nav-item.ms-3 {
+    margin-left: 0 !important;
+    margin-top: .25rem;
+  }
+}
+/* ===== PRODUCTOS ===== */
+.producto-card {
   position: relative;
+  border-radius: 15px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.producto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.producto-card .card-img-top {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-bottom: 2px solid #eee;
+}
+
+.producto-card .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  transition: transform 0.8s;
-  transform-style: preserve-3d;
-}
-
-.recipe-card.flipped .recipe-card-inner {
-  transform: rotateY(180deg);
-}
-
-.recipe-card-front,
-.recipe-card-back {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  border-radius: 12px;
-  background: #fff;
-}
-
-.recipe-card-back {
-  transform: rotateY(180deg);
-  padding: 1rem;
-  overflow-y: auto;
+  background: rgba(58, 65, 55, 0.8);
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: column;
-  justify-content: flex-start;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
-button,
-.btn,
-.btn-sm,
-.btn-outline-secondary,
-.btn-success,
-.btn-light {
-  background-color: var(--dorado) !important;
-  border: none !important;
-  border-radius: 8px;
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  transition: background 0.3s ease, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+.producto-card:hover .overlay {
+  opacity: 1;
 }
+
+/* Botones dentro de overlay */
+.producto-card .overlay .btn {
+  margin: 5px;
+  width: 140px;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.producto-card .overlay .btn:hover {
+  transform: scale(1.05);
+  background-color: #ffc107 !important;
+  color: #333 !important;
+}
+
+/* Texto */
+.producto-card .card-body h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.producto-card .card-body p {
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.producto-card .card-body h6 {
+  font-size: 1rem;
+  color: #198754;
+}
+
+/* ===== PAGINACIÓN ===== */
+.pagination .page-item.active .page-link {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.pagination .page-link {
+  color: #198754;
+  border-radius: 8px;
+  margin: 0 3px;
+  transition: background-color 0.3s ease;
+}
+
+.pagination .page-link:hover {
+  background-color: #198754;
+  color: white;
+}
+/* =========================================================
+   🛍 DETALLE DE PRODUCTO
+   ========================================================= */
+
+.detalle-producto-page {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.detalle-producto-page img {
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.detalle-producto-page img:hover {
+  transform: scale(1.03);
+}
+
+.detalle-producto-page h2 {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.detalle-producto-page .btn-huerto {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.detalle-producto-page .btn-huerto:hover {
+  background-color: #9fdc63 !important;
+  color: #fff !important;
+}
+
+.detalle-producto-page .btn-outline-secondary {
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.detalle-producto-page .btn-outline-secondary:hover {
+  background-color: #eee;
+}
+
+/* Productos similares */
+.detalle-producto-page section {
+  margin-top: 60px;
+}
+

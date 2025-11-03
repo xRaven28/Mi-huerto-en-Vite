@@ -50,7 +50,6 @@ export const ModalAgregarProducto: React.FC<ModalAgregarProps> = ({
 
     onGuardar(nuevoProducto);
     
-    // Limpiar formulario
     setFormData({
       nombre: '',
       precio: '',

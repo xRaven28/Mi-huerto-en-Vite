@@ -1,4 +1,3 @@
-// src/hooks/useAuth.ts (Nuevo archivo)
 import { useState, useEffect } from 'react';
 import { Usuario } from '../types/index';
 import { AuthService } from '../services/auth';
@@ -9,7 +8,6 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar si ya hay usuario logueado al cargar
     const usuarioActual = AuthService.obtenerUsuarioActual();
     setUsuario(usuarioActual);
     setLoading(false);

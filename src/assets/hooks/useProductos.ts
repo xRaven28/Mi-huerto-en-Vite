@@ -1,65 +1,57 @@
-import { useEffect, useState } from 'react';
-import { Producto } from '../types';
-import * as svc from '../services/productos';
+import { useState, useEffect, useCallback } from "react";
+import { Producto } from "../types";
+import { cargarProductosDesdeLocal } from "../services/productos";
+
+const KEY = "catalogo";
 
 export const useProductos = () => {
-    const [productos, setProductos] = useState<Producto[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-    useEffect(() => {
-        cargarProductos();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const cargarProductos = async () => {
-        try {
-            setLoading(true);
-            const data = await svc.cargarProductosDesdeLocal();
-            setProductos(data);
-            setError(null);
-        } catch (err) {
-            console.error(err);
-            setError('Error cargando productos');
-        } finally {
-            setLoading(false);
-        }
+  useEffect(() => {
+    const cargar = async () => {
+      setLoading(true);
+      const data = await cargarProductosDesdeLocal();
+      setProductos(data);
+      setLoading(false);
     };
+    cargar();
+  }, []);
 
-    const agregarProducto = async (p: Omit<Producto, 'id'>) => {
-        const nuevo = await svc.guardarProductoEnLocal(p);
-        setProductos(prev => [...prev, nuevo]);
-        return nuevo;
-    };
+  const agregarProducto = useCallback(async (producto: Omit<Producto, "id">) => {
+    const nuevo: Producto = { ...producto, id: Date.now() };
+    const actualizados = [...productos, nuevo];
+    setProductos(actualizados);
+    localStorage.setItem(KEY, JSON.stringify(actualizados));
+    return nuevo;
+  }, [productos]);
 
-    const actualizarProducto = async (id: number, updates: Partial<Producto>) => {
-        const updated = await svc.actualizarProductoEnLocal(id, updates);
-        if (updated) setProductos(prev => prev.map(x => (x.id === id ? updated : x)));
-        return updated;
-    };
+  const actualizarProducto = useCallback(async (productoActualizado: Producto) => {
+    const actualizados = productos.map((p) =>
+      p.id === productoActualizado.id ? productoActualizado : p
+    );
+    setProductos(actualizados);
+    localStorage.setItem(KEY, JSON.stringify(actualizados));
+  }, [productos]);
 
-    const eliminarProducto = async (id: number) => {
-        const ok = await svc.eliminarProductoDeLocal(id);
-        if (ok) setProductos(prev => prev.filter(p => p.id !== id));
-        return ok;
-    };
-    const getProductosCliente = (busqueda: string): Producto[] => {
-        if (!busqueda.trim()) return productos;
-        return productos.filter(p =>
-            p.name.toLowerCase().includes(busqueda.toLowerCase()) ||
-            p.categoria.toLowerCase().includes(busqueda.toLowerCase())
-        );
-    };
+  const eliminarProducto = useCallback(async (id: number) => {
+    const actualizados = productos.filter((p) => p.id !== id);
+    setProductos(actualizados);
+    localStorage.setItem(KEY, JSON.stringify(actualizados));
+  }, [productos]);
 
+  const getProductosCliente = useCallback((busqueda: string) => {
+    const term = busqueda.toLowerCase();
+    return productos.filter((p) => p.name.toLowerCase().includes(term));
+  }, [productos]);
 
-    return {
-        productos,
-        loading,
-        error,
-        cargarProductos,
-        agregarProducto,
-        actualizarProducto,
-        eliminarProducto,
-        getProductosCliente
-    };
+  return {
+    productos,
+    setProductos,
+    loading,
+    agregarProducto,
+    eliminarProducto,
+    getProductosCliente,
+    actualizarProducto
+  };
 };

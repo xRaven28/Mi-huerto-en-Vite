@@ -22,7 +22,7 @@ const Admin: React.FC = () => {
   const handleToggle = async (id: number) => {
     const p = productos.find(x => x.id === id);
     if (!p) return;
-    await actualizarProducto(id, { habilitado: !p.habilitado });
+    await actualizarProducto({ ...p, habilitado: !p.habilitado });
   };
 
   const handleEliminar = async (id: number) => {

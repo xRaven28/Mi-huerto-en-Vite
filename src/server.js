@@ -11,7 +11,7 @@ const PORT = 8080;
 app.use(cors());
 app.use(express.json());
 
-// Archivo para guardar los productos (simulando base de datos)
+// Archivo para guardar los productos 
 const PRODUCTOS_FILE = 'productos.json';
 
 // Función para leer productos del archivo

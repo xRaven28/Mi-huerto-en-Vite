@@ -1,4 +1,3 @@
-// src/pages/Terminos.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,7 +5,6 @@ const Terminos: React.FC = () => {
     const navigate = useNavigate();
 
     const handleVolver = () => {
-        // Intentar volver a la página anterior, o a crear-cuenta por defecto
         if (window.history.length > 1) {
             navigate(-1);
         } else {
