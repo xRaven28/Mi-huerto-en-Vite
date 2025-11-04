@@ -43,6 +43,7 @@ export const ModalAgregarProducto: React.FC<Props> = ({ isOpen, onClose, onGuard
     });
     onClose();
   };
+  
 
   return (
     <div className="modal fade show d-block" tabIndex={-1}>

@@ -1,412 +1,464 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface Receta {
-    id: number;
     titulo: string;
-    descripcion: string;
     imagen: string;
-    tiempoPreparacion: string;
-    dificultad: 'Fácil' | 'Media' | 'Difícil';
-    categoria: string;
+    descripcion: string;
     ingredientes: string[];
-    instrucciones: string[];
-    destacada?: boolean;
+    preparacion: string;
 }
 
 const Recetas: React.FC = () => {
     const [recetas, setRecetas] = useState<Receta[]>([]);
-    const [recetaSeleccionada, setRecetaSeleccionada] = useState<Receta | null>(null);
-    const [filtroCategoria, setFiltroCategoria] = useState('todas');
-    const [busqueda, setBusqueda] = useState('');
-
-    const recetasEjemplo: Receta[] = [
-        {
-            id: 1,
-            titulo: "Ensalada César con Pollo a la Parrilla",
-            descripcion: "Una clásica ensalada César con crujientes lechugas, pollo a la parrilla y nuestro aderezo casero.",
-            imagen: "/img/ensalada-cesar.jpg",
-            tiempoPreparacion: "25 min",
-            dificultad: "Fácil",
-            categoria: "ensaladas",
-            destacada: true,
-            ingredientes: [
-                "1 pechuga de pollo",
-                "2 lechugas romanas frescas",
-                "1 taza de crutones",
-                "50g de queso parmesano",
-                "3 cucharadas de aceite de oliva",
-                "Jugo de 1 limón",
-                "2 anchoas",
-                "1 diente de ajo"
-            ],
-            instrucciones: [
-                "Cocinar el pollo a la parrilla hasta que esté dorado por ambos lados.",
-                "Lavar y cortar las lechugas en trozos medianos.",
-                "Preparar el aderezo mezclando aceite, limón, ajo y anchoas.",
-                "Cortar el pollo en tiras y mezclar con la lechuga.",
-                "Agregar crutones y queso parmesano rallado.",
-                "Servir inmediatamente con el aderezo César."
-            ]
-        },
-        {
-            id: 2,
-            titulo: "Sopa de Verduras de la Huerta",
-            descripcion: "Sopa nutritiva cargada de verduras frescas de temporada, perfecta para días fríos.",
-            imagen: "/img/sopa-verduras.jpg",
-            tiempoPreparacion: "40 min",
-            dificultad: "Fácil",
-            categoria: "sopas",
-            ingredientes: [
-                "2 zanahorias medianas",
-                "1 calabacín",
-                "2 papas",
-                "1 cebolla",
-                "2 dientes de ajo",
-                "1 litro de caldo de verduras",
-                "Sal y pimienta al gusto",
-                "Aceite de oliva"
-            ],
-            instrucciones: [
-                "Picar todas las verduras en cubos pequeños.",
-                "Sofreír la cebolla y el ajo en aceite de oliva.",
-                "Agregar las zanahorias y papas, cocinar 5 minutos.",
-                "Incorporar el caldo y cocinar 20 minutos.",
-                "Añadir el calabacín y cocinar 10 minutos más.",
-                "Sazonar con sal y pimienta al gusto.",
-                "Servir caliente con perejil fresco."
-            ]
-        },
-        {
-            id: 3,
-            titulo: "Wok de Verduras con Tofu",
-            descripcion: "Salteado asiático lleno de color y nutrientes, perfecto para una cena ligera y saludable.",
-            imagen: "/img/wok-verduras.jpg",
-            tiempoPreparacion: "20 min",
-            dificultad: "Media",
-            categoria: "principales",
-            ingredientes: [
-                "200g de tofu firme",
-                "1 pimiento rojo",
-                "1 pimiento amarillo",
-                "1 zanahoria",
-                "100g de brotes de soja",
-                "2 cucharadas de salsa de soja",
-                "1 cucharada de jengibre rallado",
-                "2 dientes de ajo"
-            ],
-            instrucciones: [
-                "Cortar el tofu en cubos y dorar en un wok con aceite.",
-                "Retirar el tofu y reservar.",
-                "Saltear el ajo y jengibre por 1 minuto.",
-                "Agregar las verduras cortadas en tiras.",
-                "Cocinar a fuego alto por 5 minutos.",
-                "Incorporar el tofu y la salsa de soja.",
-                "Servir inmediatamente con arroz integral."
-            ]
-        },
-        {
-            id: 4,
-            titulo: "Batido Energético Verde",
-            descripcion: "Batido revitalizante lleno de vitaminas y antioxidantes para empezar el día con energía.",
-            imagen: "/img/batido-verde.jpg",
-            tiempoPreparacion: "5 min",
-            dificultad: "Fácil",
-            categoria: "bebidas",
-            ingredientes: [
-                "1 plátano maduro",
-                "1 taza de espinacas frescas",
-                "1/2 pepino",
-                "1 cucharada de semillas de chía",
-                "200ml de agua de coco",
-                "Jugo de 1/2 limón",
-                "1 cucharadita de miel"
-            ],
-            instrucciones: [
-                "Lavar bien las espinacas y el pepino.",
-                "Pelar el plátano y cortar el pepino en trozos.",
-                "Colocar todos los ingredientes en la licuadora.",
-                "Licuar hasta obtener una textura suave.",
-                "Servir inmediatamente con hielo."
-            ]
-        },
-        {
-            id: 5,
-            titulo: "Hummus de Remolacha",
-            descripcion: "Una versión colorida y nutritiva del clásico hummus, perfecta como dip o untable.",
-            imagen: "/img/hummus-remolacha.jpg",
-            tiempoPreparacion: "15 min",
-            dificultad: "Fácil",
-            categoria: "aperitivos",
-            ingredientes: [
-                "1 remolacha cocida",
-                "400g de garbanzos cocidos",
-                "2 cucharadas de tahini",
-                "Jugo de 1 limón",
-                "1 diente de ajo",
-                "3 cucharadas de aceite de oliva",
-                "Comino y sal al gusto"
-            ],
-            instrucciones: [
-                "Pelar y cortar la remolacha en trozos.",
-                "En una procesadora, mezclar todos los ingredientes.",
-                "Procesar hasta obtener una pasta suave.",
-                "Ajustar condimentos al gusto.",
-                "Servir con aceite de oliva y pan pita."
-            ]
-        },
-        {
-            id: 6,
-            titulo: "Ensalada de Quinoa con Aguacate",
-            descripcion: "Ensalada completa y nutritiva con quinoa, aguacate y verduras frescas.",
-            imagen: "/img/ensalada-quinoa.jpg",
-            tiempoPreparacion: "30 min",
-            dificultad: "Fácil",
-            categoria: "ensaladas",
-            ingredientes: [
-                "1 taza de quinoa",
-                "1 aguacate maduro",
-                "1 pepino",
-                "1 tomate",
-                "1/4 de cebolla morada",
-                "Jugo de 2 limones",
-                "Aceite de oliva",
-                "Cilantro fresco"
-            ],
-            instrucciones: [
-                "Cocinar la quinoa según instrucciones del paquete.",
-                "Cortar todas las verduras en cubos pequeños.",
-                "Mezclar la quinoa fría con las verduras.",
-                "Preparar el aderezo con limón y aceite.",
-                "Incorporar el aguacate en el momento de servir.",
-                "Decorar con cilantro fresco."
-            ]
-        }
-    ];
-
+    const [recetaSeleccionada, setRecetaSeleccionada] = useState<Receta | null>(
+        null
+    );
     useEffect(() => {
-        // Simular carga de datos
+        const recetasEjemplo: Receta[] = [
+            {
+                titulo: "Aros de cebolla",
+                imagen: "/img/ArosDeCebolla.webp",
+                descripcion: "Crujientes y dorados, perfectos como aperitivo.",
+                ingredientes: [
+                    "2 cebollas grandes",
+                    "150 g de harina",
+                    "2 huevos",
+                    "100 ml de leche",
+                    "100 g de pan rallado",
+                    "Aceite para freír",
+                    "Sal y pimienta",
+                ],
+                preparacion: `Corte las cebollas en rodajas y separe los aros.
+Pase cada aro por harina, luego por huevo batido con la leche y finalmente por pan rallado.
+Fría en aceite caliente hasta que estén dorados.
+Escúrralos sobre papel absorbente y sirva de inmediato.`,
+            },
+            {
+                titulo: "Batido de frutilla",
+                imagen: "/img/BatidoFrutilla.webp",
+                descripcion: "Fresco y dulce, ideal para el verano.",
+                ingredientes: [
+                    "250 g de frutillas frescas",
+                    "300 ml de leche",
+                    "3 cucharadas de azúcar",
+                    "4 cubos de hielo",
+                ],
+                preparacion: `Lave bien las frutillas y quite el tallo.
+Licúelas junto con la leche, azúcar y hielo.
+Sirva frío en vasos altos.`,
+            },
+            {
+                titulo: "Calabaza rellena",
+                imagen: "img/CalabazaRellena.jpeg",
+                descripcion: "Calabaza horneada con un delicioso relleno de carne, arroz y queso.",
+                ingredientes: [
+                    "1 calabaza mediana",
+                    "200 g de carne molida",
+                    "½ cebolla picada fina",
+                    "½ pimiento rojo picado",
+                    "100 g de arroz cocido",
+                    "50 g de queso rallado",
+                    "2 cucharadas de aceite",
+                    "Sal y pimienta"
+                ],
+                preparacion: `Corte la parte superior de la calabaza y retire las semillas.
+En un sartén, sofría la cebolla y el pimiento en aceite, luego agregue la carne y condimente.
+Mezcle con el arroz cocido y rellene la calabaza.
+Espolvoree con queso y hornee a 180 °C por 40 minutos.`
+            },
+            {
+                titulo: "Jugo de beterraga",
+                imagen: "img/JugoBeterraga.PNG",
+                descripcion: "Refrescante y saludable, perfecto para cualquier hora.",
+                ingredientes: [
+                    "2 beterragas medianas",
+                    "2 zanahorias",
+                    "1 manzana verde",
+                    "250 ml de agua"
+                ],
+                preparacion: `Pele las beterragas y zanahorias.
+Pique todo en trozos y licúe con el agua.
+Cuele si lo prefiere más suave.
+Sirva bien frío.`
+            },
+            {
+                titulo: "Kuchen de manzana",
+                imagen: "img/kuchenManzana.JPG",
+                descripcion: "Dulce y aromático, ideal para la merienda.",
+                ingredientes: [
+                    "200 g de harina",
+                    "100 g de azúcar",
+                    "125 g de mantequilla",
+                    "2 huevos",
+                    "3 manzanas",
+                    "1 cucharadita de polvos de hornear",
+                    "1 cucharadita de canela"
+                ],
+                preparacion: `Forme una masa mezclando harina, polvos de hornear, azúcar, mantequilla y huevos.
+Extienda en un molde enmantequillado.
+Disponga las manzanas en láminas sobre la masa.
+Espolvoree con azúcar y canela.
+Hornee a 180 °C durante 35 minutos.`
+            },
+            {
+                titulo: "Palta reina",
+                imagen: "img/PaltaReina.jpg",
+                descripcion: "Deliciosa ensalada servida dentro de la palta.",
+                ingredientes: [
+                    "2 paltas maduras",
+                    "1 pechuga de pollo cocida y desmenuzada",
+                    "3 cucharadas de mayonesa",
+                    "1 huevo duro picado",
+                    "Sal y pimienta"
+                ],
+                preparacion: `Corte las paltas por la mitad y retire el carozo.
+En un bol, mezcle pollo, mayonesa y huevo duro.
+Rellene las mitades de palta.
+Sirva frío.`
+            },
+            {
+                titulo: "Pie de limón",
+                imagen: "img/PieDeLimón.JPG",
+                descripcion: "Clásico pie con base de galleta y merengue dorado.",
+                ingredientes: [
+                    "150 g de galletas molidas",
+                    "80 g de mantequilla derretida",
+                    "1 tarro de leche condensada (400 g aprox.)",
+                    "3 yemas de huevo",
+                    "100 ml de jugo de limón",
+                    "3 claras de huevo",
+                    "4 cucharadas de azúcar"
+                ],
+                preparacion: `Mezcle las galletas con la mantequilla y forme la base en un molde.
+Combine las yemas con la leche condensada y el jugo de limón.
+Vierta sobre la base.
+Bata las claras a nieve con el azúcar y cubra con el merengue.
+Hornee a 180 °C por 10 minutos hasta dorar.`
+            },
+            {
+                titulo: "Puré de papas",
+                imagen: "img/PuréDePapas.jpg",
+                descripcion: "Suave y cremoso, ideal como acompañamiento.",
+                ingredientes: [
+                    "1 kg de papas",
+                    "50 g de mantequilla",
+                    "150 ml de leche caliente",
+                    "Sal a gusto"
+                ],
+                preparacion: `Pele y cueza las papas en agua con sal.
+Escúrralas y muélalas calientes.
+Agregue la mantequilla y la leche caliente.
+Mezcle hasta obtener un puré cremoso.`
+            },
+            {
+                titulo: "Queque de naranja",
+                imagen: "img/QuequeDeNaranja.jpg",
+                descripcion: "Esponjoso y aromático, con un toque cítrico.",
+                ingredientes: [
+                    "250 g de harina",
+                    "180 g de azúcar",
+                    "3 huevos",
+                    "100 ml de aceite",
+                    "100 ml de jugo de naranja",
+                    "Ralladura de 1 naranja",
+                    "1 cucharadita de polvos de hornear"
+                ],
+                preparacion: `Bata los huevos con el azúcar hasta espumar.
+Agregue el aceite, jugo y ralladura de naranja.
+Incorpore la harina con los polvos de hornear.
+Vierta en un molde enmantequillado.
+Hornee a 180 °C por 35 minutos.`
+            },
+            {
+                titulo: "Torta de cereza",
+                imagen: "img/TortaDeCereza.webp",
+                descripcion: "Deliciosa torta con cerezas y opcional crema batida.",
+                ingredientes: [
+                    "250 g de harina",
+                    "200 g de azucar",
+                    "3 huevos",
+                    "100 g de mantequilla",
+                    "150 ml de leche",
+                    "1 cucharadita de polvos de hornear",
+                    "200 g de cerezas deshuesadas",
+                    "Crema batida (opcional para decorar)"
+                ],
+                preparacion: `Bata la mantequilla con el azúcar hasta cremar.
+Agregue los huevos de a uno, luego la leche.
+Incorpore la harina con los polvos de hornear.
+Añada las cerezas y mezcle suavemente.
+Hornee a 180 °C por 40 minutos.
+Decore con crema batida si lo desea.`
+            },
+            {
+                titulo: "Postre árabe de granada",
+                imagen: "img/PostreÁrabe.JPG",
+                descripcion: "Un postre árabe fresco y delicioso con crema blanca, granada y un toque de hierbabuena.",
+                ingredientes: [
+                    "500 ml de leche",
+                    "2 cucharadas de maicena",
+                    "1 cucharada de azúcar",
+                    "100 g de chocolate blanco",
+                    "1 sobre de azúcar vainillado",
+                    "5 bizcochitos de huevo (o 2 cucharadas de semillas de granada por vaso)",
+                    "5 granadas grandes",
+                    "1 sobre de flan de fresa en polvo",
+                    "Azúcar al gusto",
+                    "Hojas de hierbabuena (para decorar)"
+                ],
+                preparacion: `En una cacerola, mezcle la leche, la maicena, el azúcar y el azúcar vainillado.
+Cocine a fuego medio sin dejar de remover hasta obtener una crema espesa.
+Retire del fuego, agregue el chocolate blanco y mezcle hasta que se derrita.
+Coloque un bizcochito troceado en cada vaso y vierta encima la crema blanca.
+Deje enfriar a temperatura ambiente y luego refrigere.`
+            },
+            {
+                titulo: "Tomates rellenos",
+                imagen: "img/TomateRelleno.webp",
+                descripcion: "Tomates frescos rellenos con atún, lechuga y mayonesa, ideales como entrada.",
+                ingredientes: [
+                    "4 tomates grandes",
+                    "1 lata de atún escurrido",
+                    "1 taza de lechuga picada fina",
+                    "3 cucharadas de mayonesa",
+                    "1 huevo duro picado (opcional)",
+                    "Sal y pimienta a gusto"
+                ],
+                preparacion: `Lave los tomates, corte la parte superior y ahuéquelos con una cuchara.
+Mezcle el atún con la lechuga, mayonesa y huevo duro. Sazone con sal y pimienta.
+Rellene los tomates con la mezcla y refrigere 15 minutos antes de servir.`
+            },
+            {
+                titulo: "Zapallo italiano relleno",
+                imagen: "img/ZapalloRelleno.PNG",
+                descripcion: "Zapallos italianos horneados con un delicioso relleno de carne y verduras.",
+                ingredientes: [
+                    "3 zapallos italianos medianos",
+                    "200 g de carne molida",
+                    "1 cebolla picada fina",
+                    "1 diente de ajo picado",
+                    "1 zanahoria rallada",
+                    "½ taza de pan rallado",
+                    "2 cucharadas de queso rallado",
+                    "1 huevo",
+                    "Aceite, sal, pimienta y orégano"
+                ],
+                preparacion: `Corte los zapallos italianos a lo largo y ahuéquelos. Reserve la pulpa.
+Sofría la cebolla, ajo, pulpa de zapallo y zanahoria. Agregue la carne molida y cocine 5 min.
+Retire del fuego, mezcle con pan rallado, huevo, queso y condimentos.
+Rellene los zapallos, dispóngalos en una bandeja y hornee a 180 °C por 20-25 min.`
+            },
+            {
+                titulo: "Tortilla de coliflor",
+                imagen: "img/TortillaColiflor.jpg",
+                descripcion: "Una tortilla ligera y saludable a base de coliflor.",
+                ingredientes: [
+                    "1 coliflor pequeña",
+                    "4 huevos",
+                    "1 cebolla pequeña",
+                    "2 cucharadas de queso rallado",
+                    "2 cucharadas de aceite de oliva",
+                    "Sal y pimienta"
+                ],
+                preparacion: `Cueza la coliflor en agua con sal hasta que esté blanda. Escurra bien.
+Pique la coliflor y la cebolla en trozos pequeños.
+En un bol bata los huevos, agregue la coliflor, cebolla, queso y condimentos.
+Caliente aceite en sartén, vierta la mezcla y cocine a fuego medio por ambos lados hasta dorar.`
+            },
+            {
+                titulo: "Pastel de choclo",
+                imagen: "img/PastelChoclo.webp",
+                descripcion: "Tradicional pastel de choclo chileno con carne, pollo y una capa de maíz.",
+                ingredientes: [
+                    "1 kg de choclo desgranado",
+                    "1 taza de leche",
+                    "2 cucharadas de mantequilla",
+                    "1 cebolla grande picada",
+                    "300 g de carne molida",
+                    "2 presas de pollo cocido y desmenuzado",
+                    "3 huevos duros",
+                    "Aceitunas y pasas a gusto",
+                    "Sal, pimienta, comino y albahaca"
+                ],
+                preparacion: `Muele el choclo y cocine con leche y mantequilla hasta formar una pasta espesa. Agregue sal y albahaca.
+Sofría la cebolla y carne molida con comino, sal y pimienta.
+En una fuente para horno coloque la carne, luego el pollo, aceitunas, pasas y huevo duro.
+Cubra con la pasta de choclo y espolvoree azúcar por encima.
+Hornee a 180 °C hasta dorar la superficie.`
+            },
+            {
+                titulo: "Alcachofas al horno",
+                imagen: "img/AlcachofaAlHorno.webp",
+                descripcion: "Alcachofas tiernas rellenas con pan rallado, ajo y queso al horno.",
+                ingredientes: [
+                    "4 alcachofas grandes",
+                    "3 cucharadas de pan rallado",
+                    "2 cucharadas de queso parmesano rallado",
+                    "2 dientes de ajo picados",
+                    "3 cucharadas de aceite de oliva",
+                    "Sal, pimienta y perejil picado"
+                ],
+                preparacion: `Lave las alcachofas, quite las hojas duras exteriores y corte las puntas.
+Mezcle pan rallado, queso, ajo, perejil, sal y pimienta.
+Abra las hojas de las alcachofas y rellene con la mezcla.
+Coloque en bandeja, rocíe con aceite y hornee a 180 °C por 35-40 min.`
+            },
+            {
+                titulo: "Lasaña de berenjenas",
+                imagen: "img/LasanaBerenjena.webp",
+                descripcion: "Lasaña ligera hecha con capas de berenjena, salsa de tomate y queso.",
+                ingredientes: [
+                    "3 berenjenas grandes",
+                    "400 g de salsa de tomate",
+                    "200 g de carne molida o pollo (opcional)",
+                    "200 g de queso mozzarella",
+                    "50 g de queso parmesano",
+                    "1 cebolla picada",
+                    "Aceite, sal, pimienta y orégano"
+                ],
+                preparacion: `Corte las berenjenas en láminas, sáquelas en agua con sal 15 min y luego séquelas.
+Dórelas en sartén con un poco de aceite.
+Prepare un sofrito con cebolla, salsa de tomate y carne (si desea).
+En una fuente alterne capas de berenjena, salsa y queso.
+Termine con queso mozzarella y parmesano. Hornee a 180 °C por 30 min.`
+            },
+            {
+                titulo: "Desayuno saludable",
+                imagen: "img/YogurtAvenaFrutilla.jpg",
+                descripcion: "Yogurt natural con avena y frutillas, nutritivo y fresco para empezar el día.",
+                ingredientes: [
+                    "1 taza de yogurt natural o griego",
+                    "½ taza de avena",
+                    "1 taza de frutillas frescas en trozos",
+                    "1 cucharadita de miel (opcional)",
+                    "Semillas de chía o frutos secos (opcional)"
+                ],
+                preparacion: `Coloque en un vaso o bowl una capa de yogurt.
+Agregue encima una capa de avena y luego frutillas.
+Repita hasta completar el recipiente.
+Endulce con miel y decore con semillas o frutos secos.`
+            }
+        ];
+
         setRecetas(recetasEjemplo);
     }, []);
 
-    const categorias = [
-        { id: 'todas', nombre: 'Todas las Recetas' },
-        { id: 'ensaladas', nombre: 'Ensaladas' },
-        { id: 'sopas', nombre: 'Sopas' },
-        { id: 'principales', nombre: 'Platos Principales' },
-        { id: 'aperitivos', nombre: 'Aperitivos' },
-        { id: 'bebidas', nombre: 'Bebidas' }
-    ];
-
-    const recetasFiltradas = recetas.filter(receta => {
-        const coincideCategoria = filtroCategoria === 'todas' || receta.categoria === filtroCategoria;
-        const coincideBusqueda = receta.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                               receta.descripcion.toLowerCase().includes(busqueda.toLowerCase());
-        return coincideCategoria && coincideBusqueda;
-    });
-
-    const abrirModalReceta = (receta: Receta) => {
+    const toggleReceta = (receta: Receta) => {
         setRecetaSeleccionada(receta);
     };
 
-    const cerrarModalReceta = () => {
-        setRecetaSeleccionada(null);
-    };
+    const cerrarModal = () => setRecetaSeleccionada(null);
 
     return (
-        <div>
-            <main style={{ marginTop: '80px' }}>
-                {/* Header */}
-                <div className="container py-5">
-                    <h1 className="text-center display-4 fw-bold text-success">🍳 Recetas Saludables</h1>
-                    <p className="text-center lead mt-3">
-                        Descubre deliciosas recetas saludables que puedes preparar con los productos frescos de HuertoHogar.<br />
-                        Desde ensaladas vibrantes hasta platos principales nutritivos, nuestras recetas están diseñadas para inspirarte a cocinar comidas sabrosas y equilibradas en casa.<br /> 
-                        ¡Explora, prueba y disfruta de la cocina saludable con nosotros!
-                    </p>
-                </div>
+        <main style={{ marginTop: "80px" }}>
+            {/* Encabezado */}
+            <section className="container py-5 text-center">
+                <h1 className="text-success fw-bold display-5">Recetas Caseras</h1>
+                <p className="text-muted fs-5">
+                    Descubre deliciosas recetas saludables que puedes preparar con los productos frescos de HuertoHogar.
+Desde ensaladas vibrantes hasta platos principales nutritivos, nuestras recetas están diseñadas para inspirarte a cocinar comidas sabrosas y equilibradas en casa.
+¡Explora, prueba y disfruta de la cocina saludable con nosotros!
+                </p>
+            </section>
 
-                {/* Filtros y Búsqueda */}
-                <div className="container mb-5">
-                    <div className="row justify-content-center">
-                        <div className="col-md-8">
-                            <div className="card shadow-sm">
-                                <div className="card-body">
-                                    <div className="row g-3">
-                                        <div className="col-md-6">
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                placeholder="🔍 Buscar recetas..."
-                                                value={busqueda}
-                                                onChange={(e) => setBusqueda(e.target.value)}
-                                            />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <select
-                                                className="form-select"
-                                                value={filtroCategoria}
-                                                onChange={(e) => setFiltroCategoria(e.target.value)}
-                                            >
-                                                {categorias.map(categoria => (
-                                                    <option key={categoria.id} value={categoria.id}>
-                                                        {categoria.nombre}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
+            {/* Tarjetas de recetas */}
+            <section className="container mb-5">
+                <div className="recetas-grid">
+                    {recetas.map((receta, i) => (
+                        <div key={i} className="recipe-card card shadow-lg border-0">
+                            <img
+                                src={receta.imagen}
+                                alt={receta.titulo}
+                                className="card-img-top"
+                                onError={(e) =>
+                                    ((e.target as HTMLImageElement).src = "/img/placeholder.jpg")
+                                }
+                            />
+
+                            <div className="card-body d-flex flex-column">
+                                <h5 className="card-title fw-bold text-success text-center">
+                                    {receta.titulo}
+                                </h5>
+                                <p className="text-muted flex-grow-1 text-center">
+                                    {receta.descripcion}
+                                </p>
+                                <button
+                                    className="btn btn-success mt-auto"
+                                    onClick={() => toggleReceta(receta)}
+                                >
+                                    Ver Receta
+                                </button>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    ))}
 
-                {/* Recetas Destacadas */}
-                {recetasFiltradas.filter(r => r.destacada).length > 0 && (
-                    <div className="container mb-5">
-                        <h2 className="text-center mb-4">⭐ Recetas Destacadas</h2>
-                        <div className="row">
-                            {recetasFiltradas.filter(r => r.destacada).map(receta => (
-                                <div key={receta.id} className="col-lg-6 mb-4">
-                                    <div className="card h-100 shadow-lg border-0">
-                                        <img 
-                                            src={receta.imagen} 
-                                            className="card-img-top" 
-                                            alt={receta.titulo}
-                                            style={{ height: '250px', objectFit: 'cover' }}
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).src = '/img/placeholder.jpg';
-                                            }}
-                                        />
-                                        <div className="card-body">
-                                            <span className={`badge ${receta.dificultad === 'Fácil' ? 'bg-success' : receta.dificultad === 'Media' ? 'bg-warning' : 'bg-danger'} mb-2`}>
-                                                {receta.dificultad}
-                                            </span>
-                                            <span className="badge bg-secondary ms-2">
-                                                ⏱️ {receta.tiempoPreparacion}
-                                            </span>
-                                            <h5 className="card-title mt-2">{receta.titulo}</h5>
-                                            <p className="card-text">{receta.descripcion}</p>
-                                            <button 
-                                                className="btn btn-success"
-                                                onClick={() => abrirModalReceta(receta)}
-                                            >
-                                                Ver Receta Completa
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Todas las Recetas */}
-                <div className="container my-5">
-                    <h2 className="text-center mb-4">📚 Todas Nuestras Recetas</h2>
-                    <div className="row">
-                        {recetasFiltradas.map(receta => (
-                            <div key={receta.id} className="col-xl-4 col-lg-6 mb-4">
-                                <div className="card h-100 shadow-sm">
-                                    <img 
-                                        src={receta.imagen} 
-                                        className="card-img-top" 
-                                        alt={receta.titulo}
-                                        style={{ height: '200px', objectFit: 'cover' }}
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).src = '/img/placeholder.jpg';
-                                        }}
-                                    />
-                                    <div className="card-body d-flex flex-column">
-                                        <div className="mb-2">
-                                            <span className={`badge ${receta.dificultad === 'Fácil' ? 'bg-success' : receta.dificultad === 'Media' ? 'bg-warning' : 'bg-danger'}`}>
-                                                {receta.dificultad}
-                                            </span>
-                                            <span className="badge bg-secondary ms-1">
-                                                ⏱️ {receta.tiempoPreparacion}
-                                            </span>
-                                        </div>
-                                        <h5 className="card-title">{receta.titulo}</h5>
-                                        <p className="card-text flex-grow-1">{receta.descripcion}</p>
-                                        <button 
-                                            className="btn btn-outline-success mt-auto"
-                                            onClick={() => abrirModalReceta(receta)}
-                                        >
-                                            Ver Receta
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {recetasFiltradas.length === 0 && (
+                    {recetas.length === 0 && (
                         <div className="text-center py-5">
                             <div className="alert alert-info">
-                                <i className="bi bi-search fs-1 d-block mb-3"></i>
-                                <h4>No se encontraron recetas</h4>
-                                <p>Intenta con otros términos de búsqueda o cambia la categoría</p>
+                                <i className="bi bi-hourglass-split fs-3"></i>
+                                <h4 className="mt-2">Cargando recetas...</h4>
                             </div>
                         </div>
                     )}
                 </div>
-            </main>
+            </section>
 
-            {/* Modal de Receta */}
-            {recetaSeleccionada && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">{recetaSeleccionada.titulo}</h5>
-                                <button type="button" className="btn-close" onClick={cerrarModalReceta}></button>
-                            </div>
-                            <div className="modal-body">
-                                <img 
-                                    src={recetaSeleccionada.imagen} 
-                                    className="img-fluid rounded mb-3" 
-                                    alt={recetaSeleccionada.titulo}
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).src = '/img/placeholder.jpg';
-                                    }}
-                                />
-                                
-                                <div className="row mb-3">
-                                    <div className="col-md-6">
-                                        <strong>⏱️ Tiempo:</strong> {recetaSeleccionada.tiempoPreparacion}
-                                    </div>
-                                    <div className="col-md-6">
-                                        <strong>📊 Dificultad:</strong> {recetaSeleccionada.dificultad}
-                                    </div>
+            {/* Modal de receta */}
+            {
+                recetaSeleccionada && (
+                    <div
+                        className="modal fade show d-block"
+                        style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+                    >
+                        <div className="modal-dialog modal-lg modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title fw-bold">
+                                        {recetaSeleccionada.titulo}
+                                    </h5>
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        onClick={cerrarModal}
+                                    ></button>
                                 </div>
+                                <div className="modal-body">
+                                    <img
+                                        src={recetaSeleccionada.imagen}
+                                        alt={recetaSeleccionada.titulo}
+                                        className="img-fluid rounded mb-3"
+                                    />
+                                    <h6 className="fw-bold text-success mb-2">🥕 Ingredientes</h6>
+                                    <ul>
+                                        {recetaSeleccionada.ingredientes.map((ing, idx) => (
+                                            <li key={idx}>{ing}</li>
+                                        ))}
+                                    </ul>
 
-                                <h6>🥕 Ingredientes:</h6>
-                                <ul>
-                                    {recetaSeleccionada.ingredientes.map((ingrediente, index) => (
-                                        <li key={index}>{ingrediente}</li>
-                                    ))}
-                                </ul>
-
-                                <h6>👩‍🍳 Instrucciones:</h6>
-                                <ol>
-                                    {recetaSeleccionada.instrucciones.map((instruccion, index) => (
-                                        <li key={index}>{instruccion}</li>
-                                    ))}
-                                </ol>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={cerrarModalReceta}>
-                                    Cerrar
-                                </button>
-                                <button type="button" className="btn btn-success">
-                                    <i className="bi bi-printer me-2"></i>
-                                    Imprimir Receta
-                                </button>
+                                    <h6 className="fw-bold text-success mt-3">👩‍🍳 Preparación</h6>
+                                    <p style={{ whiteSpace: "pre-line" }}>
+                                        {recetaSeleccionada.preparacion}
+                                    </p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button
+                                        className="btn btn-secondary"
+                                        onClick={cerrarModal}
+                                    >
+                                        Cerrar
+                                    </button>
+                                    <button
+                                        className="btn btn-success"
+                                        onClick={() => window.print()}
+                                    >
+                                        <i className="bi bi-printer me-2"></i> Imprimir
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Footer */}
             <footer className="footer-custom text-white pt-4 pb-2 mt-5">
@@ -422,15 +474,26 @@ const Recetas: React.FC = () => {
                         <div className="col-md-4 mb-3">
                             <h5>Enlaces útiles</h5>
                             <ul className="list-unstyled">
-                                <li><a href="/" className="text-white text-decoration-none">Inicio</a></li>
-                                <li><a href="/productos" className="text-white text-decoration-none">Productos</a></li>
-                                <li><a href="/recetas" className="text-white text-decoration-none">Recetas</a></li>
                                 <li>
-                                    <a 
-                                        href="https://github.com/xRaven28/HuertoHogar.git" 
+                                    <a href="/" className="text-white text-decoration-none">
+                                        Inicio
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/productos" className="text-white text-decoration-none">
+                                        Productos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/recetas" className="text-white text-decoration-none">
+                                        Recetas
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="https://github.com/xRaven28/HuertoHogar.git"
                                         className="text-white text-decoration-none"
                                         target="_blank"
-                                        rel="noopener noreferrer"
                                     >
                                         GitHub de esta página
                                     </a>
@@ -440,24 +503,25 @@ const Recetas: React.FC = () => {
 
                         <div className="col-md-4 mb-3">
                             <h5>Síguenos</h5>
-                            <a href="#" className="text-white me-2 text-decoration-none">
+                            <a href="#" className="text-white d-block">
                                 <i className="bi bi-facebook"></i> Facebook
                             </a>
-                            <br />
-                            <a href="#" className="text-white me-2 text-decoration-none">
+                            <a href="#" className="text-white d-block">
                                 <i className="bi bi-instagram"></i> Instagram
                             </a>
-                            <br />
-                            <a href="#" className="text-white me-2 text-decoration-none">
+                            <a href="#" className="text-white d-block">
                                 <i className="bi bi-whatsapp"></i> WhatsApp
                             </a>
                         </div>
                     </div>
+
                     <hr className="bg-white mx-5" />
-                    <p className="text-center mb-0">&copy; 2025 Huerto Hogar. Todos los derechos reservados.</p>
+                    <p className="text-center mb-0">
+                        &copy; 2025 Huerto Hogar. Todos los derechos reservados.
+                    </p>
                 </div>
             </footer>
-        </div>
+        </main >
     );
 };
 

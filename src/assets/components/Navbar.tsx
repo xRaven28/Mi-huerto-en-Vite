@@ -12,7 +12,7 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0, usuario, onLogout }) 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Guarda la búsqueda y actualiza Productos
+  // Maneja búsqueda
   const handleBuscar = (e: React.FormEvent) => {
     e.preventDefault();
     localStorage.setItem("busqueda", busqueda);
@@ -20,7 +20,7 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0, usuario, onLogout }) 
     if (location.pathname !== "/productos") navigate("/productos");
   };
 
-  // Mantener la búsqueda persistente
+  // Mantener búsqueda persistente
   useEffect(() => {
     const term = localStorage.getItem("busqueda") || "";
     setBusqueda(term);
@@ -38,7 +38,7 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0, usuario, onLogout }) 
             height="45"
             className="me-2 rounded-circle"
           />
-          <span className="brand-text">HuertoHogar</span>
+          <span className="brand-text fw-bold text-white">HuertoHogar</span>
         </Link>
 
         {/* BOTÓN RESPONSIVE */}
@@ -47,27 +47,30 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0, usuario, onLogout }) 
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* LINKS */}
+        {/* CONTENIDO */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-center">
             <li className="nav-item">
-              <Link className="nav-link" to="/">Inicio</Link>
+              <Link className="nav-link text-white" to="/">Inicio</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/productos">Productos</Link>
+              <Link className="nav-link text-white" to="/productos">Productos</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/recetas">Recetas</Link>
+              <Link className="nav-link text-white" to="/recetas">Recetas</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/quienes-somos">Quiénes Somos</Link>
+              <Link className="nav-link text-white" to="/quienessomos">Quiénes Somos</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/contacto">Contacto</Link>
+              <Link className="nav-link text-white" to="/contacto">Contacto</Link>
             </li>
 
             {/* BUSCADOR */}
@@ -84,49 +87,49 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0, usuario, onLogout }) 
               </form>
             </li>
 
-            {/* CARRITO */}
-            <li className="nav-item ms-3 position-relative">
-              <Link className="nav-link" to="/carrito">
-                <i className="bi bi-cart4 fs-5"></i>
-                {carritoCount > 0 && (
-                  <span
-                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
-                    style={{ fontSize: "0.75rem" }}
-                  >
-                    {carritoCount}
-                  </span>
-                )}
-              </Link>
-            </li>
+<li className="nav-item ms-3 position-relative">
+  <Link className="nav-link text-white d-flex align-items-center position-relative" to="/carrito">
+    <i className="bi bi-cart3 fs-4"></i>
+    {carritoCount > 0 && (
+      <span
+        className="badge rounded-pill bg-success position-absolute"
+        style={{
+          fontSize: "0.7rem",
+          top: "-3px",       
+          right: "-8px",    
+          padding: "0.3em 0.45em",
+          zIndex: 10
+        }}
+      >
+        {carritoCount}
+      </span>
+    )}
+  </Link>
+</li>
+
 
             {/* CUENTA */}
-            <li className="nav-item ms-2">
+            <li className="nav-item ms-3">
               {usuario ? (
                 <div className="dropdown">
                   <button
-                    className="btn btn-sm btn-outline-light dropdown-toggle"
+                    className="btn btn-sm btn-outline-light dropdown-toggle d-flex align-items-center"
                     type="button"
                     id="dropdownUser"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
+                    style={{ border: "none", background: "transparent", color: "#fff" }}
                   >
-                    <i className="bi bi-person-circle me-1"></i>
-                    {usuario.nombre.split(" ")[0]}
+                    <i className="bi bi-person-circle fs-5"></i>
                   </button>
-                  <ul className="dropdown-menu dropdown-menu-end">
+                  <ul className="dropdown-menu dropdown-menu-end shadow-sm">
                     <li>
-                      <Link className="dropdown-item" to="/mi-cuenta">
-                        Mi Cuenta
-                      </Link>
+                      <Link className="dropdown-item" to="/mi-cuenta">Mi Cuenta</Link>
                     </li>
                     <li>
-                      <Link className="dropdown-item" to="/historial">
-                        Historial
-                      </Link>
+                      <Link className="dropdown-item" to="/historial">Historial</Link>
                     </li>
-                    <li>
-                      <hr className="dropdown-divider" />
-                    </li>
+                    <li><hr className="dropdown-divider" /></li>
                     <li>
                       <button className="dropdown-item text-danger" onClick={onLogout}>
                         <i className="bi bi-box-arrow-right me-1"></i> Cerrar sesión
@@ -135,8 +138,8 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0, usuario, onLogout }) 
                   </ul>
                 </div>
               ) : (
-                <Link className="nav-link" to="/mi-cuenta">
-                  <i className="bi bi-person-circle me-1"></i> Mi Cuenta
+                <Link className="nav-link text-white d-flex align-items-center" to="/mi-cuenta">
+                  <i className="bi bi-person-circle fs-5"></i>
                 </Link>
               )}
             </li>

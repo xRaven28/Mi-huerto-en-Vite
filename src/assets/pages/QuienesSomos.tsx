@@ -7,7 +7,7 @@ const QuienesSomos: React.FC = () => {
         <div className="container">
           <div className="mb-4">
             <img
-              src="/Img/frutas-y-verduras.jpg"
+              src="/img/frutas-y-verduras.jpg"
               alt="Quiénes somos Huerto Hogar"
               className="img-fluid rounded shadow w-100"
               style={{ maxHeight: '400px', objectFit: 'cover' }}
@@ -103,6 +103,54 @@ const QuienesSomos: React.FC = () => {
           </div>
         </div>
       </section>
+      {/* 🦶 Footer */}
+      <footer className="footer-custom text-white pt-4 pb-2">
+        <div className="container">
+          <div className="row px-5">
+            <div className="col-md-4 mb-3">
+              <h5>Contacto</h5>
+              <p>Email: contacto@huertohogar.cl</p>
+              <p>Tel: +56 9 1234 5678</p>
+              <p>Dirección: Calle Ejemplo 123, Concepción, Chile</p>
+            </div>
+
+            <div className="col-md-4 mb-3">
+              <h5>Enlaces útiles</h5>
+              <ul className="list-unstyled">
+                <li><a href="/" className="text-white text-decoration-none">Inicio</a></li>
+                <li><a href="/productos" className="text-white text-decoration-none">Productos</a></li>
+                <li><a href="/recetas" className="text-white text-decoration-none">Recetas</a></li>
+                <li>
+                  <a
+                    href="https://github.com/xRaven28/HuertoHogar.git"
+                    className="text-white text-decoration-none"
+                  >
+                    GitHub de esta página
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="col-md-4 mb-3">
+              <h5>Síguenos</h5>
+              <a href="#" className="text-white d-block mb-1">
+                <i className="bi bi-facebook"></i> Facebook
+              </a>
+              <a href="#" className="text-white d-block mb-1">
+                <i className="bi bi-instagram"></i> Instagram
+              </a>
+              <a href="#" className="text-white d-block">
+                <i className="bi bi-whatsapp"></i> WhatsApp
+              </a>
+            </div>
+          </div>
+
+          <hr className="bg-white mx-5" />
+          <p className="text-center mb-0">
+            &copy; 2025 Huerto Hogar. Todos los derechos reservados.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };

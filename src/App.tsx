@@ -9,7 +9,8 @@ import Admin from './assets/pages/Admin';
 import Carrito from './assets/pages/Carrito';
 import Checkout from './assets/pages/Checkout';
 import Contacto from './assets/pages/Contacto';
-
+import Recetas from './assets/pages/Recetas';
+import QuienesSomos from './assets/pages/QuienesSomos';
 import { useAuth } from './assets/hooks/useAuth';
 import Toast from './assets/components/Toast';
 
@@ -61,6 +62,8 @@ const App: React.FC = () => {
         <Route path="/carrito" element={<Carrito />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/contacto" element={<Contacto />} />
+        <Route path="/recetas" element={<Recetas />} />
+        <Route path="/quienessomos" element={<QuienesSomos />} />
 
         <Route
           path="*"
