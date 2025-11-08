@@ -1,94 +1,77 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Usuario } from "../hooks/useAuth";
 
 interface CrearCuentaProps {
   mostrarToast: (message: string, color?: string) => void;
-  onLogin?: (usuario: any) => void;
 }
 
-interface FormData {
-  nombre: string;
-  apellido: string;
-  run: string;
-  correo: string;
-  telefono: string;
-  direccion: string;
-  password: string;
-  confirmarPassword: string;
-}
-
-const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast, onLogin }) => {
+const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<FormData>({
-    nombre: '',
-    apellido: '',
-    run: '',
-    correo: '',
-    telefono: '',
-    direccion: '',
-    password: '',
-    confirmarPassword: ''
+  const [formData, setFormData] = useState({
+    nombre: "",
+    apellido: "",
+    run: "",
+    correo: "",
+    telefono: "",
+    direccion: "",
+    password: "",
+    confirmarPassword: "",
   });
-  const [terminosAceptados, setTerminosAceptados] = useState(false);
-  const [errores, setErrores] = useState<Partial<FormData>>({});
+  const [terminos, setTerminos] = useState(false);
+  const [errores, setErrores] = useState<any>({});
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ============================
+  // 🔹 VALIDACIONES
+  // ============================
+  const validarEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
-
-    if (errores[id as keyof FormData]) {
-      setErrores(prev => ({ ...prev, [id]: undefined }));
-    }
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const validarRUN = (run: string): boolean => /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/.test(run);
-  const validarEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validar = () => {
+    const errs: any = {};
+    if (!formData.nombre) errs.nombre = "El nombre es obligatorio";
+    if (!formData.apellido) errs.apellido = "El apellido es obligatorio";
+    if (!formData.run) errs.run = "El RUN es obligatorio";
+    if (!formData.correo) errs.correo = "El correo es obligatorio";
+    else if (!validarEmail(formData.correo)) errs.correo = "Correo inválido";
+    if (!formData.password) errs.password = "Contraseña requerida";
+    else if (formData.password.length < 6) errs.password = "Debe tener al menos 6 caracteres";
+    if (formData.password !== formData.confirmarPassword)
+      errs.confirmarPassword = "Las contraseñas no coinciden";
 
-  const validarFormulario = (): boolean => {
-    const nuevosErrores: Partial<FormData> = {};
-
-    if (!formData.nombre.trim()) nuevosErrores.nombre = 'El nombre es obligatorio';
-    if (!formData.apellido.trim()) nuevosErrores.apellido = 'El apellido es obligatorio';
-    if (!formData.run.trim()) nuevosErrores.run = 'El RUN es obligatorio';
-    else if (!validarRUN(formData.run)) nuevosErrores.run = 'Formato de RUN inválido';
-    if (!formData.correo.trim()) nuevosErrores.correo = 'El correo es obligatorio';
-    else if (!validarEmail(formData.correo)) nuevosErrores.correo = 'Correo electrónico inválido';
-    if (!formData.telefono.trim()) nuevosErrores.telefono = 'El teléfono es obligatorio';
-    if (!formData.direccion.trim()) nuevosErrores.direccion = 'La dirección es obligatoria';
-    if (!formData.password) nuevosErrores.password = 'La contraseña es obligatoria';
-    else if (formData.password.length < 6)
-      nuevosErrores.password = 'Debe tener al menos 6 caracteres';
-    if (!formData.confirmarPassword)
-      nuevosErrores.confirmarPassword = 'Confirma tu contraseña';
-    else if (formData.password !== formData.confirmarPassword)
-      nuevosErrores.confirmarPassword = 'Las contraseñas no coinciden';
-
-    setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0;
+    setErrores(errs);
+    return Object.keys(errs).length === 0;
   };
 
+  // ============================
+  // 🔹 FUNCIONES DE REGISTRO
+  // ============================
+
+  // Guarda el nuevo usuario en localStorage y sincroniza con AuthProvider
+  const registrarUsuario = (nuevoUsuario: Usuario) => {
+    const lista = JSON.parse(localStorage.getItem("usuarios") || "[]");
+    lista.push(nuevoUsuario);
+    localStorage.setItem("usuarios", JSON.stringify(lista));
+    localStorage.setItem("usuarioActual", JSON.stringify(nuevoUsuario)); // sincroniza con Auth
+  };
+
+  // ============================
+  // 🔹 SUBMIT PRINCIPAL
+  // ============================
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!terminos) return mostrarToast("Debes aceptar los términos", "#dc3545");
+    if (!validar()) return mostrarToast("Corrige los errores", "#dc3545");
 
-    if (!terminosAceptados) {
-      mostrarToast('Debes aceptar los términos y condiciones', '#dc3545');
-      return;
-    }
+    const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
+    const existe = usuarios.find((u: any) => u.correo === formData.correo);
+    if (existe) return mostrarToast("Correo ya registrado", "#dc3545");
 
-    if (!validarFormulario()) {
-      mostrarToast('Corrige los errores del formulario', '#dc3545');
-      return;
-    }
-
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const usuarioExistente = usuarios.find((u: any) => u.correo === formData.correo);
-
-    if (usuarioExistente) {
-      mostrarToast('Este correo ya está registrado', '#dc3545');
-      return;
-    }
-
-    const nuevoUsuario = {
+    const nuevoUsuario: Usuario = {
       id: Date.now(),
       nombre: `${formData.nombre} ${formData.apellido}`,
       run: formData.run,
@@ -96,103 +79,90 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast, onLogin }) => {
       telefono: formData.telefono,
       direccion: formData.direccion,
       password: formData.password,
-      fechaRegistro: new Date().toISOString()
+      rol: "usuario",
+      compras: [],
+      fechaRegistro: new Date().toLocaleString(),
     };
 
-    usuarios.push(nuevoUsuario);
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-    localStorage.setItem('usuarioActual', JSON.stringify(nuevoUsuario));
+    registrarUsuario(nuevoUsuario);
+    mostrarToast("✅ Cuenta creada con éxito", "#198754");
 
-    if (onLogin) onLogin(nuevoUsuario);
+    // Sincronizar con AuthProvider
+    window.dispatchEvent(new Event("storage"));
 
-    mostrarToast('✅ ¡Cuenta creada con éxito!');
-    setTimeout(() => navigate('/'), 1500);
+    // Redirigir tras 1.5 segundos
+    setTimeout(() => navigate("/"), 1500);
   };
 
-  const handleTerminosClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate('/terminos');
-  };
-
+  // ============================
+  // 🔹 RENDERIZADO DEL FORMULARIO
+  // ============================
   return (
     <main className="container py-5 crearcuenta-page">
       <div className="row justify-content-center">
         <div className="col-md-6">
-          <div className="card shadow-lg rounded-3 border-0">
+          <div className="card shadow-lg border-0 rounded-3">
             <div className="card-body p-4">
-              <h3 className="text-center mb-4 text-success">
+              <h3 className="text-center text-success mb-4">
                 <i className="bi bi-person-plus"></i> Crear Cuenta
               </h3>
 
               <form onSubmit={handleSubmit}>
-                {[
-                  { id: 'nombre', label: 'Nombre', type: 'text', placeholder: 'Ingresa tu nombre' },
-                  { id: 'apellido', label: 'Apellido', type: 'text', placeholder: 'Ingresa tu apellido' },
-                  { id: 'run', label: 'RUN', type: 'text', placeholder: 'Ej: 12.345.678-9' },
-                  { id: 'correo', label: 'Correo', type: 'email', placeholder: 'ejemplo@correo.com' },
-                  { id: 'telefono', label: 'Teléfono', type: 'tel', placeholder: '+56 9 1234 5678' },
-                  { id: 'direccion', label: 'Dirección', type: 'text', placeholder: 'Calle, número, ciudad' },
-                  { id: 'password', label: 'Contraseña', type: 'password', placeholder: '********' },
-                  { id: 'confirmarPassword', label: 'Confirmar Contraseña', type: 'password', placeholder: '********' }
-                ].map((campo) => (
-                  <div key={campo.id} className="mb-3">
-                    <label htmlFor={campo.id} className="form-label fw-bold">{campo.label}</label>
-                    <input
-                      type={campo.type}
-                      className={`form-control ${errores[campo.id as keyof FormData] ? 'is-invalid' : ''}`}
-                      id={campo.id}
-                      placeholder={campo.placeholder}
-                      value={formData[campo.id as keyof FormData]}
-                      onChange={handleInputChange}
-                    />
-                    {errores[campo.id as keyof FormData] && (
-                      <div className="invalid-feedback">{errores[campo.id as keyof FormData]}</div>
-                    )}
-                  </div>
-                ))}
+                {Object.keys(formData).map((key) =>
+                  key !== "confirmarPassword" ? (
+                    <div key={key} className="mb-3">
+                      <label className="form-label fw-bold text-capitalize">
+                        {key}
+                      </label>
+                      <input
+                        id={key}
+                        type={key.includes("password") ? "password" : "text"}
+                        className={`form-control ${errores[key] ? "is-invalid" : ""}`}
+                        value={(formData as any)[key]}
+                        onChange={handleChange}
+                      />
+                      {errores[key] && (
+                        <div className="invalid-feedback">{errores[key]}</div>
+                      )}
+                    </div>
+                  ) : null
+                )}
+
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Confirmar contraseña</label>
+                  <input
+                    id="confirmarPassword"
+                    type="password"
+                    className={`form-control ${
+                      errores.confirmarPassword ? "is-invalid" : ""
+                    }`}
+                    value={formData.confirmarPassword}
+                    onChange={handleChange}
+                  />
+                  {errores.confirmarPassword && (
+                    <div className="invalid-feedback">{errores.confirmarPassword}</div>
+                  )}
+                </div>
 
                 <div className="form-check mb-3">
                   <input
-                    className="form-check-input"
                     type="checkbox"
+                    className="form-check-input"
                     id="terminos"
-                    checked={terminosAceptados}
-                    onChange={(e) => setTerminosAceptados(e.target.checked)}
+                    checked={terminos}
+                    onChange={(e) => setTerminos(e.target.checked)}
                   />
                   <label className="form-check-label" htmlFor="terminos">
-                    Acepto los{' '}
-                    <a href="/terminos" className="text-decoration-none" onClick={handleTerminosClick}>
-                      términos y condiciones
-                    </a>
+                    Acepto los <a href="/terminos">términos y condiciones</a>
                   </label>
                 </div>
 
                 <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-success fw-bold"
-                    disabled={!terminosAceptados}
-                  >
+                  <button className="btn btn-success fw-bold" type="submit">
                     Crear cuenta
                   </button>
                 </div>
               </form>
-
-              <div className="text-center mt-3">
-                <p>
-                  ¿Ya tienes una cuenta?{' '}
-                  <a
-                    href="/mi-cuenta"
-                    className="text-decoration-none"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate('/mi-cuenta');
-                    }}
-                  >
-                    Inicia sesión
-                  </a>
-                </p>
-              </div>
             </div>
           </div>
         </div>

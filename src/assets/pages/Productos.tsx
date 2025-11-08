@@ -73,18 +73,40 @@ const ProductoCard: React.FC<{
   const { src, onError } = useImageSrc(producto.img);
   const catKey = toCategoryKey(producto.categoria);
 
+  const precioFinal = producto.oferta
+    ? Math.round(producto.precio * (1 - (producto.descuento || 0) / 100))
+    : producto.precio;
+
   return (
     <div className="col-xl-4 col-lg-4 col-md-6 mb-4">
       <div className={`hh-card cat-${catKey}`}>
-        <div className="hh-media">
+        <div className="hh-media position-relative">
           <img src={src} alt={producto.name} onError={onError} />
+          {producto.oferta && (
+            <span className="badge bg-danger position-absolute top-0 start-0 m-2">
+              {producto.descuento}% OFF
+            </span>
+          )}
         </div>
-        <div className="hh-badge">{producto.categoria.toUpperCase()}</div>
-        <div className="hh-body">
+
+        <div className="hh-body text-center">
           <h5 className="hh-title">{producto.name}</h5>
+
           <div className="hh-price">
-            ${producto.precio.toLocaleString("es-CL")}
+            {producto.oferta ? (
+              <>
+                <span className="text-muted text-decoration-line-through me-2">
+                  ${producto.precio.toLocaleString("es-CL")}
+                </span>
+                <span className="fw-bold text-danger">
+                  ${precioFinal.toLocaleString("es-CL")}
+                </span>
+              </>
+            ) : (
+              <span>${producto.precio.toLocaleString("es-CL")}</span>
+            )}
           </div>
+
           <div className="d-flex justify-content-center gap-2 mt-2">
             <Link
               to={`/producto/${producto.id}`}
@@ -131,7 +153,9 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   /* 🔄 Filtrado y orden */
   useEffect(() => {
     try {
-      let filtered = getProductosCliente(busqueda);
+      // 🔥 Solo productos habilitados
+      let filtered = getProductosCliente(busqueda).filter((p) => p.habilitado);
+
       if (categoria !== "todos") {
         filtered = filtered.filter(
           (p) => p.categoria.toLowerCase() === categoria.toLowerCase()

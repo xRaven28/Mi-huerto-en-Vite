@@ -7,6 +7,9 @@ export interface Producto {
   compania: string;
   img: string;
   habilitado: boolean;
+
+  oferta?: boolean;
+  descuento?: number;  
 }
 
 export interface ProductoCarrito extends Producto {

@@ -1,27 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-interface ToastProps {
-  message: string;
-  color?: string;
-  onClose: () => void;
-}
+let showToastFn: (message: string, color?: string) => void;
 
-const Toast: React.FC<ToastProps> = ({ message, color = '#51af13ff', onClose }) => {
+export const ToastContainer: React.FC = () => {
+  const [toasts, setToasts] = useState<{ id: number; message: string; color?: string }[]>([]);
+
   useEffect(() => {
-    const t = setTimeout(onClose, 3000);
-    return () => clearTimeout(t);
-  }, [onClose]);
+    showToastFn = (message: string, color = "#198754") => {
+      const id = Date.now();
+      setToasts((prev) => [...prev, { id, message, color }]);
+      setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000);
+    };
+  }, []);
 
   return (
-    <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
-      <div className="toast show align-items-center text-white border-0" style={{ backgroundColor: color }}>
-        <div className="d-flex">
-          <div className="toast-body">{message}</div>
-          <button type="button" className="btn-close btn-close-white me-2 m-auto" onClick={onClose} aria-label="Close" />
+    <div
+      style={{
+        position: "fixed",
+        top: "1rem",
+        right: "1rem",
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+      }}
+    >
+
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          style={{
+            background: toast.color,
+            color: "#fff",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            boxShadow: "0 3px 6px rgba(0,0,0,0.3)",
+            fontWeight: 500,
+            pointerEvents: "auto", 
+          }}
+        >
+          {toast.message}
         </div>
-      </div>
+      ))}
     </div>
   );
 };
 
-export default Toast;
+export const useToast = () => showToastFn;

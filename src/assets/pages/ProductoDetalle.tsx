@@ -3,27 +3,21 @@ import { useParams, Link } from "react-router-dom";
 import { useProductos } from "../hooks/useProductos";
 import { Producto } from "../types";
 
-/* =========================================================
-   🖼️ FUNCIÓN PARA RUTA DE IMÁGENES
-   ========================================================= */
+
 const getImagePath = (img: string): string => {
   if (!img) return "/img/placeholder.jpg";
   const clean = img.replace(/^\/?(img|Img)\//, "").trim();
   return `/img/${clean}`;
 };
 
-/* =========================================================
-   🌿 COMPONENTE PRINCIPAL
-   ========================================================= */
+
 const DetalleProducto: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { productos } = useProductos();
   const [producto, setProducto] = useState<Producto | null>(null);
   const [similares, setSimilares] = useState<Producto[]>([]);
 
-  /* =========================================================
-     🎯 CARGAR PRODUCTO Y SIMILARES
-     ========================================================= */
+
   useEffect(() => {
     if (productos.length > 0 && id) {
       const prod = productos.find((p) => String(p.id) === id);
@@ -44,9 +38,7 @@ const DetalleProducto: React.FC = () => {
     }
   }, [productos, id]);
 
-  /* =========================================================
-     🛒 AGREGAR AL CARRITO
-     ========================================================= */
+
   const agregarAlCarrito = (producto: Producto) => {
     const raw = localStorage.getItem("carrito") || "[]";
     const carrito = JSON.parse(raw);
@@ -57,9 +49,7 @@ const DetalleProducto: React.FC = () => {
     window.dispatchEvent(new Event("storage"));
   };
 
-  /* =========================================================
-     🕓 ESTADOS DE CARGA / ERROR
-     ========================================================= */
+
   if (!productos.length) {
     return (
       <div className="text-center py-5">
@@ -83,9 +73,6 @@ const DetalleProducto: React.FC = () => {
     );
   }
 
-  /* =========================================================
-     🌿 RENDER PRINCIPAL
-     ========================================================= */
   return (
     <>
       <main

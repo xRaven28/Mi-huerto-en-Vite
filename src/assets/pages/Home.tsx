@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+
 
 const Home: React.FC = () => {
-  const [usuario, setUsuario] = useState<any>(null);
+  const [setUsuario] = useState<any>(null);
   const [ofertas, setOfertas] = useState<any[]>([]);
   const [indiceCarrusel, setIndiceCarrusel] = useState(0);
 
-  /* ================================
-     🧠 Usuario activo (si existe)
-  ================================ */
+  // Usuario activo 
+
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem("usuarioActivo");
     if (usuarioGuardado) setUsuario(JSON.parse(usuarioGuardado));
   }, []);
 
-  /* ================================
-     🔥 Ofertas desde localStorage
-  ================================ */
+  // Ofertas
+
   useEffect(() => {
     const productosGuardados = localStorage.getItem("productos");
     if (productosGuardados) {
@@ -24,11 +22,12 @@ const Home: React.FC = () => {
         const productos = JSON.parse(productosGuardados);
 
         const seleccion = productos
-          .filter((p: any) => p.habilitado && p.enOferta)
+          .filter((p: any) => p.habilitado && p.oferta) 
           .map((p: any) => ({
             ...p,
-            precio: Number(p.precio) || 0, // Asegura que el precio siempre sea numérico
-            img: p.img || "/img/placeholder.jpg", // Imagen por defecto
+            precio: Number(p.precio) || 0,
+            descuento: Number(p.descuento) || 0,
+            img: p.img || "/img/placeholder.jpg",
           }))
           .sort(() => Math.random() - 0.5)
           .slice(0, 6);
@@ -40,9 +39,7 @@ const Home: React.FC = () => {
     }
   }, []);
 
-  /* ================================
-     🎞️ Carrusel automático
-  ================================ */
+// Carrusel automático
   const imagenes = [
     "/img/Inicio_1.jpg",
     "/img/Frutaindex2.png",
@@ -56,9 +53,7 @@ const Home: React.FC = () => {
     return () => clearInterval(intervalo);
   }, [imagenes.length]);
 
-  /* ================================
-     🛒 Agregar producto al carrito
-  ================================ */
+//Agregar producto al carrito
   const agregarAlCarrito = (producto: any) => {
     const carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
     const idx = carrito.findIndex((p: any) => p.id === producto.id);
@@ -68,9 +63,7 @@ const Home: React.FC = () => {
     alert(`🛒 ${producto.name || "Producto"} agregado al carrito`);
   };
 
-  /* ================================
-     💬 Testimonios fijos
-  ================================ */
+//Testimonios fijos
   const testimonios = [
     {
       nombre: "María González",
@@ -91,13 +84,9 @@ const Home: React.FC = () => {
       imagen: "/img/ana.PNG",
     },
   ];
-
-  /* ================================
-     🏡 Render principal
-  ================================ */
+// Render principal
   return (
     <main className="home-page">
-      {/* 🌿 Carrusel automático */}
       <div className="carousel-container">
         <img
           src={imagenes[indiceCarrusel]}
@@ -114,10 +103,8 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* 🌱 Consejos del día + 🔥 Ofertas */}
       <div className="container py-5">
         <div className="row g-4 align-items-stretch">
-          {/* 🌱 Consejos del día */}
           <div className="col-lg-4 d-flex flex-column">
             <h2 className="text-center mb-4 text-success">🌱 Consejos del Día</h2>
             <div className="card text-white shadow-sm border-0">
@@ -142,7 +129,6 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* 🔥 Ofertas de la Semana */}
           <div className="col-lg-8">
             <h2 className="text-center mb-4 text-success">🔥 Ofertas de la Semana</h2>
             <div className="row g-4">
@@ -151,7 +137,7 @@ const Home: React.FC = () => {
                   <div key={p.id} className="col-md-4">
                     <div className="card h-100 shadow-sm border-0 position-relative oferta-card">
                       <span className="badge bg-danger position-absolute top-0 start-0 m-2">
-                        Oferta
+                        {p.descuento}% OFF
                       </span>
 
                       <div className="text-center p-3">
@@ -161,8 +147,8 @@ const Home: React.FC = () => {
                           className="img-fluid rounded"
                           style={{ maxHeight: "150px", objectFit: "contain" }}
                           onError={(e) =>
-                            ((e.target as HTMLImageElement).src =
-                              "/img/placeholder.jpg")
+                          ((e.target as HTMLImageElement).src =
+                            "/img/placeholder.jpg")
                           }
                         />
                       </div>
@@ -172,10 +158,14 @@ const Home: React.FC = () => {
                           {p.name || "Producto sin nombre"}
                         </h5>
                         <p className="card-text mb-2">
+                          <span className="text-muted text-decoration-line-through me-2">
+                            ${p.precio.toLocaleString("es-CL")}
+                          </span>
                           <span className="text-danger fw-bold">
-                            {p.precio > 0
-                              ? `$${p.precio.toLocaleString("es-CL")}`
-                              : "Consultar precio"}
+                            $
+                            {Math.round(
+                              p.precio * (1 - (p.descuento || 0) / 100)
+                            ).toLocaleString("es-CL")}
                           </span>
                         </p>
                         <button
@@ -195,7 +185,6 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        {/* 💬 Testimonios de Clientes */}
         <section className="py-5 bg-light mt-5 rounded-3">
           <h2 className="text-center mb-4 text-success">
             💬 Qué dicen nuestros clientes
@@ -221,7 +210,6 @@ const Home: React.FC = () => {
         </section>
       </div>
 
-      {/* 🦶 Footer */}
       <footer className="footer-custom text-white pt-4 pb-2">
         <div className="container">
           <div className="row px-5">
@@ -265,7 +253,7 @@ const Home: React.FC = () => {
 
           <hr className="bg-white mx-5" />
           <p className="text-center mb-0">
-            &copy; 2025 Huerto Hogar. Todos los derechos reservados.
+            &copy; 2025 HuertoHogar. Todos los derechos reservados.
           </p>
         </div>
       </footer>
