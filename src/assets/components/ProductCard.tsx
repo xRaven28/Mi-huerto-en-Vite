@@ -17,7 +17,7 @@ export const ModalAgregarProducto: React.FC<Props> = ({ isOpen, onClose, onGuard
 
   if (!isOpen) return null;
 
-  // 🖼️ Convertir imagen a base64
+  // Convertir imagen a base64
   const handleImagenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -27,7 +27,7 @@ export const ModalAgregarProducto: React.FC<Props> = ({ isOpen, onClose, onGuard
     }
   };
 
-  // 💾 Guardar producto
+  // Guardar producto
   const handleGuardar = () => {
     if (!nombre || !precio || !categoria) {
       alert("⚠️ Completa los campos obligatorios: nombre, precio y categoría.");
@@ -44,6 +44,7 @@ export const ModalAgregarProducto: React.FC<Props> = ({ isOpen, onClose, onGuard
       habilitado: true,
       oferta: false,
       descuento: 0,
+      valoraciones: [],
     };
 
     onGuardar(nuevo);

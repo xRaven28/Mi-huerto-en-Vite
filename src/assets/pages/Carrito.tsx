@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ProductoCarrito } from "../types";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-
+import { useToast } from "../components/Toast";
 const KEY = "carrito";
 
 const Carrito: React.FC = () => {
@@ -11,10 +11,9 @@ const Carrito: React.FC = () => {
   const [mostrarModal, setMostrarModal] = useState(false);
   const { usuario } = useAuth();
   const navigate = useNavigate();
+  const showToast = useToast();
 
-  // ===============================
-  // 🔹 Cargar carrito desde localStorage
-  // ===============================
+  //Cargar carrito desde localStorage
   useEffect(() => {
     const raw = localStorage.getItem(KEY);
     if (raw) setCarrito(JSON.parse(raw));
@@ -26,9 +25,7 @@ const Carrito: React.FC = () => {
     localStorage.setItem(KEY, JSON.stringify(nuevo));
   };
 
-  // ===============================
-  // 🔹 Funciones del carrito
-  // ===============================
+  // Funciones del carrito
   const actualizarCantidad = (id: number, cantidad: number) => {
     if (cantidad < 1) return;
     const nuevo = carrito.map((p) => (p.id === id ? { ...p, cantidad } : p));
@@ -39,37 +36,27 @@ const Carrito: React.FC = () => {
     const eliminado = carrito.find((p) => p.id === id);
     const nuevo = carrito.filter((p) => p.id !== id);
     guardarCarrito(nuevo);
-    alert(`${eliminado?.name} fue eliminado del carrito`);
+    showToast(`${eliminado?.name} fue eliminado del carrito`);
   };
 
-  // ===============================
-  // 💰 Calcular precio con descuento
-  // ===============================
+  // Calcular precio con descuento
   const precioConDescuento = (p: ProductoCarrito) => {
     if (p.oferta && p.descuento) {
       return Math.round(p.precio * (1 - p.descuento / 100));
     }
     return p.precio;
   };
-
-  // ===============================
-  // 🔹 Calcular total general
-  // ===============================
+  // Calcular total general
   const calcularTotal = () =>
     carrito.reduce(
       (s, p) => s + precioConDescuento(p) * (p.cantidad || 1),
       0
     );
-
-  // ===============================
-  // 🔹 Lógica de pago
-  // ===============================
+  // Lógica de pago
   const handlePagar = () => {
     if (usuario) {
-      // ✅ Usuario logueado → pasa directo
       navigate("/checkout");
     } else {
-      // ❌ No logueado → muestra opciones
       setMostrarModal(true);
     }
   };
@@ -83,9 +70,7 @@ const Carrito: React.FC = () => {
     }, 150);
   };
 
-  // ===============================
-  // 🔹 Render principal
-  // ===============================
+  // Render principal
   if (loading)
     return (
       <div className="container text-center py-5 carrito-page">
@@ -108,7 +93,7 @@ const Carrito: React.FC = () => {
         style={{ maxWidth: "500px", width: "100%" }}
       >
         <h4 className="fw-bold text-success mb-3">
-          Tu carrito está vacío 🛒
+          Tu carrito está vacío 
         </h4>
         <a href="/productos" className="btn btn-success px-4">
           Ir a Productos
@@ -119,7 +104,7 @@ const Carrito: React.FC = () => {
 
   return (
     <main className="container carrito-page" style={{ paddingTop: "120px" }}>
-      <h2 className="text-center mb-4">🛒 Carrito de Compras</h2>
+      <h2 className="text-center mb-4">Carrito de Compras</h2>
 
       <div className="table-responsive shadow-sm">
         <table className="table table-bordered align-middle">
@@ -228,10 +213,7 @@ const Carrito: React.FC = () => {
           <i className="bi bi-credit-card me-2"></i>Pagar ahora
         </button>
       </div>
-
-      {/* ===========================
-          🪟 Modal opciones de pago
-      ============================ */}
+      {/*Modal opciones de pago*/}
       {mostrarModal && (
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"

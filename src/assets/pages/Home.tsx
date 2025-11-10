@@ -1,28 +1,24 @@
 import React, { useEffect, useState } from "react";
 
-
 const Home: React.FC = () => {
-  const [setUsuario] = useState<any>(null);
+  const [usuario, setUsuario] = useState<any>(null);
   const [ofertas, setOfertas] = useState<any[]>([]);
   const [indiceCarrusel, setIndiceCarrusel] = useState(0);
 
-  // Usuario activo 
-
+  // Cargar usuario activo
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem("usuarioActivo");
     if (usuarioGuardado) setUsuario(JSON.parse(usuarioGuardado));
   }, []);
 
-  // Ofertas
-
+  // Cargar ofertas desde localStorage
   useEffect(() => {
     const productosGuardados = localStorage.getItem("productos");
     if (productosGuardados) {
       try {
         const productos = JSON.parse(productosGuardados);
-
         const seleccion = productos
-          .filter((p: any) => p.habilitado && p.oferta) 
+          .filter((p: any) => p.habilitado && p.oferta)
           .map((p: any) => ({
             ...p,
             precio: Number(p.precio) || 0,
@@ -31,7 +27,6 @@ const Home: React.FC = () => {
           }))
           .sort(() => Math.random() - 0.5)
           .slice(0, 6);
-
         setOfertas(seleccion);
       } catch (e) {
         console.error("Error leyendo productos:", e);
@@ -39,12 +34,8 @@ const Home: React.FC = () => {
     }
   }, []);
 
-// Carrusel automático
-  const imagenes = [
-    "/img/Inicio_1.jpg",
-    "/img/Frutaindex2.png",
-    "/img/Frutaindex3.jpeg",
-  ];
+  // Carrusel automático
+  const imagenes = ["/img/Inicio_1.jpg", "/img/Frutaindex2.png", "/img/Frutaindex3.jpeg"];
 
   useEffect(() => {
     const intervalo = setInterval(() => {
@@ -53,40 +44,44 @@ const Home: React.FC = () => {
     return () => clearInterval(intervalo);
   }, [imagenes.length]);
 
-//Agregar producto al carrito
+  // Agregar producto al carrito
   const agregarAlCarrito = (producto: any) => {
-    const carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
-    const idx = carrito.findIndex((p: any) => p.id === producto.id);
-    if (idx >= 0) carrito[idx].cantidad += 1;
-    else carrito.push({ ...producto, cantidad: 1 });
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-    alert(`🛒 ${producto.name || "Producto"} agregado al carrito`);
+    try {
+      const carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
+      const idx = carrito.findIndex((p: any) => p.id === producto.id);
+      if (idx >= 0) carrito[idx].cantidad += 1;
+      else carrito.push({ ...producto, cantidad: 1 });
+
+      localStorage.setItem("carrito", JSON.stringify(carrito));
+      console.log(`✅ ${producto.name || "Producto"} agregado al carrito`);
+      window.dispatchEvent(new Event("storage"));
+    } catch (error) {
+      console.error("❌ Error al agregar producto:", error);
+    }
   };
 
-//Testimonios fijos
+  // Testimonios
   const testimonios = [
     {
       nombre: "María González",
-      texto:
-        "Los productos son frescos y de excelente calidad. Siempre llegan a tiempo y en perfectas condiciones.",
+      texto: "Los productos son frescos y de excelente calidad. Siempre llegan a tiempo y en perfectas condiciones.",
       imagen: "/img/maria.png",
     },
     {
       nombre: "Juan Pérez",
-      texto:
-        "Me encanta la variedad de productos que ofrecen. Todo se siente natural y fresco, justo como lo necesito.",
+      texto: "Me encanta la variedad de productos que ofrecen. Todo se siente natural y fresco, justo como lo necesito.",
       imagen: "/img/el.png",
     },
     {
       nombre: "Ana Torres",
-      texto:
-        "Excelente servicio y atención al cliente. ¡Recomiendo HuertoHogar a todos mis amigos y familiares!",
+      texto: "Excelente servicio y atención al cliente. ¡Recomiendo HuertoHogar a todos mis amigos y familiares!",
       imagen: "/img/ana.PNG",
     },
   ];
-// Render principal
+
   return (
     <main className="home-page">
+      {/* Carrusel */}
       <div className="carousel-container">
         <img
           src={imagenes[indiceCarrusel]}
@@ -94,33 +89,24 @@ const Home: React.FC = () => {
           className="carousel-img"
         />
         <div className="carousel-overlay">
-          <h1 className="text-white text-center fw-bold">
-            Bienvenido a HuertoHogar
-          </h1>
-          <p className="text-white text-center">
-            Frescura natural, directo del campo a tu mesa 🍎
-          </p>
+          <h1 className="text-white text-center fw-bold">Bienvenido a HuertoHogar</h1>
         </div>
       </div>
 
+      {/* Sección principal */}
       <div className="container py-5">
         <div className="row g-4 align-items-stretch">
+          {/* Consejo del día */}
           <div className="col-lg-4 d-flex flex-column">
-            <h2 className="text-center mb-4 text-success">🌱 Consejos del Día</h2>
+            <h2 className="text-center mb-4">🌱 Consejos del Día</h2>
             <div className="card text-white shadow-sm border-0">
               <div className="img-cuadrada">
-                <img
-                  src="/img/Fondo.jpg"
-                  className="card-img"
-                  alt="Consejo saludable"
-                />
+                <img src="/img/Fondo.jpg" className="card-img" alt="Consejo saludable" />
                 <div
                   className="card-img-overlay d-flex flex-column justify-content-center text-center"
                   style={{ background: "rgba(0,0,0,0.45)", borderRadius: "6px" }}
                 >
-                  <h5 className="card-title fw-bold">
-                    Come 5 frutas y verduras al día
-                  </h5>
+                  <h5 className="card-title fw-bold">Come 5 frutas y verduras al día</h5>
                   <p className="card-text">
                     Te aportan vitaminas, minerales y fibra para una vida más saludable.
                   </p>
@@ -129,8 +115,9 @@ const Home: React.FC = () => {
             </div>
           </div>
 
+          {/* Ofertas */}
           <div className="col-lg-8">
-            <h2 className="text-center mb-4 text-success">🔥 Ofertas de la Semana</h2>
+            <h2 className="text-center mb-4">🔥 Ofertas de la Semana</h2>
             <div className="row g-4">
               {ofertas.length > 0 ? (
                 ofertas.map((p) => (
@@ -139,7 +126,6 @@ const Home: React.FC = () => {
                       <span className="badge bg-danger position-absolute top-0 start-0 m-2">
                         {p.descuento}% OFF
                       </span>
-
                       <div className="text-center p-3">
                         <img
                           src={p.img}
@@ -147,12 +133,10 @@ const Home: React.FC = () => {
                           className="img-fluid rounded"
                           style={{ maxHeight: "150px", objectFit: "contain" }}
                           onError={(e) =>
-                          ((e.target as HTMLImageElement).src =
-                            "/img/placeholder.jpg")
+                            ((e.target as HTMLImageElement).src = "/img/placeholder.jpg")
                           }
                         />
                       </div>
-
                       <div className="card-body text-center">
                         <h5 className="card-title fw-semibold text-dark">
                           {p.name || "Producto sin nombre"}
@@ -163,9 +147,9 @@ const Home: React.FC = () => {
                           </span>
                           <span className="text-danger fw-bold">
                             $
-                            {Math.round(
-                              p.precio * (1 - (p.descuento || 0) / 100)
-                            ).toLocaleString("es-CL")}
+                            {Math.round(p.precio * (1 - (p.descuento || 0) / 100)).toLocaleString(
+                              "es-CL"
+                            )}
                           </span>
                         </p>
                         <button
@@ -185,10 +169,9 @@ const Home: React.FC = () => {
           </div>
         </div>
 
+        {/* Testimonios */}
         <section className="py-5 bg-light mt-5 rounded-3">
-          <h2 className="text-center mb-4 text-success">
-            💬 Qué dicen nuestros clientes
-          </h2>
+          <h2 className="text-center mb-4 text-success">💬 Qué dicen nuestros clientes</h2>
           <div className="row text-center g-4">
             {testimonios.map((t, index) => (
               <div key={index} className="col-md-4">
@@ -210,7 +193,8 @@ const Home: React.FC = () => {
         </section>
       </div>
 
-      <footer className="footer-custom text-white pt-4 pb-2">
+      {/* ✅ FOOTER */}
+      <footer className="footer-custom text-white pt-5 pb-3 mt-5 w-100">
         <div className="container">
           <div className="row px-5">
             <div className="col-md-4 mb-3">
@@ -223,13 +207,20 @@ const Home: React.FC = () => {
             <div className="col-md-4 mb-3">
               <h5>Enlaces útiles</h5>
               <ul className="list-unstyled">
-                <li><a href="/" className="text-white text-decoration-none">Inicio</a></li>
-                <li><a href="/productos" className="text-white text-decoration-none">Productos</a></li>
-                <li><a href="/recetas" className="text-white text-decoration-none">Recetas</a></li>
+                <li>
+                  <a href="/" className="text-white text-decoration-none">Inicio</a>
+                </li>
+                <li>
+                  <a href="/productos" className="text-white text-decoration-none">Productos</a>
+                </li>
+                <li>
+                  <a href="/recetas" className="text-white text-decoration-none">Recetas</a>
+                </li>
                 <li>
                   <a
                     href="https://github.com/xRaven28/HuertoHogar.git"
                     className="text-white text-decoration-none"
+                    target="_blank"
                   >
                     GitHub de esta página
                   </a>
@@ -252,8 +243,8 @@ const Home: React.FC = () => {
           </div>
 
           <hr className="bg-white mx-5" />
-          <p className="text-center mb-0">
-            &copy; 2025 HuertoHogar. Todos los derechos reservados.
+          <p className="text-center mb-0 small">
+            &copy; 2025 Huerto Hogar. Todos los derechos reservados.
           </p>
         </div>
       </footer>

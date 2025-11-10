@@ -1,5 +1,5 @@
 import React from 'react';
-import { Producto } from '../types/index';
+import type { Producto, Usuario } from '../types';
 
 // Interfaces para los props
 interface ModalAgregarProps {
@@ -7,14 +7,6 @@ interface ModalAgregarProps {
   onClose: () => void;
   onGuardar: (producto: Omit<Producto, 'id'>) => void;
 }
-
-interface Usuario {
-  nombre?: string;
-  apellido?: string;
-  run?: string;
-  correo?: string;
-}
-
 // Componente Modal para agregar producto
 export const ModalAgregarProducto: React.FC<ModalAgregarProps> = ({ 
   isOpen, 
@@ -181,7 +173,7 @@ export const TablaUsuarios: React.FC = () => {
         {usuarios.map((usuario, index) => (
           <tr key={index}>
             <td>{usuario.nombre || ''} {usuario.apellido || ''}</td>
-            <td>{usuario.run || 'N/A'}</td>
+            <td>{usuario.rut || 'N/A'}</td>
             <td>Usuario</td>
             <td><span className="badge bg-success">Activo</span></td>
             <td>

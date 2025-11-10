@@ -12,7 +12,7 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
   const location = useLocation();
   const { usuario, esAdmin, logout } = useAuth();
 
-  // 🔍 Buscar productos
+  //Buscar productos
   const handleBuscar = (e: React.FormEvent) => {
     e.preventDefault();
     localStorage.setItem("busqueda", busqueda);
@@ -20,13 +20,13 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
     if (location.pathname !== "/productos") navigate("/productos");
   };
 
-  // Mantener búsqueda al recargar
+  //Mantener búsqueda al recargar
   useEffect(() => {
     const term = localStorage.getItem("busqueda") || "";
     setBusqueda(term);
   }, []);
 
-  // Cerrar sesión
+  //Cerrar sesión
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -47,7 +47,7 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
           <span className="brand-text fw-bold text-white">HuertoHogar</span>
         </Link>
 
-        {/* BOTÓN RESPONSIVE */}
+        {/*BOTÓN RESPONSIVE */}
         <button
           className="navbar-toggler"
           type="button"
@@ -60,10 +60,10 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* CONTENIDO PRINCIPAL */}
+        {/*CONTENIDO PRINCIPAL */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-center">
-            {/* LINKS DE NAVEGACIÓN */}
+            {/*LINKS DE NAVEGACIÓN */}
             <li className="nav-item">
               <Link className="nav-link text-white" to="/">
                 Inicio
@@ -90,7 +90,7 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
               </Link>
             </li>
 
-            {/* BUSCADOR */}
+            {/*BUSCADOR */}
             <li className="nav-item ms-3">
               <form className="d-flex" onSubmit={handleBuscar}>
                 <input

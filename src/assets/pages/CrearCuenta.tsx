@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Usuario } from "../hooks/useAuth";
+import type { Usuario } from "../types";
+import { useToast } from "../components/Toast";
+
 
 interface CrearCuentaProps {
   mostrarToast: (message: string, color?: string) => void;
@@ -11,7 +13,7 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
-    run: "",
+    rut: "",
     correo: "",
     telefono: "",
     direccion: "",
@@ -20,10 +22,9 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
   });
   const [terminos, setTerminos] = useState(false);
   const [errores, setErrores] = useState<any>({});
+  const showToast = useToast();
 
-  // ============================
-  // 🔹 VALIDACIONES
-  // ============================
+  // VALIDACIONES
   const validarEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +36,7 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
     const errs: any = {};
     if (!formData.nombre) errs.nombre = "El nombre es obligatorio";
     if (!formData.apellido) errs.apellido = "El apellido es obligatorio";
-    if (!formData.run) errs.run = "El RUN es obligatorio";
+    if (!formData.rut) errs.rut = "El RUN es obligatorio";
     if (!formData.correo) errs.correo = "El correo es obligatorio";
     else if (!validarEmail(formData.correo)) errs.correo = "Correo inválido";
     if (!formData.password) errs.password = "Contraseña requerida";
@@ -47,21 +48,17 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
     return Object.keys(errs).length === 0;
   };
 
-  // ============================
-  // 🔹 FUNCIONES DE REGISTRO
-  // ============================
 
-  // Guarda el nuevo usuario en localStorage y sincroniza con AuthProvider
+  //FUNCIONES DE REGISTRO
   const registrarUsuario = (nuevoUsuario: Usuario) => {
     const lista = JSON.parse(localStorage.getItem("usuarios") || "[]");
     lista.push(nuevoUsuario);
     localStorage.setItem("usuarios", JSON.stringify(lista));
-    localStorage.setItem("usuarioActual", JSON.stringify(nuevoUsuario)); // sincroniza con Auth
+    localStorage.setItem("usuarioActual", JSON.stringify(nuevoUsuario));
   };
 
-  // ============================
-  // 🔹 SUBMIT PRINCIPAL
-  // ============================
+  //SUBMIT PRINCIPAL
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!terminos) return mostrarToast("Debes aceptar los términos", "#dc3545");
@@ -74,29 +71,27 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
     const nuevoUsuario: Usuario = {
       id: Date.now(),
       nombre: `${formData.nombre} ${formData.apellido}`,
-      run: formData.run,
+      rut: formData.rut,
       correo: formData.correo,
       telefono: formData.telefono,
       direccion: formData.direccion,
       password: formData.password,
-      rol: "usuario",
+      confirpassword: formData.confirmarPassword,
+      rol: "Cliente",
       compras: [],
       fechaRegistro: new Date().toLocaleString(),
     };
 
     registrarUsuario(nuevoUsuario);
-    mostrarToast("✅ Cuenta creada con éxito", "#198754");
+    showToast(`Cuenta creada con éxito`);
 
-    // Sincronizar con AuthProvider
+
     window.dispatchEvent(new Event("storage"));
 
-    // Redirigir tras 1.5 segundos
     setTimeout(() => navigate("/"), 1500);
   };
 
-  // ============================
-  // 🔹 RENDERIZADO DEL FORMULARIO
-  // ============================
+  // RENDERIZADO DEL FORMULARIO
   return (
     <main className="container py-5 crearcuenta-page">
       <div className="row justify-content-center">
@@ -133,9 +128,8 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
                   <input
                     id="confirmarPassword"
                     type="password"
-                    className={`form-control ${
-                      errores.confirmarPassword ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${errores.confirmarPassword ? "is-invalid" : ""
+                      }`}
                     value={formData.confirmarPassword}
                     onChange={handleChange}
                   />

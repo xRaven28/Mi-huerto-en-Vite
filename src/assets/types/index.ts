@@ -1,5 +1,5 @@
 export interface Producto {
-  id: number;           
+  id: number;
   name: string;
   precio: number;
   desc: string;
@@ -7,33 +7,40 @@ export interface Producto {
   compania: string;
   img: string;
   habilitado: boolean;
-
+  valoraciones?: Valoracion[];
   oferta?: boolean;
-  descuento?: number;  
+  descuento?: number;
 }
 
 export interface ProductoCarrito extends Producto {
-  cantidad: number;         
+  cantidad: number;
 }
+export interface Valoracion {
+  usuario: string;
+  estrellas: number;
+  comentario: string;
+  fecha: string;
+}
+
 
 export interface Usuario {
   id: number;
   nombre: string;
-  name?: string;
   apellido?: string;
   rut?: string;
-  run?: string;
-  correo?: string;
-  email?: string;
+  correo: string;
   password: string;
+  confirpassword: string,
   telefono?: string;
   direccion?: string;
-  rol: string;        
-  estado: string;      
-  bloqueado: boolean;
-  historial: string[];
+  rol: string;
+  estado?: "Activo" | "Inactivo";
+  bloqueado?: boolean;
+  historial?: string[];
   compras?: Compra[];
+  fechaRegistro?: string;
 }
+
 
 export interface Compra {
   id: number;
@@ -66,4 +73,9 @@ export interface FormularioRegistro {
   direccion: string;
   password: string;
   confirmarPassword: string;
+}
+export interface HistorialAccion {
+  fecha: string;
+  accion: string;
+  usuario: string;
 }

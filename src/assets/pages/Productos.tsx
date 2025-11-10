@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useProductos } from "../hooks/useProductos";
 import type { Producto } from "../types";
+import StarRating from "../components/StarRating";
+
 
 /* =========================================================
-   ⚙️ Tipos y helpers
+  Tipos y helpers
    ========================================================= */
 interface ProductosProps {
   onAddToCart: () => void;
@@ -63,15 +65,20 @@ const toCategoryKey = (c: string) => {
   return "otros";
 };
 
-/* =========================================================
-   🛒 Tarjeta individual de producto
-   ========================================================= */
+/*Tarjeta individual de producto*/
 const ProductoCard: React.FC<{
   producto: Producto;
   onAdd: (p: Producto) => void;
 }> = ({ producto, onAdd }) => {
   const { src, onError } = useImageSrc(producto.img);
   const catKey = toCategoryKey(producto.categoria);
+
+  const valoraciones = producto.valoraciones || [];
+  const promedio =
+    valoraciones.length > 0
+      ? valoraciones.reduce((acc, v) => acc + (v.estrellas || 0), 0) /
+        valoraciones.length
+      : 0;
 
   const precioFinal = producto.oferta
     ? Math.round(producto.precio * (1 - (producto.descuento || 0) / 100))
@@ -91,8 +98,18 @@ const ProductoCard: React.FC<{
 
         <div className="hh-body text-center">
           <h5 className="hh-title">{producto.name}</h5>
+          <div className="mb-2 d-flex justify-content-center align-items-center flex-column">
+            <StarRating value={promedio} readOnly size={18} />
+            <small className="text-muted">
+              {valoraciones.length > 0
+                ? `(${valoraciones.length} valoración${
+                    valoraciones.length > 1 ? "es" : ""
+                  })`
+                : "Sin valoraciones aún"}
+            </small>
+          </div>
 
-          <div className="hh-price">
+          <div className="hh-price mb-2">
             {producto.oferta ? (
               <>
                 <span className="text-muted text-decoration-line-through me-2">
@@ -107,17 +124,11 @@ const ProductoCard: React.FC<{
             )}
           </div>
 
-          <div className="d-flex justify-content-center gap-2 mt-2">
-            <Link
-              to={`/producto/${producto.id}`}
-              className="btn btn-outline-success rounded-pill px-3 py-1"
-            >
+          <div className="hh-buttons">
+            <Link to={`/producto/${producto.id}`} className="btn btn-ver">
               <i className="bi bi-eye"></i> Ver
             </Link>
-            <button
-              className="btn btn-success rounded-pill px-3 py-1"
-              onClick={() => onAdd(producto)}
-            >
+            <button className="btn btn-anadir" onClick={() => onAdd(producto)}>
               <i className="bi bi-cart-plus"></i> Añadir
             </button>
           </div>
@@ -127,9 +138,8 @@ const ProductoCard: React.FC<{
   );
 };
 
-/* =========================================================
-   🧩 Componente principal Productos
-   ========================================================= */
+
+/*Componente principal Productos*/
 const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   const { productos, loading, getProductosCliente } = useProductos();
   const [categoria, setCategoria] = useState("todos");
@@ -139,7 +149,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   const [paginaActual, setPaginaActual] = useState(1);
   const productosPorPagina = 9;
 
-  /* 🔍 Sincroniza búsqueda */
+  /*Sincroniza búsqueda */
   useEffect(() => {
     const actualizarBusqueda = () => {
       const term = (localStorage.getItem("busqueda") || "").toLowerCase();
@@ -150,10 +160,10 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
     return () => window.removeEventListener("storage", actualizarBusqueda);
   }, []);
 
-  /* 🔄 Filtrado y orden */
+  /* Filtrado y orden */
   useEffect(() => {
     try {
-      // 🔥 Solo productos habilitados
+      // Solo productos habilitados
       let filtered = getProductosCliente(busqueda).filter((p) => p.habilitado);
 
       if (categoria !== "todos") {
@@ -190,7 +200,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
     }
   }, [productos, busqueda, categoria, orden, getProductosCliente]);
 
-  /* 🛍️ Agregar al carrito */
+  /* Agregar al carrito */
   const handleAddToCart = useCallback(
     (producto: Producto) => {
       try {
@@ -203,22 +213,20 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
 
         onAddToCart();
         window.dispatchEvent(new Event("storage"));
-        mostrarToast(`${producto.name} agregado al carrito`, "#198754");
       } catch (e) {
-        console.error("Error al agregar al carrito", e);
         mostrarToast("Error al agregar producto", "#dc3545");
       }
     },
     [onAddToCart, mostrarToast]
   );
 
-  /* 📄 Paginación */
+  /* Paginación */
   const indexOfLast = paginaActual * productosPorPagina;
   const indexOfFirst = indexOfLast - productosPorPagina;
   const productosPagina = productosFiltrados.slice(indexOfFirst, indexOfLast);
   const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
 
-  /* ⏳ Cargando */
+  /* Cargando */
   if (loading) {
     return (
       <div
@@ -231,17 +239,15 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
     );
   }
 
-  /* =========================================================
-     🎨 Render principal
-     ========================================================= */
+  /*Render principal*/
   return (
     <>
       <main className="container py-5 productos-page" style={{ marginTop: "100px" }}>
-        <h2 className="text-center text-success mb-4">
+        <h2 className="text-center mb-4">
           <i className="bi bi-cart3 me-2"></i> Todos los Productos
         </h2>
 
-        {/* 🔽 Filtros */}
+        {/*Filtros */}
         <div className="row mb-4 align-items-center text-center">
           <div className="col-md-6 mb-2">
             <select
@@ -273,7 +279,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
           </div>
         </div>
 
-        {/* 🛒 Lista de productos */}
+        {/*Lista de productos */}
         <div className="row gy-4 mt-4">
           {productosPagina
             .filter((p) => p && p.id && p.img)
@@ -282,7 +288,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
             ))}
         </div>
 
-        {/* 📄 Paginación */}
+        {/*Paginación */}
         {totalPaginas > 1 && (
           <div className="d-flex justify-content-center mt-4">
             <ul className="pagination">
@@ -303,7 +309,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
           </div>
         )}
 
-        {/* ⚠️ Sin resultados */}
+        {/*Sin resultados */}
         {productosFiltrados.length === 0 && !loading && (
           <div className="text-center mt-4">
             <div className="alert alert-warning">
@@ -313,7 +319,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
         )}
       </main>
 
-      {/* 🦶 FOOTER */}
+      {/*FOOTER */}
       <footer className="footer-custom text-white pt-5 pb-3 mt-5 w-100">
         <div className="container">
           <div className="row px-5">

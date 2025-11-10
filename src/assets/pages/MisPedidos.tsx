@@ -5,7 +5,7 @@ const MisPedidos: React.FC = () => {
 
   useEffect(() => {
     const historial = JSON.parse(localStorage.getItem("historialCompras") || "[]");
-    setPedidos(historial.reverse()); // Mostrar el pedido más reciente primero
+    setPedidos(historial.reverse()); 
   }, []);
 
   if (pedidos.length === 0) {
@@ -52,7 +52,7 @@ const MisPedidos: React.FC = () => {
 
   return (
     <main className="container mis-pedidos-page" style={{ paddingTop: "120px" }}>
-      <h3 className="text-success mb-4 text-center">🧾 Mis pedidos</h3>
+      <h3 className="text-success mb-4 text-center">Mis pedidos</h3>
 
       {pedidos.map((pedido) => (
         <div key={pedido.codigo} className="card mb-3 shadow-sm border-0">

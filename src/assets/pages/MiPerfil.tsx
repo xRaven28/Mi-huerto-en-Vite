@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useToast } from "../components/Toast";
+
 
 const MiPerfil: React.FC = () => {
   const [usuario, setUsuario] = useState<any>(null);
   const [form, setForm] = useState({ nombre: "", direccion: "", telefono: "" });
+  const showToast = useToast();
+
 
   useEffect(() => {
     const userData = localStorage.getItem("usuarioActual");
@@ -29,7 +33,8 @@ const MiPerfil: React.FC = () => {
     if (idx >= 0) usuarios[idx] = updatedUser;
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
-    alert("✅ Tus datos fueron actualizados correctamente");
+    showToast("Tus datos fueron actualizados correctamente", "exito");
+
   };
 
   if (!usuario) {
@@ -81,7 +86,7 @@ const MiPerfil: React.FC = () => {
 
         <div className="mb-3">
           <label className="form-label">RUN</label>
-          <input className="form-control" value={usuario.run || ""} disabled />
+          <input className="form-control" value={usuario.rut || ""} disabled />
         </div>
 
         <button className="btn btn-success w-100" onClick={handleSave}>

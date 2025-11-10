@@ -2,43 +2,21 @@
 import React, { useEffect, useState } from "react";
 import { useProductos } from "../hooks/useProductos";
 import { ModalAgregarProducto } from "../components/ProductCard";
-import { Producto } from "../types";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../components/Toast";
+import { Producto, Usuario, HistorialAccion } from "../types";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import StarRating from "../components/StarRating";
+import AdminEstadisticas from "../components/AdminEstadisticas";
+
 
 /* ================================
-   🔹 Interfaces
-================================ */
-interface Usuario {
-  id: number;
-  nombre: string;
-  correo: string;
-  rut?: string;
-  run?: string;
-  direccion?: string;
-  telefono?: string;
-  rol: string;
-  estado?: string;
-  bloqueado?: boolean;
-  compras?: {
-    id: number;
-    fecha: string;
-    total: number;
-    productos: { name: string; precio: number; cantidad: number; img?: string }[];
-  }[];
-}
-interface HistorialAccion {
-  fecha: string;
-  accion: string;
-  usuario: string;
-}
-
-/* ================================
-   🔹 Componente principal
+  Componente principal
 ================================ */
 const Admin: React.FC = () => {
   const { productos, loading, agregarProducto, actualizarProducto, eliminarProducto } = useProductos();
-  const [seccionActual, setSeccionActual] = useState<"menu" | "productos" | "cuentas" | "historial">("menu");
+  const [seccionActual, setSeccionActual] = useState<"menu" | "productos" | "estadisticas" | "cuentas" | "historial">("menu");
   const [modalOpen, setModalOpen] = useState(false);
   const [filtroProductos, setFiltroProductos] = useState("");
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -48,6 +26,8 @@ const Admin: React.FC = () => {
   const [nuevoCorreo, setNuevoCorreo] = useState("");
   const [nuevoRut, setNuevoRut] = useState("");
   const [nuevoRol, setNuevoRol] = useState("Cliente");
+  const [nuevoPassword, setNuevoPassword] = useState("");
+  const [confirmarPassword, setConfirmarPassword] = useState("");
 
   const [modalOfertaOpen, setModalOfertaOpen] = useState(false);
   const [modalEditarOpen, setModalEditarOpen] = useState(false);
@@ -56,25 +36,33 @@ const Admin: React.FC = () => {
   const [editData, setEditData] = useState<Partial<Producto>>({});
   const { usuario, esAdmin } = useAuth();
   const navigate = useNavigate();
+  const showToast = useToast();
 
 
   const [historialProductos, setHistorialProductos] = useState<HistorialAccion[]>([]);
   const [historialCuentas, setHistorialCuentas] = useState<HistorialAccion[]>([]);
+  const productosValorados = productos
+    .filter((p) => p.valoraciones && p.valoraciones.length > 0)
+    .map((p) => ({
+      name: p.name,
+      promedio:
+        p.valoraciones!.reduce((acc, v) => acc + v.estrellas, 0) / p.valoraciones!.length,
+    }));
 
   /* ==========================
-     🔐 Protección de acceso
+    Protección de acceso
   ========================== */
   useEffect(() => {
     if (!usuario) {
       navigate("/micuenta");
     } else if (!esAdmin) {
-      alert("No tienes permisos para acceder al panel de administrador.");
+      showToast(`No tienes permisos para acceder al panel de administrador`);
       navigate("/");
     }
   }, [usuario, esAdmin, navigate]);
 
   /* ==========================
-     📦 Cargar usuarios e historial
+    Cargar usuarios e historial
   ========================== */
   useEffect(() => {
     const usuariosLS = JSON.parse(localStorage.getItem("usuarios") || "[]");
@@ -88,7 +76,7 @@ const Admin: React.FC = () => {
   }, []);
 
   /* ==========================
-     💾 Guardar usuarios
+     Guardar usuarios
   ========================== */
   const guardarUsuarios = (nuevos: Usuario[], accion?: string) => {
     setUsuarios(nuevos);
@@ -108,7 +96,7 @@ const Admin: React.FC = () => {
   };
 
   /* ==========================
-     💾 Registrar acción de producto
+    Registrar acción de producto
   ========================== */
   const registrarAccionProducto = (accion: string) => {
     const registro: HistorialAccion = {
@@ -123,7 +111,7 @@ const Admin: React.FC = () => {
   };
 
   /* ==========================
-     🛒 Productos base
+    Productos base
   ========================== */
   const productosFiltrados = productos.filter(
     (p) =>
@@ -134,7 +122,7 @@ const Admin: React.FC = () => {
   const handleAgregar = async (p: Omit<Producto, "id">) => {
     await agregarProducto(p);
     registrarAccionProducto(`Agregó el producto "${p.name}"`);
-    alert("✅ Producto agregado correctamente");
+    showToast(`Producto agregado correctamente`);
   };
 
   const handleToggleProducto = async (id: number) => {
@@ -148,15 +136,15 @@ const Admin: React.FC = () => {
     localStorage.setItem("productos", JSON.stringify(nuevos));
 
     registrarAccionProducto(`${actualizado.habilitado ? "Habilitó" : "Inhabilitó"} el producto "${p.name}"`);
-    alert(`Producto "${p.name}" ${p.habilitado ? "inhabilitado" : "habilitado"} correctamente.`);
+    showToast(`Producto "${p.name}" ${p.habilitado ? "inhabilitado" : "habilitado"} correctamente.`);
   };
 
   /* ==========================
-     💸 Ofertas
+    Ofertas
   ========================== */
   const abrirModalOferta = (producto: Producto) => {
     if (!producto.habilitado) {
-      alert("⚠️ No puedes poner en oferta un producto inhabilitado.");
+      showToast(`No puedes poner en oferta un producto inhabilitado`);
       return;
     }
     setProductoSeleccionado(producto);
@@ -176,21 +164,27 @@ const Admin: React.FC = () => {
     localStorage.setItem("productos", JSON.stringify(nuevos));
     setModalOfertaOpen(false);
     registrarAccionProducto(`Puso en oferta "${actualizado.name}" con ${porcentajeOferta}%`);
-    alert(`✅ ${actualizado.name} ahora tiene un ${porcentajeOferta}% de descuento.`);
+    showToast(`${actualizado.name} ahora tiene un ${porcentajeOferta}% de descuento.`);
   };
 
   const quitarOferta = async (producto: Producto) => {
-    if (!confirm("¿Quitar este producto de ofertas?")) return;
+    console.log(`Eliminando oferta del producto: ${producto.name}`);
+
     const actualizado = { ...producto, oferta: false, descuento: 0 };
     await actualizarProducto(actualizado);
+
     const nuevos = productos.map((p) => (p.id === producto.id ? actualizado : p));
     localStorage.setItem("productos", JSON.stringify(nuevos));
+
     registrarAccionProducto(`Quitó la oferta de "${producto.name}"`);
-    alert(`🛒 ${producto.name} ya no está en oferta.`);
+    console.log(` Oferta eliminada para "${producto.name}"`);
+    showToast(`${producto.name} ya no está en oferta.`);
   };
 
+
+
   /* ==========================
-     ✏️ Editar producto
+    Editar producto
   ========================== */
   const abrirModalEditar = (producto: Producto) => {
     setProductoSeleccionado(producto);
@@ -206,7 +200,7 @@ const Admin: React.FC = () => {
     localStorage.setItem("productos", JSON.stringify(nuevos));
     registrarAccionProducto(`Editó el producto "${actualizado.name}"`);
     setModalEditarOpen(false);
-    alert(`✅ Producto "${actualizado.name}" editado correctamente.`);
+    showToast(`Producto "${actualizado.name}" editado correctamente.`);
   };
 
   const handleEliminarProducto = async (id: number) => {
@@ -217,7 +211,7 @@ const Admin: React.FC = () => {
   };
 
   /* ==========================
-     🧭 Render principal
+   Render principal
   ========================== */
   return (
     <div>
@@ -257,6 +251,9 @@ const Admin: React.FC = () => {
               />
               <button className="btn btn-success" onClick={() => setModalOpen(true)}>
                 ➕ Agregar Producto
+              </button>
+              <button className="btn btn-warning text-white" onClick={() => setSeccionActual("estadisticas")}>
+                📊 Ver Estadísticas
               </button>
               <button className="btn btn-secondary" onClick={() => setSeccionActual("menu")}>
                 ⬅ Volver
@@ -339,14 +336,24 @@ const Admin: React.FC = () => {
             )}
           </section>
         )}
+        {/*ESTADÍSTICAS DE PRODUCTOS */}
+        {seccionActual === "estadisticas" && (
+          <section>
+            <h2 className="text-center mb-4">Estadísticas de Productos</h2>
+            <div className="d-flex gap-2 mb-3">
+              <button className="btn btn-secondary" onClick={() => setSeccionActual("productos")}>
+                ⬅ Volver a Productos
+              </button>
+            </div>
 
-        {/* ==========================
-           GESTIÓN DE USUARIOS
-        ========================== */}
+            <AdminEstadisticas productos={productos} />
+          </section>
+        )}
+
+        {/* GESTIÓN DE USUARIOS*/}
         {seccionActual === "cuentas" && (
           <section>
-            <h2 className="text-center mb-4 text-success">👥 Gestión de Cuentas</h2>
-
+            <h2 className="text-center mb-4">Panel Administrador -Gestión de Cuentas</h2>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <button
                 className="btn btn-outline-secondary"
@@ -386,7 +393,7 @@ const Admin: React.FC = () => {
                         <tr key={u.id}>
                           <td>{u.nombre}</td>
                           <td>{u.correo}</td>
-                          <td>{u.run || "—"}</td>
+                          <td>{u.rut || "—"}</td>
                           <td>{u.rol || "Cliente"}</td>
                           <td>
                             <span className={`badge ${u.bloqueado ? "bg-danger" : "bg-success"}`}>
@@ -438,7 +445,7 @@ const Admin: React.FC = () => {
               </div>
             )}
 
-            {/* 🟩 Modal Crear Cuenta */}
+            {/* Modal Crear Cuenta */}
             {modalCrearCuentaOpen && (
               <div
                 className="modal fade show"
@@ -454,15 +461,20 @@ const Admin: React.FC = () => {
                         <form
                           onSubmit={(e) => {
                             e.preventDefault();
-                            const nuevoUsuario = {
+                            const nuevoUsuario: Usuario = {
                               id: Date.now(),
                               nombre: nuevoNombre,
                               correo: nuevoCorreo,
                               rut: nuevoRut,
                               rol: nuevoRol,
                               bloqueado: false,
+                              estado: "Activo",
+                              historial: [],
+                              password: nuevoPassword,
+                              confirpassword: confirmarPassword,
                               compras: [],
                             };
+
                             const nuevos = [...usuarios, nuevoUsuario];
                             guardarUsuarios(nuevos, `Creó la cuenta de ${nuevoNombre}`);
                             setModalCrearCuentaOpen(false);
@@ -470,6 +482,9 @@ const Admin: React.FC = () => {
                             setNuevoCorreo("");
                             setNuevoRut("");
                             setNuevoRol("Cliente");
+                            setNuevoPassword("");
+                            setConfirmarPassword("");
+
                           }}
                         >
                           <div className="mb-3">
@@ -499,6 +514,26 @@ const Admin: React.FC = () => {
                               className="form-control"
                               value={nuevoRut}
                               onChange={(e) => setNuevoRut(e.target.value)}
+                            />
+                          </div>
+                          <div className="mb-3">
+                            <label className="form-label">Contraseña</label>
+                            <input
+                              type="password"
+                              className="form-control"
+                              value={nuevoPassword}
+                              onChange={(e) => setNuevoPassword(e.target.value)}
+                              required
+                            />
+                          </div>
+                          <div className="mb-3">
+                            <label className="form-label">Confirmar contraseña</label>
+                            <input
+                              type="password"
+                              className="form-control"
+                              value={confirmarPassword}
+                              onChange={(e) => setConfirmarPassword(e.target.value)}
+                              required
                             />
                           </div>
 
@@ -542,7 +577,7 @@ const Admin: React.FC = () => {
         ========================== */}
         {seccionActual === "historial" && (
           <section>
-            <h2 className="text-center mb-4">📜 Historial de Actividades</h2>
+            <h2 className="text-center mb-4">Historial de Actividades</h2>
             <div className="d-flex gap-2 mb-3">
               <button className="btn btn-secondary" onClick={() => setSeccionActual("menu")}>
                 ⬅ Volver
@@ -662,7 +697,7 @@ const Admin: React.FC = () => {
                   <div className="tab-content">
                     <div className="tab-pane fade show active" id="resumen">
                       <p><strong>Correo:</strong> {usuarioSeleccionado.correo}</p>
-                      <p><strong>RUT:</strong> {usuarioSeleccionado.rut || usuarioSeleccionado.run || "No especificado"}</p>
+                      <p><strong>RUT:</strong> {usuarioSeleccionado.rut || usuarioSeleccionado.rut || "No especificado"}</p>
                       <p><strong>Dirección:</strong> {usuarioSeleccionado.direccion || "No especificada"}</p>
                       <p><strong>Teléfono:</strong> {usuarioSeleccionado.telefono || "No especificado"}</p>
 

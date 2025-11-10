@@ -55,7 +55,7 @@ const MiCuenta: React.FC<MiCuentaProps> = ({ mostrarToast }) => {
 
     const success = login(formData.correo, formData.password, recordarme);
     if (success) {
-      mostrarToast(`✅ Bienvenido a HuertoHogar`);
+      mostrarToast(`Bienvenido a HuertoHogar`);
       setTimeout(() => navigate("/"), 1000);
     } else {
       mostrarToast("Correo o contraseña incorrectos", "#dc3545");
@@ -89,7 +89,7 @@ const MiCuenta: React.FC<MiCuentaProps> = ({ mostrarToast }) => {
                   <h5>Información de la cuenta:</h5>
                   <p><strong>Nombre:</strong> {usuario.nombre}</p>
                   <p><strong>Correo:</strong> {usuario.correo}</p>
-                  {usuario.run && <p><strong>RUN:</strong> {usuario.run}</p>}
+                  {usuario.rut && <p><strong>RUN:</strong> {usuario.rut}</p>}
                   {usuario.telefono && <p><strong>Teléfono:</strong> {usuario.telefono}</p>}
                   {usuario.direccion && <p><strong>Dirección:</strong> {usuario.direccion}</p>}
                 </div>
@@ -121,10 +121,8 @@ const MiCuenta: React.FC<MiCuentaProps> = ({ mostrarToast }) => {
       </main>
     );
   }
-
-  // ============================
-  // 🔐 MODO LOGIN
-  // ============================
+  
+  //MODO LOGIN
   return (
     <main className="container mi-cuenta-page" style={{ paddingTop: "120px" }}>
       <h2 className="text-center text-success mb-4">👤 Mi Cuenta</h2>

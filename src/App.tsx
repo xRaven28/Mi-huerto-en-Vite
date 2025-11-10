@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
+// 🔹 Páginas principales
 import Home from "./assets/pages/Home";
 import Productos from "./assets/pages/Productos";
 import ProductoDetalle from "./assets/pages/ProductoDetalle";
@@ -9,28 +10,33 @@ import Recetas from "./assets/pages/Recetas";
 import QuienesSomos from "./assets/pages/QuienesSomos";
 import Terminos from "./assets/pages/Terminos";
 
+// 🔹 Cuentas y usuario
 import MiCuenta from "./assets/pages/MiCuenta";
 import CrearCuenta from "./assets/pages/CrearCuenta";
-import RecuperarContrasena from "./assets/pages/Recuperar-contrasena";
-import RestablecerContrasena from "./assets/pages/Restablecer_contrasena";
+import MiPerfil from "./assets/pages/MiPerfil.tsx";
+import MisPedidos from "./assets/pages/MisPedidos.tsx";
 
+// 🔹 Comercio y admin
 import Carrito from "./assets/pages/Carrito";
 import Checkout from "./assets/pages/Checkout";
 import Admin from "./assets/pages/Admin";
 
+// 🔹 Componentes y hooks
 import Navbar from "./assets/components/Navbar";
-import { ToastContainer } from "./assets/components/Toast";
 import RutaProtegida from "./assets/routes/RutaProtegida";
+import { ToastContainer, useToast } from "./assets/components/Toast";
 import { useAuth } from "./assets/hooks/useAuth";
-import MisPedidos from "./assets/pages/MisPedidos.tsx";
-import MiPerfil from "./assets/pages/MiPerfil.tsx";
 
 const App: React.FC = () => {
   const { usuario } = useAuth();
-  const [toast, setToast] = React.useState<{ msg: string; bg?: string } | null>(null);
   const [carritoCount, setCarritoCount] = React.useState<number>(0);
 
-  // Actualizar contador del carrito
+  // Hook para mostrar mensajes flotantes
+  const showToast = useToast();
+
+  // ==============================
+  // 🔹 Actualizar contador carrito
+  // ==============================
   React.useEffect(() => {
     const actualizarCarrito = () => {
       try {
@@ -47,75 +53,67 @@ const App: React.FC = () => {
     return () => window.removeEventListener("storage", actualizarCarrito);
   }, []);
 
-  // ===============================
-  // Sistema de toasts
-  // ===============================
-  const handleToast = (msg: string, color?: string) => {
-    setToast({ msg, bg: color });
-    setTimeout(() => setToast(null), 4000);
-  };
-
-  // ===============================
-  // 🌍 Render principal
-  // ===============================
+  // ==============================
+  // 🔹 Render principal
+  // ==============================
   return (
     <>
       <Navbar carritoCount={carritoCount} />
 
-      {/* Contenedor global de notificaciones */}
-      <ToastContainer />
-
-      {/* Rutas principales */}
+      {/* ==========================
+          RUTAS PRINCIPALES
+      =========================== */}
       <Routes>
-        {/* 🏠 Página principal */}
+        {/* Inicio */}
         <Route path="/" element={<Home />} />
 
-        {/* 🛍️ Productos */}
+        {/* Productos */}
         <Route
           path="/productos"
           element={
             <Productos
               onAddToCart={() =>
-                handleToast("🛒 Producto agregado al carrito", "#7cca33")
+                showToast("🛒 Producto agregado al carrito", "exito")
               }
-              mostrarToast={handleToast}
+              mostrarToast={(msg: string) => showToast(msg, "info")}
               usuario={usuario}
             />
           }
         />
         <Route path="/producto/:id" element={<ProductoDetalle />} />
 
-        {/* 📄 Páginas informativas */}
+        {/* Información */}
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/recetas" element={<Recetas />} />
         <Route path="/quienessomos" element={<QuienesSomos />} />
         <Route path="/terminos" element={<Terminos />} />
 
-        {/* 👤 Cuenta de usuario */}
-        <Route path="/mi-cuenta" element={<MiCuenta mostrarToast={handleToast} />} />
-        <Route path="/crear-cuenta" element={<CrearCuenta mostrarToast={handleToast} />} />
+        {/* Cuenta */}
         <Route
-          path="/recuperar-contrasena"
-          element={<RecuperarContrasena mostrarToast={handleToast} />}
+          path="/mi-cuenta"
+          element={<MiCuenta mostrarToast={(msg) => showToast(msg, "exito")} />}
         />
         <Route
-          path="/restablecer-contrasena"
-          element={<RestablecerContrasena mostrarToast={handleToast} />}
+          path="/crear-cuenta"
+          element={<CrearCuenta mostrarToast={(msg) => showToast(msg, "exito")} />}
         />
-
-        {/* 🛒 Comercio */}
-        <Route path="/carrito" element={<Carrito />} />
-        <Route path="/checkout" element={<RutaProtegida element={<Checkout />} />} />
         <Route path="/mi-perfil" element={<MiPerfil />} />
         <Route path="/mis-pedidos" element={<MisPedidos />} />
 
-        {/* 🔒 Panel de administración */}
+        {/* Comercio */}
+        <Route path="/carrito" element={<Carrito />} />
+        <Route
+          path="/checkout"
+          element={<RutaProtegida element={<Checkout />} />}
+        />
+
+        {/* Panel Admin */}
         <Route
           path="/admin"
           element={<RutaProtegida element={<Admin />} adminOnly />}
         />
 
-        {/* 🚫 404 */}
+        {/* 404 */}
         <Route
           path="*"
           element={
@@ -130,25 +128,10 @@ const App: React.FC = () => {
         />
       </Routes>
 
-      {toast && (
-        <div
-          style={{
-            position: "fixed",
-            top: "1rem",
-            right: "1rem",
-            background: toast.bg || "#198754",
-            color: "#fff",
-            padding: "10px 20px",
-            borderRadius: "10px",
-            boxShadow: "0 3px 6px rgba(0,0,0,0.3)",
-            zIndex: 3000,
-            fontWeight: 500,
-            transition: "all 0.3s ease",
-          }}
-        >
-          {toast.msg}
-        </div>
-      )}
+      {/* ==========================
+          TOASTS GLOBALES
+      =========================== */}
+      <ToastContainer />
     </>
   );
 };

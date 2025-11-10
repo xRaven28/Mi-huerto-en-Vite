@@ -27,7 +27,7 @@ export const productosIniciales: Producto[] = [
   { id: 76, name: "Miel Multifloral", precio: 6900, categoria: "otros", compania: "", img: "img/Miel_multi_2.jpg", desc: "Miel natural 100% pura y artesanal.", habilitado: true },
   { id: 31, name: "Lechuga", precio: 900, categoria: "verduras", compania: "", img: "img/Lechuga_2.webp", desc: "Fresca y crujiente, ideal para ensaladas.", habilitado: true },
   { id: 5, name: "Plátanos", precio: 1200, categoria: "frutas", compania: "", img: "img/Platano_3.png", desc: "Plátanos maduros, energéticos.", habilitado: true },
-   { id: 56, name: "Alcachofa", precio: 2800, categoria: "verduras", compania: "", img: "img/Alcachofa_1.webp", desc: "Alcachofas tiernas, ricas en fibra y antioxidantes.", habilitado: true },
+  { id: 56, name: "Alcachofa", precio: 2800, categoria: "verduras", compania: "", img: "img/Alcachofa_1.webp", desc: "Alcachofas tiernas, ricas en fibra y antioxidantes.", habilitado: true },
   { id: 1, name: "Manzanas Rojas", precio: 990, categoria: "frutas", compania: "", img: "img/Manzana_1.png", desc: "Manzanas frescas, crocantes y dulces.", habilitado: true },
   { id: 50, name: "Choclo", precio: 1800, categoria: "verduras", compania: "", img: "img/Choclo_2.jpg", desc: "Choclo fresco, amarillo y jugoso, perfecto para humitas y pastel de choclo.", habilitado: true },
   { id: 78, name: "Mermelada de Frutilla", precio: 2800, categoria: "otros", compania: "", img: "img/Mermelada_frutilla_1.png", desc: "Tradicional mermelada de frutilla casera, dulce y natural.", habilitado: true },
@@ -59,7 +59,7 @@ export const productosIniciales: Producto[] = [
   { id: 16, name: "Membrillo", precio: 2790, categoria: "frutas", compania: "", img: "img/Membrillo_1.png", desc: "Membrillo aromático, ideal para preparar dulces y compotas.", habilitado: true },
   { id: 82, name: "Mermelada de Frambuesa", precio: 2800, categoria: "otros", compania: "", img: "img/MermeladaFrambuesa_1.webp", desc: "Mermelada de frambuesa fresca, intensa y natural.", habilitado: true },
   { id: 42, name: "Tomates Cherry", precio: 1600, categoria: "verduras", compania: "", img: "img/tomatecherry_1.png", desc: "Pequeños y dulces, perfectos para snack o ensaladas.", habilitado: true },
-   { id: 40, name: "Pepino", precio: 900, categoria: "verduras", compania: "", img: "img/Pepino_1.png", desc: "Crujiente y refrescante, ideal para ensaladas y aguas saborizadas.", habilitado: true },
+  { id: 40, name: "Pepino", precio: 900, categoria: "verduras", compania: "", img: "img/Pepino_1.png", desc: "Crujiente y refrescante, ideal para ensaladas y aguas saborizadas.", habilitado: true },
   { id: 7, name: "Sandías", precio: 3500, categoria: "frutas", compania: "", img: "img/Sandía_1.png", desc: "Sandía fresca, ideal para verano.", habilitado: true },
   { id: 20, name: "Arándanos", precio: 4200, categoria: "frutas", compania: "", img: "img/Arándano_1.avif", desc: "Arándanos pequeños, azules y llenos de antioxidantes.", habilitado: true },
   { id: 8, name: "Melón Tuna", precio: 3200, categoria: "frutas", compania: "", img: "img/MelónTuna_1.png", desc: "Melón dulce y refrescante.", habilitado: true },
@@ -84,22 +84,55 @@ export const productosIniciales: Producto[] = [
   { id: 58, name: "Cilantro", precio: 800, categoria: "verduras", compania: "", img: "img/Cilantro_2.webp", desc: "Cilantro fresco, aromático e indispensable en la cocina chilena.", habilitado: true },
   { id: 54, name: "Ají", precio: 1500, categoria: "verduras", compania: "", img: "img/aji.jpg", desc: "Ají fresco, aporta picor y sabor intenso a las comidas.", habilitado: true },
 ];
-
 export async function cargarProductosDesdeLocal(): Promise<Producto[]> {
   const raw = localStorage.getItem(KEY);
+
   if (!raw) {
-    localStorage.setItem(KEY, JSON.stringify(productosIniciales));
-    return productosIniciales;
+    const inicializados = productosIniciales.map((p) => ({
+      ...p,
+      valoraciones: [], 
+      oferta: false,
+      descuento: 0,
+    }));
+    localStorage.setItem(KEY, JSON.stringify(inicializados));
+    return inicializados;
   }
-  return JSON.parse(raw) as Producto[];
+
+  const lista = JSON.parse(raw) as Producto[];
+  const corregida = lista.map((p) => ({
+    ...p,
+    valoraciones: p.valoraciones || [], 
+    oferta: p.oferta ?? false, 
+    descuento: p.descuento ?? 0, 
+  }));
+
+  localStorage.setItem(KEY, JSON.stringify(corregida));
+  return corregida;
 }
 
+/*GUARDAR NUEVO PRODUCTO*/
 export async function guardarProductoEnLocal(nuevo: Producto): Promise<void> {
   const lista = await cargarProductosDesdeLocal();
-  lista.push(nuevo);
+
+  const productoCompleto = {
+    ...nuevo,
+    valoraciones: nuevo.valoraciones || [],
+    oferta: nuevo.oferta ?? false,
+    descuento: nuevo.descuento ?? 0,
+  };
+
+  lista.push(productoCompleto);
   localStorage.setItem(KEY, JSON.stringify(lista));
 }
 
+/*ACTUALIZAR LISTA DE PRODUCTOS*/
 export async function actualizarProductos(lista: Producto[]): Promise<void> {
-  localStorage.setItem(KEY, JSON.stringify(lista));
+  const corregida = lista.map((p) => ({
+    ...p,
+    valoraciones: p.valoraciones || [],
+    oferta: p.oferta ?? false,
+    descuento: p.descuento ?? 0,
+  }));
+
+  localStorage.setItem(KEY, JSON.stringify(corregida));
 }

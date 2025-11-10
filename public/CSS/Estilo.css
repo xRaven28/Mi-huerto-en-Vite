@@ -1,25 +1,31 @@
-/* =========================================================
-   🌿 VARIABLES GLOBALES
-   ========================================================= */
 :root {
-  --verde: #7cca33;
-  --verde-oscuro: #3A4137;
-  --verde-claro: #9fdc63;
-  --gris: #f8f9fa;
-  --texto: #333;
+  --verde-principal: #81B12D;   
+  --verde-secundario: #6A8639; 
+  --verde-lima: #90DB13;       
+  --verde-oscuro: #4E5C36;      
+  --gris-oscuro: #31332D;         
+  --gris-suave: #F3F3F3;      
+  --blanco: #FFFFFF;
+  --rojo: #DC3545;
   --dorado: #FFD700;
-  --blanco: #fff;
-  --rojo: #dc3545;
 }
 
-/* =========================================================
-   🌿 NAVBAR HUERTOHOGAR
-   ========================================================= */
+/*NAVBAR HUERTOHOGAR*/
 .navbar-huerto {
-  background-color: var(--verde-oscuro) !important;
+  background: linear-gradient(90deg, var(--verde-oscuro), var(--verde-secundario));
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   padding: 10px 20px;
+  position: fixed;
+  width: 100%;
+  top: 0;
   z-index: 1000;
+  transition: background 0.4s ease, backdrop-filter 0.4s ease;
+}
+
+.navbar-huerto.transparent {
+  background-color: rgba(78, 92, 54, 0.6) !important;
+  backdrop-filter: blur(6px);
+  box-shadow: none;
 }
 
 .navbar-huerto .nav-link {
@@ -40,7 +46,7 @@
 }
 
 .navbar-toggler {
-  background-color: var(--verde);
+  background-color: var(--verde-principal);
   border: none;
 }
 
@@ -55,14 +61,7 @@
   transform: scale(1.15);
 }
 
-.navbar-huerto.transparent {
-  background-color: rgba(58, 65, 55, 0.7) !important;
-  backdrop-filter: blur(6px);
-}
-
-/* =========================================================
-   🎞️ CARRUSEL
-   ========================================================= */
+/*CARRUSEL*/
 .carousel-container {
   position: relative;
   width: 100%;
@@ -95,18 +94,19 @@
 .carousel-overlay h1 {
   font-size: 2.8rem;
   font-weight: 700;
+  color: var(--blanco);
 }
 
 .carousel-overlay p {
   font-size: 1.2rem;
   margin-top: 10px;
+  color: var(--blanco);
 }
 
-/* =========================================================
-   🌱 CONSEJOS Y OFERTAS
-   ========================================================= */
+/*CONSEJOS Y OFERTAS*/
 .container h2 {
   font-weight: 700;
+  color: var(--gris-oscuro);
 }
 
 .img-cuadrada {
@@ -120,15 +120,6 @@
   height: 280px;
 }
 
-.card .card-img-overlay h5 {
-  font-size: 1.2rem;
-}
-
-.card .card-img-overlay p {
-  font-size: 0.95rem;
-}
-
-/* Ofertas de la Semana */
 .oferta-card {
   border-radius: 12px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -147,7 +138,7 @@
 }
 
 .oferta-card .btn-huerto {
-  background-color: var(--verde);
+  background-color: var(--verde-principal);
   color: var(--blanco);
   border: none;
   border-radius: 20px;
@@ -156,23 +147,23 @@
 }
 
 .oferta-card .btn-huerto:hover {
-  background-color: var(--verde-claro);
+  background-color: var(--verde-secundario);
 }
 
-/* =========================================================
-   🛒 PRODUCTOS (CARDS)
-   ========================================================= */
+/*PRODUCTOS*/
 .hh-card {
   background-color: var(--blanco);
   border: 1px solid #e0e0e0;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   width: 100%;
-  max-width: 260px;
+  max-width: 270px;
   margin: 0 auto;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .hh-card:hover {
@@ -180,6 +171,7 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
 }
 
+/* Imagen */
 .hh-media {
   width: 100%;
   height: 200px;
@@ -187,27 +179,27 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--blanco) !important;
+  background-color: var(--gris-suave);
 }
 
 .hh-media img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background-color: transparent !important;
+  background-color: transparent;
   transition: transform 0.3s ease;
 }
 
 .hh-card:hover .hh-media img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
-/* Categoría badge */
+/* Cinta de descuento */
 .hh-badge {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: var(--verde-oscuro);
+  background: var(--verde-secundario);
   color: var(--blanco);
   font-weight: 600;
   font-size: 0.75rem;
@@ -215,67 +207,86 @@
   border-radius: 20px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  z-index: 10;
 }
 
-/* Contenido */
+/* Texto */
 .hh-body {
   padding: 15px;
   text-align: center;
-  background-color: var(--blanco);
 }
 
 .hh-title {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--verde-oscuro);
+  color: var(--gris-oscuro);
   margin-bottom: 6px;
 }
 
 .hh-price {
   font-size: 1rem;
   font-weight: bold;
-  color: var(--verde);
-  margin-bottom: 10px;
+  color: var(--verde-principal);
+  margin-bottom: 12px;
 }
 
+/* Botones */
 .hh-body .btn {
   font-size: 0.85rem;
   border-radius: 20px;
-  padding: 5px 15px;
+  padding: 6px 14px;
+  transition: all 0.3s ease;
 }
 
-/* =========================================================
-   💬 TESTIMONIOS
-   ========================================================= */
+/* Botón Ver */
+.hh-body .btn-ver {
+  background-color: transparent;
+  border: 1.5px solid var(--verde-principal);
+  color: var(--verde-principal);
+}
+.hh-body .btn-ver:hover {
+  background-color: var(--verde-principal);
+  color: var(--blanco);
+}
+
+/* Botón Añadir */
+.hh-body .btn-add {
+  background-color: var(--verde-oscuro);
+  color: var(--blanco);
+  border: none;
+}
+.hh-body .btn-add:hover {
+  background-color: var(--verde-secundario);
+}
+
 section.bg-light {
-  background-color: var(--gris) !important;
+  background-color: var(--gris-suave) !important;
 }
 
 section h2 {
   font-weight: 700;
+  color: var(--gris-oscuro);
 }
 
 .card.shadow-sm {
   border-radius: 12px;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
 }
 
 .card.shadow-sm:hover {
   transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .card img.rounded-circle {
-  border: 3px solid var(--verde);
+  border: 3px solid var(--verde-principal);
   padding: 3px;
 }
 
-/* =========================================================
-   🍳 TARJETAS DE RECETAS (GRANDES)
-   ========================================================= */
+/*TARJETAS DE RECETAS*/
 .recetas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 2.5rem;
   justify-items: center;
   margin-top: 2rem;
@@ -284,29 +295,25 @@ section h2 {
 .recipe-card {
   width: 100%;
   max-width: 400px;
-  height: 620px;
   border-radius: 18px;
   overflow: hidden;
   background-color: var(--blanco);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
 }
 
 .recipe-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
 }
 
 .recipe-card img {
   width: 100%;
-  height: 310px;
+  height: 280px;
   object-fit: cover;
   transition: transform 0.4s ease;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
 }
 
 .recipe-card:hover img {
@@ -325,7 +332,7 @@ section h2 {
 .recipe-card .card-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--verde-oscuro);
+  color: var(--gris-oscuro);
   margin-bottom: 0.8rem;
 }
 
@@ -338,31 +345,41 @@ section h2 {
 .recipe-card .btn {
   font-size: 1.05rem;
   font-weight: 600;
-  border-radius: 10px;
-  background-color: var(--verde);
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--verde-principal), var(--verde-secundario));
   color: var(--blanco);
   padding: 12px 0;
   border: none;
-  transition: background-color 0.25s ease-in-out, transform 0.2s ease;
+  transition: all 0.25s ease-in-out;
   margin-top: 1.2rem;
 }
 
 .recipe-card .btn:hover {
-  background-color: var(--verde-claro);
-  transform: scale(1.05);
+  background: var(--verde-lima);
+  transform: translateY(-2px) scale(1.05);
 }
 
-/* =========================================================
-   🦶 FOOTER
-   ========================================================= */
+/*FOOTER CON DEGRADADO*/
 .footer-custom {
-  background-color: var(--verde-oscuro);
+  background: linear-gradient(135deg, var(--verde-oscuro), var(--verde-principal));
   color: var(--blanco);
+  padding-top: 40px;
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.footer-custom::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(255,255,255,0.08), transparent);
+  pointer-events: none;
 }
 
 .footer-custom h5 {
   font-weight: 700;
   margin-bottom: 10px;
+  color: var(--blanco);
 }
 
 .footer-custom a {
@@ -377,23 +394,29 @@ section h2 {
 
 .footer-custom hr {
   opacity: 0.4;
+  border-color: rgba(255,255,255,0.3);
 }
 
-/* =========================================================
-   📱 RESPONSIVE GENERAL
-   ========================================================= */
+/*RESPONSIVE GENERAL*/
 @media (max-width: 992px) {
   .carousel-container {
     height: 60vh;
   }
+
   .carousel-overlay h1 {
     font-size: 2rem;
   }
+
   .carousel-overlay p {
     font-size: 1rem;
   }
+
   .hh-card {
     max-width: 240px;
+  }
+
+  .recipe-card img {
+    height: 240px;
   }
 }
 
@@ -401,27 +424,38 @@ section h2 {
   .carousel-container {
     height: 50vh;
   }
+
   .carousel-overlay h1 {
     font-size: 1.6rem;
   }
+
   .carousel-overlay p {
     font-size: 0.9rem;
   }
+
   .hh-card {
     max-width: 90%;
   }
+
   .hh-media {
     height: 160px;
   }
+
   .hh-title {
     font-size: 0.9rem;
   }
+
+  .recipe-card img {
+    height: 200px;
+  }
 }
+
+/*ADMIN MODAL*/
 .admin-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  display: none; 
+  display: none;
   justify-content: center;
   align-items: center;
   z-index: 3000;
@@ -432,9 +466,8 @@ section h2 {
   display: flex;
 }
 
-
 .admin-card {
-  background: #fff;
+  background: var(--blanco);
   border-radius: 16px;
   padding: 25px 30px;
   width: 400px;
@@ -448,6 +481,7 @@ section h2 {
     transform: scale(0.9);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -458,79 +492,455 @@ section h2 {
   font-weight: 700;
   text-align: center;
   margin-bottom: 1rem;
+  color: var(--gris-oscuro);
 }
 
 .admin-card input,
 .admin-card textarea {
   border-radius: 10px;
   border: 1px solid #ccc;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .admin-card input:focus,
 .admin-card textarea:focus {
-  border-color: var(--verde);
-  box-shadow: 0 0 5px rgba(124, 202, 51, 0.3);
+  border-color: var(--verde-principal);
+  box-shadow: 0 0 6px rgba(129, 177, 45, 0.4);
 }
 
 .admin-card .btn {
   border-radius: 8px;
   font-weight: 600;
+  background: var(--verde-oscuro);
+  color: var(--blanco);
+  border: none;
+  transition: background-color 0.3s ease;
 }
-/* ============================
-   🎨 Cards de Historial de Compras
-============================ */
+
+.admin-card .btn:hover {
+  background-color: var(--verde-secundario);
+}
+
+/*CARDS DE HISTORIAL DE COMPRAS*/
 .card-compra {
-  background-color: #fff;
+  background-color: var(--blanco);
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   padding: 20px;
   margin-bottom: 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   border: 1px solid #e6e6e6;
 }
 
 .card-compra:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 .card-compra h5 {
-  color: #2d6a4f; /* Verde oscuro */
-  font-weight: 600;
+  color: var(--verde-principal);
+  font-weight: 700;
   margin-bottom: 10px;
+  font-size: 1.1rem;
 }
 
 .card-compra p {
   margin: 4px 0;
-  color: #333;
+  color: var(--gris-oscuro);
+  font-size: 0.95rem;
 }
 
 .card-compra strong {
-  color: #1b4332;
+  color: var(--verde-oscuro);
+  font-weight: 600;
 }
 
 .card-compra .btn-descargar {
-  background-color: transparent;
-  border: 1px solid #2d6a4f;
-  color: #2d6a4f;
+  background: transparent;
+  border: 1.5px solid var(--verde-oscuro);
+  color: var(--verde-oscuro);
   font-weight: 500;
-  border-radius: 8px;
-  transition: 0.2s;
+  border-radius: 10px;
+  padding: 6px 14px;
+  transition: all 0.3s ease;
 }
 
 .card-compra .btn-descargar:hover {
-  background-color: #2d6a4f;
-  color: #fff;
+  background: linear-gradient(90deg, var(--verde-principal), var(--verde-secundario));
+  color: var(--blanco);
+  border-color: transparent;
+  transform: translateY(-1px);
 }
 
 .card-compra .ver-detalle {
-  color: #007bff;
+  color: var(--verde-lima);
   cursor: pointer;
   font-weight: 500;
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 .card-compra .ver-detalle:hover {
+  color: var(--verde-principal);
   text-decoration: underline;
+}
+
+/*ANIMACIONES DE TOASTS*/
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+}
+
+/* Animación del ícono */
+@keyframes iconSlideIn {
+  from {
+    transform: translateX(-12px) rotate(-30deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/*TOASTS*/
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 5000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast-card {
+  border-radius: 12px;
+  padding: 14px 18px;
+  min-width: 280px;
+  max-width: 400px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  animation: fadeIn 0.4s ease, fadeOut 0.4s ease 3.8s forwards;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  border-left: 6px solid transparent;
+  overflow: hidden;
+}
+
+/* Tipos de mensajes */
+.toast-card.exito {
+  background: linear-gradient(90deg, #d9f7d5, #eafbe3);
+  color: #155724;
+  border-left-color: var(--verde-principal);
+}
+
+.toast-card.error {
+  background: linear-gradient(90deg, #fce2e2, #f8d7da);
+  color: #721c24;
+  border-left-color: var(--rojo);
+}
+
+.toast-card.info {
+  background: linear-gradient(90deg, #f4f4f5, #e2e3e5);
+  color: #383d41;
+  border-left-color: var(--verde-secundario);
+}
+
+/* Ícono animado */
+.toast-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: iconSlideIn 0.4s ease, iconPulse 1.2s ease-in-out infinite;
+}
+
+/* Texto */
+.toast-message {
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+/* Botón cerrar */
+.toast-close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.2rem;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* Hover general */
+.toast-card:hover {
+  transform: scale(1.03);
+}
+/* =========================================================
+   🛒 SECCIÓN DE PRODUCTOS
+   ========================================================= */
+
+/* ====== TÍTULO DE LA SECCIÓN ====== */
+.section-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #212121; /* Negro suave */
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+  letter-spacing: 0.5px;
+}
+
+.section-title i {
+  color: var(--verde-principal);
+  margin-right: 8px;
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 90px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--verde-lima), var(--verde-secundario));
+  border-radius: 10px;
+  margin: 12px auto 0 auto;
+}
+
+/* ====== CARDS ====== */
+.hh-card {
+  background-color: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.hh-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.hh-media {
+  width: 100%;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fdfdfd;
+}
+
+.hh-media img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.hh-card:hover .hh-media img {
+  transform: scale(1.07);
+}
+
+.hh-body {
+  padding: 1rem;
+}
+
+.hh-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2e332c;
+}
+
+.hh-price {
+  font-size: 1rem;
+  color: var(--verde-principal);
+  font-weight: bold;
+  margin: 6px 0 14px;
+}
+
+/* ====== BOTONES ====== */
+.hh-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.hh-buttons .btn {
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Botón "Ver" */
+.btn-ver {
+  background-color: transparent;
+  border: 1.5px solid var(--gris-oscuro);
+  color: var(--gris-oscuro);
+}
+
+.btn-ver:hover {
+  background-color: var(--gris-oscuro);
+  color: #fff;
+}
+
+/* Botón "Añadir" */
+.btn-anadir {
+  background: linear-gradient(90deg, var(--verde-principal));
+  border: none;
+  color: #ffffff;
+}
+
+/* Transición suave al hacer hover */
+.btn-ver:hover,
+.btn-anadir:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+/* Botón "Ver detalle" */
+.btn-ver {
+  background: transparent;
+  border: 1.5px solid var(--verde-oscuro);
+  color: var(--verde-oscuro);
+  border-radius: 25px;
+  font-weight: 500;
+  padding: 6px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-ver:hover {
+  background-color: var(--verde-oscuro);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Botón "Añadir al carrito" */
+.btn-anadir {
+  background: linear-gradient(90deg, var(--verde-principal));
+  color: #58a019;
+  border: none;
+  border-radius: 25px;
+  font-weight: 500;
+  padding: 6px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-anadir:hover {
+  background: var(--verde-lima);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+/* ================================
+   🎉 TOASTS (Mensajes flotantes)
+================================ */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 2000;
+}
+
+.toast-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  min-width: 250px;
+  max-width: 320px;
+  animation: toastFadeIn 0.4s ease, toastFadeOut 0.4s ease 3.2s forwards;
+}
+
+.toast-card.exito {
+  background-color: #28a745; /* verde */
+}
+
+.toast-card.error {
+  background-color: #dc3545; /* rojo */
+}
+
+.toast-card.info {
+  background-color: #17a2b8; /* celeste */
+}
+
+.toast-icon {
+  font-size: 1.3rem;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: white;
+  margin-left: auto;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* Animaciones */
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastFadeOut {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
 }

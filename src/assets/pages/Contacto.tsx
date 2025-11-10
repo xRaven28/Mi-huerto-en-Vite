@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useToast } from "../components/Toast";
 
 const Contacto: React.FC = () => {
   const [form, setForm] = useState({
@@ -7,16 +8,17 @@ const Contacto: React.FC = () => {
     telefono: "",
     mensaje: "",
   });
-
+  const showToast = useToast();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const mensajes = JSON.parse(localStorage.getItem("mensajes_contacto") || "[]");
     mensajes.push({ ...form, fecha: new Date().toISOString() });
     localStorage.setItem("mensajes_contacto", JSON.stringify(mensajes));
 
-    alert("✅ Gracias por contactarnos, te responderemos pronto.");
+    showToast(`Gracias por contactarnos, te responderemos pronto.`);
     setForm({ nombre: "", correo: "", telefono: "", mensaje: "" });
   };
+
 
   return (
     <main className="container my-5 py-5">

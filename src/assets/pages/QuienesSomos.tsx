@@ -17,7 +17,7 @@ const QuienesSomos: React.FC = () => {
             />
           </div>
 
-          <h2 className="mb-3 text-success fw-bold">¿Quiénes somos?</h2>
+          <h2 className="text-center mb-4">¿Quiénes somos?</h2>
           <p className="lead">
             En <strong>Huerto Hogar</strong> creemos que lo natural y fresco es lo mejor para la familia.
             Desde hace más de 6 años llevamos frutas, verduras y productos del campo directamente

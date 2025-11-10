@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ProductoCarrito } from "../types";
+import { useToast } from "../components/Toast";
 
 const KEY = "carrito";
 const HIST = "historialCompras";
@@ -8,10 +9,9 @@ const Checkout: React.FC = () => {
   const [carrito, setCarrito] = useState<ProductoCarrito[]>([]);
   const [form, setForm] = useState({ nombre: "", direccion: "", metodoPago: "" });
   const [boleta, setBoleta] = useState<any | null>(null);
+  const showToast = useToast();
 
-  /* ================================
-     🔹 Cargar carrito y usuario activo
-  ================================ */
+  /*Cargar carrito y usuario activo*/
   useEffect(() => {
     const raw = localStorage.getItem(KEY);
     if (raw) {
@@ -31,9 +31,7 @@ const Checkout: React.FC = () => {
     }
   }, []);
 
-  /* ================================
-     💰 Calcular total del carrito
-  ================================ */
+  /*Calcular total del carrito*/
   const calcularTotal = () =>
     carrito.reduce((t, p) => {
       const precioFinal =
@@ -43,14 +41,12 @@ const Checkout: React.FC = () => {
       return t + precioFinal * (p.cantidad || 1);
     }, 0);
 
-  /* ================================
-     🧾 Finalizar compra
-  ================================ */
+  /*Finalizar compra*/
   const handleCheckoutSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!form.nombre || !form.direccion || !form.metodoPago) {
-      alert("Por favor completa todos los campos antes de continuar.");
+      showToast(`Por favor completa todos los campos antes de continuar`);
       return;
     }
 
@@ -84,9 +80,8 @@ const Checkout: React.FC = () => {
     historial.push(nuevaBoleta);
     localStorage.setItem(HIST, JSON.stringify(historial));
 
-    /* ================================
-       👤 Asociar compra al usuario actual
-    ================================ */
+    /*
+      Asociar compra al usuario actual*/
     const usuarioActualRaw = localStorage.getItem("usuarioActual");
     const usuariosRaw = localStorage.getItem("usuarios");
 
@@ -134,18 +129,14 @@ const Checkout: React.FC = () => {
       console.warn("Compra realizada sin sesión activa.");
     }
 
-    /* ================================
-       🧹 Limpiar carrito e invitado
-    ================================ */
+    /*Limpiar carrito e invitado*/
     localStorage.removeItem(KEY);
     localStorage.removeItem("modoInvitado");
     setCarrito([]);
     setBoleta(nuevaBoleta);
   };
 
-  /* ================================
-     📄 Descargar boleta como PDF
-  ================================ */
+  /*Descargar boleta como PDF*/
   const descargarPDF = () => {
     if (!boleta) return;
 
@@ -181,9 +172,7 @@ const Checkout: React.FC = () => {
     }
   };
 
-  /* ================================
-     🧾 Mostrar boleta final
-  ================================ */
+  /*Mostrar boleta final*/
   if (boleta) {
     return (
       <main className="container py-5 mt-5 checkout-page">
@@ -195,7 +184,7 @@ const Checkout: React.FC = () => {
           <p><strong>Método de pago:</strong> {boleta.metodoPago}</p>
           <p><strong>Fecha:</strong> {boleta.fecha}</p>
           <hr />
-          <h5 className="mb-3">🛒 Detalle de compra</h5>
+          <h5 className="text-center mb-4">🛒 Detalle de compra</h5>
           <ul className="list-group mb-4">
             {boleta.productos.map((p: any, i: number) => (
               <li
@@ -227,9 +216,7 @@ const Checkout: React.FC = () => {
     );
   }
 
-  /* ================================
-     🛍️ Checkout principal
-  ================================ */
+  /*Checkout principal*/
   if (carrito.length === 0) {
     return (
       <main className="container py-5 checkout-page">
@@ -241,9 +228,9 @@ const Checkout: React.FC = () => {
   return (
     <main className="container py-5 checkout-page">
       <div className="row justify-content-center">
-        {/* 🧾 Formulario comprador */}
+        {/*Formulario comprador */}
         <div className="col-md-6">
-          <div className="card p-4 shadow-sm">
+          <div className="row justify-content-cente">
             <h4>Datos del comprador</h4>
             <form onSubmit={handleCheckoutSubmit}>
               <div className="mb-3">
@@ -285,7 +272,7 @@ const Checkout: React.FC = () => {
           </div>
         </div>
 
-        {/* 💳 Resumen del pedido */}
+        {/*Resumen del pedido */}
         <div className="col-md-6">
           <div className="card p-4 shadow-sm">
             <h4>Resumen del pedido</h4>

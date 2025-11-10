@@ -353,11 +353,11 @@ Endulce con miel y decore con semillas o frutos secos.`
         <main style={{ marginTop: "80px" }}>
             {/* Encabezado */}
             <section className="container py-5 text-center">
-                <h1 className="text-success fw-bold display-5">Recetas Caseras</h1>
+                <h1 className="text-center mb-4 fw-bold display-5">Recetas Caseras</h1>
                 <p className="text-muted fs-5">
                     Descubre deliciosas recetas saludables que puedes preparar con los productos frescos de HuertoHogar.
-Desde ensaladas vibrantes hasta platos principales nutritivos, nuestras recetas están diseñadas para inspirarte a cocinar comidas sabrosas y equilibradas en casa.
-¡Explora, prueba y disfruta de la cocina saludable con nosotros!
+                    Desde ensaladas vibrantes hasta platos principales nutritivos, nuestras recetas están diseñadas para inspirarte a cocinar comidas sabrosas y equilibradas en casa.
+                    ¡Explora, prueba y disfruta de la cocina saludable con nosotros!
                 </p>
             </section>
 
@@ -410,10 +410,10 @@ Desde ensaladas vibrantes hasta platos principales nutritivos, nuestras recetas 
                         className="modal fade show d-block"
                         style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
                     >
-                        <div className="modal-dialog modal-lg modal-dialog-centered">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title fw-bold">
+                        <div className="modal-dialog modal-md modal-dialog-centered">
+                            <div className="modal-content border-0 shadow-lg rounded-4">
+                                <div className="modal-header  border-0">
+                                    <h5 className="modal-title fw-bold text-success">
                                         {recetaSeleccionada.titulo}
                                     </h5>
                                     <button
@@ -422,25 +422,28 @@ Desde ensaladas vibrantes hasta platos principales nutritivos, nuestras recetas 
                                         onClick={cerrarModal}
                                     ></button>
                                 </div>
-                                <div className="modal-body">
-                                    <img
-                                        src={recetaSeleccionada.imagen}
-                                        alt={recetaSeleccionada.titulo}
-                                        className="img-fluid rounded mb-3"
-                                    />
-                                    <h6 className="fw-bold text-success mb-2">🥕 Ingredientes</h6>
-                                    <ul>
+                                <div className="modal-body text-center px-4">
+                                    <div className="img-container mb-3">
+                                        <img
+                                            src={recetaSeleccionada.imagen}
+                                            alt={recetaSeleccionada.titulo}
+                                            className="img-fluid rounded mb-3"
+                                        />
+                                    </div>
+                                    <h6 className="fw-bold text-success mb-2">Ingredientes</h6>
+                                    <ul className="text-start small">
                                         {recetaSeleccionada.ingredientes.map((ing, idx) => (
                                             <li key={idx}>{ing}</li>
                                         ))}
                                     </ul>
 
-                                    <h6 className="fw-bold text-success mt-3">👩‍🍳 Preparación</h6>
-                                    <p style={{ whiteSpace: "pre-line" }}>
+                                    <h6 className="fw-bold text-success mt-3">Preparación</h6>
+                                    <p className="text-start small"
+                                        style={{ whiteSpace: "pre-line" }}>
                                         {recetaSeleccionada.preparacion}
                                     </p>
                                 </div>
-                                <div className="modal-footer">
+                                <div className="modal-footer border-0 justify-content-between">
                                     <button
                                         className="btn btn-secondary"
                                         onClick={cerrarModal}
