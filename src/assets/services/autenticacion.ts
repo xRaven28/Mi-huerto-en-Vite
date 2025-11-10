@@ -19,7 +19,7 @@ export const useAuth = () => {
     const allUsers: Usuario[] = [...usuariosLocal, ...usuariosAdmin];
 
     const usuarioEncontrado = allUsers.find(u =>
-      (u.correo === correo || u.email === correo) && u.password === password
+      (u.correo === correo ) && u.password === password
     );
 
     if (usuarioEncontrado) {

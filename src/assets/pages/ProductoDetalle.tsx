@@ -97,7 +97,7 @@ const DetalleProducto: React.FC = () => {
     else carrito.push({ ...producto, cantidad });
     localStorage.setItem("carrito", JSON.stringify(carrito));
     window.dispatchEvent(new Event("storage"));
-    console.log(`${producto.name} agregado al carrito`);
+    showToast(`✅ ${producto.name} agregado al carrito`);
   };
 
   /* =========================================================

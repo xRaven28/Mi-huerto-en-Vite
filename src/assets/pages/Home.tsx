@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-
+import { useToast } from "../components/Toast";
 const Home: React.FC = () => {
   const [usuario, setUsuario] = useState<any>(null);
   const [ofertas, setOfertas] = useState<any[]>([]);
   const [indiceCarrusel, setIndiceCarrusel] = useState(0);
+  const showToast = useToast();
 
   // Cargar usuario activo
   useEffect(() => {
@@ -51,12 +52,12 @@ const Home: React.FC = () => {
       const idx = carrito.findIndex((p: any) => p.id === producto.id);
       if (idx >= 0) carrito[idx].cantidad += 1;
       else carrito.push({ ...producto, cantidad: 1 });
-
       localStorage.setItem("carrito", JSON.stringify(carrito));
-      console.log(`✅ ${producto.name || "Producto"} agregado al carrito`);
       window.dispatchEvent(new Event("storage"));
+
+      showToast(`✅ ${producto.name} agregado al carrito`); 
     } catch (error) {
-      console.error("❌ Error al agregar producto:", error);
+      showToast("❌ Error al agregar producto");
     }
   };
 
