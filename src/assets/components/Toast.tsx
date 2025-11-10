@@ -1,4 +1,3 @@
-// src/assets/components/Toast.tsx
 import React, { useEffect, useState, CSSProperties } from "react";
 import { createPortal } from "react-dom";
 
