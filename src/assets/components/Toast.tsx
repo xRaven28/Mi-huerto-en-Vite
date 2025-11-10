@@ -11,64 +11,84 @@ export const ToastContainer: React.FC = () => {
 
   useEffect(() => {
     showToastFn = (message: string, tipo: TipoToast = "info") => {
-      const id =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
+      const id = crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
       setToasts((prev) => [...prev, { id, message, tipo }]);
-
-      // autocierre
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
       }, 3500);
     };
   }, []);
 
-  // Estilos inline para que NADA los pise
+  // Animación declarada solo una vez
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes toastEnter {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes toastExit {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(10px); }
+      }
+    `;
+    document.head.appendChild(style);
+  }, []);
+
+  // Posición fija arriba derecha (no afecta layout)
   const containerStyle: CSSProperties = {
     position: "fixed",
+    top: 20,
     right: 20,
-    bottom: 20,                 
     display: "flex",
     flexDirection: "column",
+    gap: 10,
     alignItems: "flex-end",
-    gap: 12,
-    zIndex: 2147483647,        
+    zIndex: 999999,
     pointerEvents: "none",
   };
 
   const baseCard: CSSProperties = {
-    pointerEvents: "auto",
     display: "flex",
     alignItems: "center",
     gap: 10,
     minWidth: 260,
-    maxWidth: 360,
+    maxWidth: 340,
     padding: "12px 16px",
-    borderRadius: 12,
+    borderRadius: 10,
     color: "#fff",
-    boxShadow: "0 10px 30px rgba(0,0,0,.25)",
-    backdropFilter: "saturate(140%) blur(8px)",
-
-    transition: "opacity .3s ease, transform .3s ease",
+    fontSize: ".95rem",
+    fontWeight: 500,
+    boxShadow: "0 4px 20px rgba(0,0,0,0.25)",
+    animation: "toastEnter 0.3s ease forwards",
+    backdropFilter: "blur(8px)",
+    pointerEvents: "auto",
   };
 
   const bgByType = (tipo: TipoToast): string => {
-    if (tipo === "exito") return "rgba(40,167,69,.95)";
-    if (tipo === "error") return "rgba(220,53,69,.95)";
-    return "rgba(23,162,184,.95)";
+    switch (tipo) {
+      case "exito":
+        return "rgba(40,167,69,0.95)";
+      case "error":
+        return "rgba(220,53,69,0.95)";
+      default:
+        return "rgba(23,162,184,0.95)";
+    }
   };
 
-  const iconByType = (tipo: TipoToast): string =>
-    tipo === "exito"
-      ? "bi bi-check-circle-fill"
-      : tipo === "error"
-      ? "bi bi-x-circle-fill"
-      : "bi bi-info-circle-fill";
+  const iconByType = (tipo: TipoToast): string => {
+    switch (tipo) {
+      case "exito":
+        return "bi bi-check-circle-fill";
+      case "error":
+        return "bi bi-x-circle-fill";
+      default:
+        return "bi bi-info-circle-fill";
+    }
+  };
 
   const render = (
-    <div style={containerStyle} aria-live="polite" aria-atomic="true">
+    <div style={containerStyle}>
       {toasts.map((t) => (
         <div
           key={t.id}
@@ -76,33 +96,28 @@ export const ToastContainer: React.FC = () => {
             ...baseCard,
             background: bgByType(t.tipo),
           }}
-          onAnimationEnd={(e) => {
-          }}
         >
-          <i className={iconByType(t.tipo)} style={{ fontSize: "1.3rem" }} />
-          <span style={{ flex: 1, fontSize: ".95rem" }}>{t.message}</span>
+          <i className={iconByType(t.tipo)} style={{ fontSize: "1.2rem" }} />
+          <span style={{ flex: 1 }}>{t.message}</span>
           <button
-            onClick={() =>
-              setToasts((prev) => prev.filter((x) => x.id !== t.id))
-            }
-            aria-label="Cerrar"
-            title="Cerrar"
+            onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
             style={{
               background: "transparent",
               border: "none",
               color: "#fff",
               cursor: "pointer",
               fontSize: "1rem",
-              opacity: 0.9,
+              opacity: 0.8,
             }}
           >
-            <i className="bi bi-x" />
+            <i className="bi bi-x"></i>
           </button>
         </div>
       ))}
     </div>
   );
 
+  // Portal directo al body — sin causar ningún reflow
   return createPortal(render, document.body);
 };
 

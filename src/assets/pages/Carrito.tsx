@@ -1,110 +1,116 @@
 import React, { useEffect, useState } from "react";
 import { ProductoCarrito } from "../types";
+import { CarritoService } from "../services/carrito";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
-const KEY = "carrito";
+import { useNavigate } from "react-router-dom";
 
 const Carrito: React.FC = () => {
   const [carrito, setCarrito] = useState<ProductoCarrito[]>([]);
+  const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [mostrarModal, setMostrarModal] = useState(false);
-  const { usuario } = useAuth();
-  const navigate = useNavigate();
-  const showToast = useToast();
 
-  //Cargar carrito desde localStorage
+  const { usuario } = useAuth();
+  const showToast = useToast();
+  const navigate = useNavigate();
+
+  // 🔹 Cargar carrito inicial
   useEffect(() => {
-    const raw = localStorage.getItem(KEY);
-    if (raw) setCarrito(JSON.parse(raw));
+    const data = CarritoService.obtenerCarrito();
+    setCarrito(data);
+    calcularTotal(data);
     setLoading(false);
   }, []);
 
+  // Guardar carrito actualizado
   const guardarCarrito = (nuevo: ProductoCarrito[]) => {
     setCarrito(nuevo);
-    localStorage.setItem(KEY, JSON.stringify(nuevo));
+    CarritoService.guardarCarrito(nuevo);
+    calcularTotal(nuevo);
   };
 
-  // Funciones del carrito
-  const actualizarCantidad = (id: number, cantidad: number) => {
-    if (cantidad < 1) return;
-    const nuevo = carrito.map((p) => (p.id === id ? { ...p, cantidad } : p));
-    guardarCarrito(nuevo);
+  //Calcular total general
+  const calcularTotal = (items: ProductoCarrito[]) => {
+    const totalCalc = items.reduce((sum, p) => {
+      const precioFinal = p.oferta && p.descuento
+        ? Math.round(p.precio * (1 - p.descuento / 100))
+        : p.precio;
+      return sum + precioFinal * (p.cantidad || 1);
+    }, 0);
+    setTotal(totalCalc);
   };
 
+  // 🔹 Actualizar cantidad
+  const actualizarCantidad = (id: number, nuevaCantidad: number) => {
+    if (nuevaCantidad < 1) return;
+    const nuevoCarrito = carrito.map((p) =>
+      p.id === id ? { ...p, cantidad: nuevaCantidad } : p
+    );
+    guardarCarrito(nuevoCarrito);
+  };
+
+  //Eliminar producto
   const eliminarProducto = (id: number) => {
     const eliminado = carrito.find((p) => p.id === id);
-    const nuevo = carrito.filter((p) => p.id !== id);
-    guardarCarrito(nuevo);
-    showToast(`${eliminado?.name} fue eliminado del carrito`);
+    const nuevoCarrito = carrito.filter((p) => p.id !== id);
+    guardarCarrito(nuevoCarrito);
+    showToast(`🗑️ ${eliminado?.name} fue eliminado del carrito`, "error");
   };
 
-  // Calcular precio con descuento
-  const precioConDescuento = (p: ProductoCarrito) => {
-    if (p.oferta && p.descuento) {
-      return Math.round(p.precio * (1 - p.descuento / 100));
-    }
-    return p.precio;
-  };
-  // Calcular total general
-  const calcularTotal = () =>
-    carrito.reduce(
-      (s, p) => s + precioConDescuento(p) * (p.cantidad || 1),
-      0
-    );
-  // Lógica de pago
+  //Lógica de pago
   const handlePagar = () => {
-    if (usuario) {
-      navigate("/checkout");
-    } else {
-      setMostrarModal(true);
+    if (carrito.length === 0) {
+      showToast("Tu carrito está vacío", "error");
+      return;
     }
+
+    if (!usuario) {
+      setMostrarModal(true);
+      return;
+    }
+
+    navigate("/checkout");
   };
 
+  //Continuar como invitado
   const continuarInvitado = () => {
     localStorage.setItem("modoInvitado", "true");
-    window.dispatchEvent(new Event("storage"));
     setMostrarModal(false);
-    setTimeout(() => {
-      navigate("/checkout");
-    }, 150);
+    showToast("Continuando como invitado...", "info");
+    setTimeout(() => navigate("/checkout"), 300);
   };
 
-  // Render principal
+  // 🌀 Loading
   if (loading)
     return (
-      <div className="container text-center py-5 carrito-page">
+      <div className="container text-center py-5">
         <div className="spinner-border text-success" role="status" />
       </div>
     );
 
+  // Carrito vacío
   if (carrito.length === 0)
     return (
-    <main
-      className="container vacio-page d-flex flex-column justify-content-center align-items-center"
-      style={{
-        minHeight: "80vh",
-        textAlign: "center",
-        paddingTop: "60px",
-      }}
-    >
-      <div
-        className="alert alert-info p-4 rounded shadow-sm"
-        style={{ maxWidth: "500px", width: "100%" }}
+      <main
+        className="container d-flex flex-column justify-content-center align-items-center"
+        style={{ minHeight: "80vh", textAlign: "center" }}
       >
-        <h4 className="fw-bold text-success mb-3">
-          Tu carrito está vacío 
-        </h4>
-        <a href="/productos" className="btn btn-success px-4">
-          Ir a Productos
-        </a>
-      </div>
-    </main>
-  );
+        <div className="alert alert-info p-4 rounded shadow-sm">
+          <h4 className="fw-bold text-success mb-3">
+            Tu carrito está vacío 😢
+          </h4>
+          <a href="/productos" className="btn btn-success px-4">
+            Ir a Productos
+          </a>
+        </div>
+      </main>
+    );
 
+  // Render principal
   return (
     <main className="container carrito-page" style={{ paddingTop: "120px" }}>
-      <h2 className="text-center mb-4">Carrito de Compras</h2>
+      <h2 className="text-center mb-4">🛒 Carrito de Compras</h2>
 
       <div className="table-responsive shadow-sm">
         <table className="table table-bordered align-middle">
@@ -119,26 +125,29 @@ const Carrito: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {carrito.map((item) => {
-              const precioFinal = precioConDescuento(item);
-              const subtotal = precioFinal * (item.cantidad || 1);
+            {carrito.map((p) => {
+              const precioFinal =
+                p.oferta && p.descuento
+                  ? Math.round(p.precio * (1 - p.descuento / 100))
+                  : p.precio;
+              const subtotal = precioFinal * (p.cantidad || 1);
 
               return (
-                <tr key={item.id}>
+                <tr key={p.id}>
                   <td>
-                    <strong>{item.name}</strong>
+                    <strong>{p.name}</strong>
                     <br />
-                    <small className="text-muted">{item.categoria}</small>
-                    {item.oferta && (
+                    <small className="text-muted">{p.categoria}</small>
+                    {p.oferta && (
                       <span className="badge bg-danger ms-2">
-                        {item.descuento}% OFF
+                        {p.descuento}% OFF
                       </span>
                     )}
                   </td>
                   <td className="text-center">
                     <img
-                      src={item.img || "/img/placeholder.jpg"}
-                      alt={item.name}
+                      src={p.img || "/img/placeholder.jpg"}
+                      alt={p.name}
                       className="img-thumbnail"
                       style={{
                         width: 60,
@@ -146,6 +155,10 @@ const Carrito: React.FC = () => {
                         objectFit: "cover",
                         borderRadius: "8px",
                       }}
+                      onError={(e) =>
+                        ((e.target as HTMLImageElement).src =
+                          "/img/placeholder.jpg")
+                      }
                     />
                   </td>
                   <td className="text-center">
@@ -153,17 +166,17 @@ const Carrito: React.FC = () => {
                       <button
                         className="btn btn-outline-secondary btn-sm"
                         onClick={() =>
-                          actualizarCantidad(item.id, (item.cantidad || 1) - 1)
+                          actualizarCantidad(p.id, (p.cantidad || 1) - 1)
                         }
-                        disabled={(item.cantidad || 1) <= 1}
+                        disabled={(p.cantidad || 1) <= 1}
                       >
                         -
                       </button>
-                      <span className="mx-2">{item.cantidad || 1}</span>
+                      <span className="mx-2">{p.cantidad || 1}</span>
                       <button
                         className="btn btn-outline-secondary btn-sm"
                         onClick={() =>
-                          actualizarCantidad(item.id, (item.cantidad || 1) + 1)
+                          actualizarCantidad(p.id, (p.cantidad || 1) + 1)
                         }
                       >
                         +
@@ -171,17 +184,17 @@ const Carrito: React.FC = () => {
                     </div>
                   </td>
                   <td className="text-center">
-                    {item.oferta ? (
+                    {p.oferta ? (
                       <>
                         <span className="text-muted text-decoration-line-through d-block">
-                          ${item.precio.toLocaleString("es-CL")}
+                          ${p.precio.toLocaleString("es-CL")}
                         </span>
                         <span className="text-danger fw-bold">
                           ${precioFinal.toLocaleString("es-CL")}
                         </span>
                       </>
                     ) : (
-                      <span>${item.precio.toLocaleString("es-CL")}</span>
+                      <span>${p.precio.toLocaleString("es-CL")}</span>
                     )}
                   </td>
                   <td className="text-center fw-bold text-success">
@@ -190,9 +203,9 @@ const Carrito: React.FC = () => {
                   <td className="text-center">
                     <button
                       className="btn btn-danger btn-sm"
-                      onClick={() => eliminarProducto(item.id)}
+                      onClick={() => eliminarProducto(p.id)}
                     >
-                      Eliminar
+                      <i className="bi bi-trash"></i>
                     </button>
                   </td>
                 </tr>
@@ -206,14 +219,15 @@ const Carrito: React.FC = () => {
         <h4>
           Total:{" "}
           <span className="text-success fw-bold">
-            ${calcularTotal().toLocaleString("es-CL")}
+            ${total.toLocaleString("es-CL")}
           </span>
         </h4>
         <button className="btn btn-success mt-3" onClick={handlePagar}>
           <i className="bi bi-credit-card me-2"></i>Pagar ahora
         </button>
       </div>
-      {/*Modal opciones de pago*/}
+
+      {/* Modal para opciones de pago */}
       {mostrarModal && (
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"

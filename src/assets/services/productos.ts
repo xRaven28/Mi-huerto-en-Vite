@@ -90,24 +90,23 @@ export async function cargarProductosDesdeLocal(): Promise<Producto[]> {
   if (!raw) {
     const inicializados = productosIniciales.map((p) => ({
       ...p,
-      valoraciones: [], 
+      valoraciones: [],
       oferta: false,
       descuento: 0,
     }));
+
     localStorage.setItem(KEY, JSON.stringify(inicializados));
     return inicializados;
   }
 
+  // Si ya hay algo, lo devuelve sin sobreescribir nada
   const lista = JSON.parse(raw) as Producto[];
-  const corregida = lista.map((p) => ({
+  return lista.map((p) => ({
     ...p,
-    valoraciones: p.valoraciones || [], 
-    oferta: p.oferta ?? false, 
-    descuento: p.descuento ?? 0, 
+    valoraciones: p.valoraciones || [],
+    oferta: p.oferta ?? false,
+    descuento: p.descuento ?? 0,
   }));
-
-  localStorage.setItem(KEY, JSON.stringify(corregida));
-  return corregida;
 }
 
 /*GUARDAR NUEVO PRODUCTO*/
@@ -125,7 +124,7 @@ export async function guardarProductoEnLocal(nuevo: Producto): Promise<void> {
   localStorage.setItem(KEY, JSON.stringify(lista));
 }
 
-/*ACTUALIZAR LISTA DE PRODUCTOS*/
+/* ACTUALIZAR LISTA COMPLETA */
 export async function actualizarProductos(lista: Producto[]): Promise<void> {
   const corregida = lista.map((p) => ({
     ...p,
@@ -135,4 +134,11 @@ export async function actualizarProductos(lista: Producto[]): Promise<void> {
   }));
 
   localStorage.setItem(KEY, JSON.stringify(corregida));
+}
+
+/*ELIMINAR PRODUCTO POR ID*/
+export async function eliminarProducto(id: number): Promise<void> {
+  const lista = await cargarProductosDesdeLocal();
+  const nuevaLista = lista.filter((p) => p.id !== id);
+  localStorage.setItem(KEY, JSON.stringify(nuevaLista));
 }

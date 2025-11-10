@@ -852,11 +852,11 @@ section h2 {
 
 /* Botón "Añadir al carrito" */
 .btn-anadir {
-  background: linear-gradient(90deg, var(--verde-principal));
-  color: #58a019;
+  background: linear-gradient(90deg, var(--verde-principal), var(--verde-secundario));
+  color: #fff;
   border: none;
   border-radius: 25px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 6px 16px;
   transition: all 0.3s ease;
 }
@@ -866,7 +866,7 @@ section h2 {
   color: #fff;
   transform: translateY(-2px);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-}
+} 
 .toast-container {
   position: fixed;
   bottom: 24px;
@@ -916,4 +916,12 @@ section h2 {
 }
 @keyframes toastFadeOut {
   to { opacity: 0; transform: translateY(6px) scale(0.98); }
+}
+.carrito-page {
+  min-height: 80vh;
+  transition: none !important; 
+}
+
+.table-responsive {
+  transition: none !important;
 }

@@ -87,9 +87,7 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
       .sort((a, b) => b.ventas - a.ventas)
       .slice(0, 5);
 
-    /* ============================================================
-       3️⃣ MEJORES / PEORES VALORADOS
-       ============================================================ */
+    /*MEJORES / PEORES VALORADOS*/
     const valorados = productos.map((p) => {
       const valoraciones = p.valoraciones || [];
       const promedio =
@@ -110,9 +108,7 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
       .sort((a, b) => a.promedio - b.promedio)
       .slice(0, 5);
 
-    /* ============================================================
-       4️⃣ ACTUALIZAR ESTADOS
-       ============================================================ */
+    /*ACTUALIZAR ESTADOS */
     setMasVendidos(topVendidos);
     setMejorValorados(topMejor);
     setPeorValorados(topPeor);
