@@ -26,7 +26,7 @@ const Contacto: React.FC = () => {
         className="bg-white shadow rounded-4 p-5 mx-auto"
         style={{ maxWidth: "700px" }}
       >
-        <h2 className="text-center text-success mb-4">
+        <h2 className="text-center mb-4">
           <i className="bi bi-envelope me-2"></i> Contáctanos
         </h2>
 
