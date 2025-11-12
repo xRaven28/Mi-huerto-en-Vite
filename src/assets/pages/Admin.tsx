@@ -11,9 +11,7 @@ import StarRating from "../components/StarRating";
 import AdminEstadisticas from "../components/AdminEstadisticas";
 
 
-/* ================================
-  Componente principal
-================================ */
+/*Componente principal*/
 const Admin: React.FC = () => {
   const { productos, loading, agregarProducto, actualizarProducto, eliminarProducto } = useProductos();
   const [seccionActual, setSeccionActual] = useState<"menu" | "productos" | "estadisticas" | "cuentas" | "historial">("menu");
@@ -49,9 +47,7 @@ const Admin: React.FC = () => {
         p.valoraciones!.reduce((acc, v) => acc + v.estrellas, 0) / p.valoraciones!.length,
     }));
 
-  /* ==========================
-    Protección de acceso
-  ========================== */
+  /*Protección de acceso*/
   useEffect(() => {
     if (!usuario) {
       navigate("/micuenta");
@@ -61,9 +57,7 @@ const Admin: React.FC = () => {
     }
   }, [usuario, esAdmin, navigate]);
 
-  /* ==========================
-    Cargar usuarios e historial
-  ========================== */
+  /*Cargar usuarios e historial*/
   useEffect(() => {
     const usuariosLS = JSON.parse(localStorage.getItem("usuarios") || "[]");
     setUsuarios(usuariosLS);
@@ -75,9 +69,7 @@ const Admin: React.FC = () => {
     setHistorialCuentas(accionesCuentas.reverse());
   }, []);
 
-  /* ==========================
-     Guardar usuarios
-  ========================== */
+  /*Guardar usuarios*/
   const guardarUsuarios = (nuevos: Usuario[], accion?: string) => {
     setUsuarios(nuevos);
     localStorage.setItem("usuarios", JSON.stringify(nuevos));
@@ -95,9 +87,7 @@ const Admin: React.FC = () => {
     }
   };
 
-  /* ==========================
-    Registrar acción de producto
-  ========================== */
+  /*Registrar acción de producto*/
   const registrarAccionProducto = (accion: string) => {
     const registro: HistorialAccion = {
       fecha: new Date().toLocaleString(),
@@ -110,9 +100,7 @@ const Admin: React.FC = () => {
     setHistorialProductos(historialPrevio.reverse());
   };
 
-  /* ==========================
-    Productos base
-  ========================== */
+  /*Productos base*/
   const productosFiltrados = productos.filter(
     (p) =>
       p.name.toLowerCase().includes(filtroProductos.toLowerCase()) ||
@@ -139,9 +127,7 @@ const Admin: React.FC = () => {
     showToast(`Producto "${p.name}" ${p.habilitado ? "inhabilitado" : "habilitado"} correctamente.`);
   };
 
-  /* ==========================
-    Ofertas
-  ========================== */
+  /*Ofertas*/
   const abrirModalOferta = (producto: Producto) => {
     if (!producto.habilitado) {
       showToast(`No puedes poner en oferta un producto inhabilitado`);
@@ -183,9 +169,7 @@ const Admin: React.FC = () => {
 
 
 
-  /* ==========================
-    Editar producto
-  ========================== */
+  /*Editar producto*/
   const abrirModalEditar = (producto: Producto) => {
     setProductoSeleccionado(producto);
     setEditData({ ...producto });
@@ -210,15 +194,11 @@ const Admin: React.FC = () => {
     registrarAccionProducto(`Eliminó el producto "${prod?.name}"`);
   };
 
-  /* ==========================
-   Render principal
-  ========================== */
+  /*Render principal*/
   return (
     <div>
       <main className="container py-5" style={{ marginTop: 80 }}>
-        {/* ==========================
-           MENU PRINCIPAL
-        ========================== */}
+        {/*MENU PRINCIPAL*/}
         {seccionActual === "menu" && (
           <section className="text-center">
             <h2>Bienvenido, Administrador</h2>
@@ -236,9 +216,7 @@ const Admin: React.FC = () => {
           </section>
         )}
 
-        {/* ==========================
-           GESTIÓN DE PRODUCTOS
-        ========================== */}
+        {/*GESTIÓN DE PRODUCTOS*/}
         {seccionActual === "productos" && (
           <section>
             <h2 className="text-center mb-4">Panel Administrador - Productos</h2>
@@ -572,9 +550,7 @@ const Admin: React.FC = () => {
         )}
 
 
-        {/* ==========================
-           HISTORIAL SEPARADO
-        ========================== */}
+        {/*HISTORIAL SEPARADO*/}
         {seccionActual === "historial" && (
           <section>
             <h2 className="text-center mb-4">Historial de Actividades</h2>
@@ -657,9 +633,7 @@ const Admin: React.FC = () => {
           </section>
         )}
 
-        {/* ==========================
-           MODAL DETALLES USUARIO
-        ========================== */}
+        {/*MODAL DETALLES USUARIO*/}
         {usuarioSeleccionado && (
           <div
             className="modal fade show"
@@ -804,9 +778,7 @@ const Admin: React.FC = () => {
         )}
       </main>
 
-      {/* ==========================
-         MODALES DE PRODUCTOS
-      ========================== */}
+      {/*MODALES DE PRODUCTOS*/}
       <ModalAgregarProducto isOpen={modalOpen} onClose={() => setModalOpen(false)} onGuardar={handleAgregar} />
 
       {/* Modal Oferta */}
@@ -844,7 +816,7 @@ const Admin: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Editar */}
+      {/*Modal Editar*/}
       {modalEditarOpen && productoSeleccionado && (
         <div className="modal fade show" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.6)" }}>
           <div className="modal-dialog modal-dialog-centered">

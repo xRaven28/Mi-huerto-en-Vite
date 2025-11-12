@@ -6,13 +6,13 @@ const Home: React.FC = () => {
   const [indiceCarrusel, setIndiceCarrusel] = useState(0);
   const showToast = useToast();
 
-  // Cargar usuario activo
+  //Cargar usuario activo
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem("usuarioActivo");
     if (usuarioGuardado) setUsuario(JSON.parse(usuarioGuardado));
   }, []);
 
-  // Cargar ofertas desde localStorage
+  //Cargar ofertas desde localStorage
   useEffect(() => {
     const productosGuardados = localStorage.getItem("productos");
     if (productosGuardados) {
@@ -35,7 +35,7 @@ const Home: React.FC = () => {
     }
   }, []);
 
-  // Carrusel automático
+  //Carrusel automático
   const imagenes = ["/img/Inicio_1.jpg", "/img/Frutaindex2.png", "/img/Frutaindex3.jpeg"];
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const Home: React.FC = () => {
     return () => clearInterval(intervalo);
   }, [imagenes.length]);
 
-  // Agregar producto al carrito
+  //Agregar producto al carrito
   const agregarAlCarrito = (producto: any) => {
     try {
       const carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
@@ -55,13 +55,13 @@ const Home: React.FC = () => {
       localStorage.setItem("carrito", JSON.stringify(carrito));
       window.dispatchEvent(new Event("storage"));
 
-      showToast(`✅ ${producto.name} agregado al carrito`); 
+      showToast(`${producto.name} agregado al carrito`); 
     } catch (error) {
-      showToast("❌ Error al agregar producto");
+      showToast("Error al agregar producto");
     }
   };
 
-  // Testimonios
+  //Testimonios
   const testimonios = [
     {
       nombre: "María González",
@@ -82,7 +82,7 @@ const Home: React.FC = () => {
 
   return (
     <main className="home-page">
-      {/* Carrusel */}
+      {/*Carrusel */}
       <div className="carousel-container">
         <img
           src={imagenes[indiceCarrusel]}
@@ -94,7 +94,7 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Sección principal */}
+      {/*Sección principal */}
       <div className="container py-5">
         <div className="row g-4 align-items-stretch">
           {/* Consejo del día */}
@@ -116,7 +116,7 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Ofertas */}
+          {/*Ofertas */}
           <div className="col-lg-8">
             <h2 className="text-center mb-4">🔥 Ofertas de la Semana</h2>
             <div className="row g-4">
@@ -170,7 +170,7 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        {/* Testimonios */}
+        {/*Testimonios */}
         <section className="py-5 bg-light mt-5 rounded-3">
           <h2 className="text-center mb-4 text-success">💬 Qué dicen nuestros clientes</h2>
           <div className="row text-center g-4">
@@ -194,7 +194,7 @@ const Home: React.FC = () => {
         </section>
       </div>
 
-      {/* ✅ FOOTER */}
+      {/*FOOTER */}
       <footer className="footer-custom text-white pt-5 pb-3 mt-5 w-100">
         <div className="container">
           <div className="row px-5">

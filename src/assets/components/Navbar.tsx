@@ -151,7 +151,6 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
                   </button>
 
                   <ul className="dropdown-menu dropdown-menu-end shadow-sm">
-                    {/* Si es ADMIN → solo Panel Admin */}
                     {esAdmin ? (
                       <>
                         <li>

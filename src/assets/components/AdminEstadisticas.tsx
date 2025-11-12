@@ -1,19 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Legend,
-} from "recharts";
+import {BarChart,Bar,XAxis,YAxis,Tooltip,ResponsiveContainer,CartesianGrid,Legend,} from "recharts";
 import type { Producto } from "../types";
 
-/* ========================================
-   📊 Componente de estadísticas de productos reales
-========================================= */
+/*Componente de estadísticas de productos reales */
 interface Props {
   productos: Producto[];
 }
@@ -26,9 +15,7 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
   useEffect(() => {
     if (!productos || productos.length === 0) return;
 
-    /* ============================================================
-       1️⃣ LEER COMPRAS REALES DESDE LOCALSTORAGE
-       ============================================================ */
+    /*LEER COMPRAS REALES DESDE LOCALSTORAGE*/
     const rawCompras =
       localStorage.getItem("historialCompras") ||
       localStorage.getItem("compras") ||
@@ -54,9 +41,7 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
       ventas: contador[p.id] || 0,
     }));
 
-    /* ============================================================
-       2️⃣ FILTRAR POR MES ACTUAL
-       ============================================================ */
+    /*FILTRAR POR MES ACTUAL*/
     const ahora = new Date();
     const mesActual = ahora.getMonth(); // 0 = enero
     const añoActual = ahora.getFullYear();
@@ -121,7 +106,7 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
       </h3>
 
       <div className="row">
-        {/* 🛒 MÁS VENDIDOS */}
+        {/*MÁS VENDIDOS */}
         <div className="col-lg-6 mb-4">
           <div className="card shadow-sm">
             <div className="card-header bg-success text-white">
@@ -148,7 +133,7 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
           </div>
         </div>
 
-        {/* ⭐ MEJOR VALORADOS */}
+        {/*MEJOR VALORADOS */}
         <div className="col-lg-6 mb-4">
           <div className="card shadow-sm">
             <div className="card-header bg-warning text-dark">
@@ -178,7 +163,7 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
           </div>
         </div>
 
-        {/* ⚠️ PEOR VALORADOS */}
+        {/*PEOR VALORADOS */}
         <div className="col-lg-12 mb-4">
           <div className="card shadow-sm">
             <div className="card-header bg-danger text-white">

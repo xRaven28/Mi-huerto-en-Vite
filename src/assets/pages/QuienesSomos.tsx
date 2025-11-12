@@ -103,7 +103,7 @@ const QuienesSomos: React.FC = () => {
           </div>
         </div>
       </section>
-      {/* 🦶 Footer */}
+      {/*Footer */}
       <footer className="footer-custom text-white pt-4 pb-2">
         <div className="container">
           <div className="row px-5">

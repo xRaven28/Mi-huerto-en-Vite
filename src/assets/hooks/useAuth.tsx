@@ -27,7 +27,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const syncUser = () => {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) ||
+        sessionStorage.getItem(STORAGE_KEY); 
         if (raw) setUsuario(JSON.parse(raw));
         else setUsuario(null);
       } catch {

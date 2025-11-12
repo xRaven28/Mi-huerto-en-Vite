@@ -58,7 +58,6 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
   };
 
   //SUBMIT PRINCIPAL
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!terminos) return mostrarToast("Debes aceptar los términos", "#dc3545");

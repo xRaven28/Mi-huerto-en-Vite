@@ -1,4 +1,3 @@
-// src/assets/pages/ProductoDetalle.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useProductos } from "../hooks/useProductos";
@@ -7,18 +6,14 @@ import StarRating from "../components/StarRating";
 import { useToast } from "../components/Toast";
 
 
-/* =========================================================
-   Función auxiliar para limpiar rutas de imagen
-========================================================= */
+/*Función auxiliar para limpiar rutas de imagen*/
 const getImagePath = (img: string): string => {
   if (!img) return "/img/placeholder.jpg";
   const clean = img.replace(/^\/?(img|Img)\//, "").trim();
   return `/img/${clean}`;
 };
 
-/* =========================================================
-  Componente principal
-========================================================= */
+/*Componente principal*/
 const DetalleProducto: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { productos } = useProductos();
@@ -29,9 +24,7 @@ const DetalleProducto: React.FC = () => {
   const [comentario, setComentario] = useState("");
   const showToast = useToast();
 
-  /* =========================================================
-    Cargar producto y similares
-  ========================================================= */
+  /*Cargar producto y similares*/
   useEffect(() => {
     if (productos.length > 0 && id) {
       const prod = productos.find((p) => String(p.id) === id);
@@ -52,17 +45,16 @@ const DetalleProducto: React.FC = () => {
     }
   }, [productos, id]);
 
-  /*Manejo de valoraciones*/
   const handleSubmitValoracion = () => {
     if (!rating) {
-      showToast("⚠️ Selecciona una cantidad de estrellas.");
+      showToast("Selecciona una cantidad de estrellas.");
       console.log("Intento de comentar sin seleccionar estrellas.");
       return;
     }
 
     const usuarioActual = JSON.parse(localStorage.getItem("usuarioActual") || "{}");
     if (!usuarioActual?.nombre) {
-      showToast("🚫 Debes iniciar sesión para comentar.");
+      showToast("Debes iniciar sesión para comentar.");
       console.log("Intento de comentar sin iniciar sesión.");
       return;
     }
@@ -100,9 +92,7 @@ const DetalleProducto: React.FC = () => {
     showToast(`✅ ${producto.name} agregado al carrito`);
   };
 
-  /* =========================================================
-    Render condicional 
-  ========================================================= */
+  /*Render condicional*/
   if (!productos.length) {
     return (
       <div className="text-center py-5">
@@ -130,9 +120,7 @@ const DetalleProducto: React.FC = () => {
     ? Math.round(producto.precio * (1 - (producto.descuento || 0) / 100))
     : producto.precio;
 
-  /* =========================================================
-    Render principal
-  ========================================================= */
+  /*Render principal*/
   return (
     <>
       <main className="container py-5 detalle-producto-page" style={{ marginTop: "90px" }}>
@@ -208,7 +196,7 @@ const DetalleProducto: React.FC = () => {
           </div>
         </div>
 
-        {/* ================== PRODUCTOS SIMILARES ================== */}
+        {/*PRODUCTOS SIMILARES*/}
         <section className="mt-5">
           <h4 className="fw-bold text-center mb-4" style={{ color: "#3A4137" }}>
             Productos similares
@@ -236,7 +224,7 @@ const DetalleProducto: React.FC = () => {
                   <div className="hh-body text-center">
                     <h6 className="hh-title">{p.name}</h6>
 
-                    {/* ⭐ Mostrar promedio de estrellas si hay valoraciones */}
+                    {/*Mostrar promedio de estrellas si hay valoraciones */}
                     {p.valoraciones?.length ? (
                       <StarRating
                         value={
@@ -282,7 +270,7 @@ const DetalleProducto: React.FC = () => {
             ))}
           </div>
         </section>
-        {/* ================== OPINIONES DE CLIENTES ================== */}
+        {/*OPINIONES DE CLIENTES*/}
         <section className="mt-5">
           <h4 className="fw-bold text-success mb-3">Opiniones de clientes</h4>
 
@@ -323,7 +311,7 @@ const DetalleProducto: React.FC = () => {
         </section>
       </main>
 
-      {/* ================== FOOTER ================== */}
+      {/*FOOTER*/}
       <footer className="footer-custom text-white pt-4 pb-2 mt-5 w-100">
         <div className="container">
           <div className="row px-5">

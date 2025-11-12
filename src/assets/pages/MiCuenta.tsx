@@ -70,9 +70,7 @@ const MiCuenta: React.FC<MiCuentaProps> = ({ mostrarToast }) => {
 
   const handleAdminClick = () => navigate("/admin");
 
-  // ============================
-  // 🌿 MODO USUARIO LOGUEADO
-  // ============================
+  //MODO USUARIO LOGUEADO
   if (usuario) {
     return (
       <main className="container py-5 micuenta-page">

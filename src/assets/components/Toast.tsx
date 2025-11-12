@@ -117,7 +117,7 @@ export const ToastContainer: React.FC = () => {
     </div>
   );
 
-  // Portal directo al body — sin causar ningún reflow
+  // Portal directo al body
   return createPortal(render, document.body);
 };
 

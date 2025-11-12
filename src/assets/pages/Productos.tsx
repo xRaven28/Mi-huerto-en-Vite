@@ -5,9 +5,7 @@ import type { Producto } from "../types";
 import StarRating from "../components/StarRating";
 
 
-/* =========================================================
-  Tipos y helpers
-   ========================================================= */
+/*Tipos y helpers*/
 interface ProductosProps {
   onAddToCart: () => void;
   mostrarToast: (message: string, color?: string) => void;
@@ -17,11 +15,9 @@ interface ProductosProps {
 type ProductoCarrito = Producto & { cantidad: number };
 const STORAGE_KEY = "carrito";
 
-/* Normaliza texto sin acentos */
 const stripDiacritics = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-/* Variantes seguras de imagen */
 const buildImageVariants = (raw: string | undefined | null): string[] => {
   const fallback = ["/img/placeholder.jpg"];
   if (!raw) return fallback;
@@ -163,7 +159,6 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   /* Filtrado y orden */
   useEffect(() => {
     try {
-      // Solo productos habilitados
       let filtered = getProductosCliente(busqueda).filter((p) => p.habilitado);
 
       if (categoria !== "todos") {
@@ -247,7 +242,6 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
           <i className="bi bi-cart3 me-2"></i> Todos los Productos
         </h2>
 
-        {/*Filtros */}
         <div className="row mb-4 align-items-center text-center">
           <div className="col-md-6 mb-2">
             <select

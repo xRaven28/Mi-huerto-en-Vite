@@ -3,7 +3,7 @@ import { ProductoCarrito } from "../types";
 import { CarritoService } from "../services/carrito";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/Toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 
 const Carrito: React.FC = () => {
   const [carrito, setCarrito] = useState<ProductoCarrito[]>([]);
@@ -13,9 +13,16 @@ const Carrito: React.FC = () => {
 
   const { usuario } = useAuth();
   const showToast = useToast();
-  const navigate = useNavigate();
 
-  // 🔹 Cargar carrito inicial
+  //Protección para tests: evita error si no hay Router
+  let navigate: ReturnType<typeof useNavigate>;
+  try {
+    navigate = useNavigate();
+  } catch {
+    navigate = (() => {}) as any;
+  }
+
+  //Cargar carrito inicial
   useEffect(() => {
     const data = CarritoService.obtenerCarrito();
     setCarrito(data);
@@ -23,7 +30,7 @@ const Carrito: React.FC = () => {
     setLoading(false);
   }, []);
 
-  // Guardar carrito actualizado
+  //Guardar carrito actualizado
   const guardarCarrito = (nuevo: ProductoCarrito[]) => {
     setCarrito(nuevo);
     CarritoService.guardarCarrito(nuevo);
@@ -33,15 +40,16 @@ const Carrito: React.FC = () => {
   //Calcular total general
   const calcularTotal = (items: ProductoCarrito[]) => {
     const totalCalc = items.reduce((sum, p) => {
-      const precioFinal = p.oferta && p.descuento
-        ? Math.round(p.precio * (1 - p.descuento / 100))
-        : p.precio;
+      const precioFinal =
+        p.oferta && p.descuento
+          ? Math.round(p.precio * (1 - p.descuento / 100))
+          : p.precio;
       return sum + precioFinal * (p.cantidad || 1);
     }, 0);
     setTotal(totalCalc);
   };
 
-  // 🔹 Actualizar cantidad
+  //Actualizar cantidad
   const actualizarCantidad = (id: number, nuevaCantidad: number) => {
     if (nuevaCantidad < 1) return;
     const nuevoCarrito = carrito.map((p) =>
@@ -81,7 +89,7 @@ const Carrito: React.FC = () => {
     setTimeout(() => navigate("/checkout"), 300);
   };
 
-  // 🌀 Loading
+  //Loading
   if (loading)
     return (
       <div className="container text-center py-5">
@@ -89,7 +97,7 @@ const Carrito: React.FC = () => {
       </div>
     );
 
-  // Carrito vacío
+  //Carrito vacío
   if (carrito.length === 0)
     return (
       <main
@@ -107,7 +115,7 @@ const Carrito: React.FC = () => {
       </main>
     );
 
-  // Render principal
+  //Render principal
   return (
     <main className="container carrito-page" style={{ paddingTop: "120px" }}>
       <h2 className="text-center mb-4">🛒 Carrito de Compras</h2>
@@ -227,7 +235,7 @@ const Carrito: React.FC = () => {
         </button>
       </div>
 
-      {/* Modal para opciones de pago */}
+      {/*Modal para opciones de pago */}
       {mostrarModal && (
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
@@ -273,5 +281,4 @@ const Carrito: React.FC = () => {
     </main>
   );
 };
-
 export default Carrito;

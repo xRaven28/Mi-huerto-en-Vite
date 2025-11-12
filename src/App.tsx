@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-// 🔹 Páginas principales
+//Páginas principales
 import Home from "./assets/pages/Home";
 import Productos from "./assets/pages/Productos";
 import ProductoDetalle from "./assets/pages/ProductoDetalle";
@@ -10,18 +10,18 @@ import Recetas from "./assets/pages/Recetas";
 import QuienesSomos from "./assets/pages/QuienesSomos";
 import Terminos from "./assets/pages/Terminos";
 
-// 🔹 Cuentas y usuario
+//Cuentas y usuario
 import MiCuenta from "./assets/pages/MiCuenta";
 import CrearCuenta from "./assets/pages/CrearCuenta";
 import MiPerfil from "./assets/pages/MiPerfil.tsx";
 import MisPedidos from "./assets/pages/MisPedidos.tsx";
 
-// 🔹 Comercio y admin
+//Comercio y admin
 import Carrito from "./assets/pages/Carrito";
 import Checkout from "./assets/pages/Checkout";
 import Admin from "./assets/pages/Admin";
 
-// 🔹 Componentes y hooks
+//Componentes y hooks
 import Navbar from "./assets/components/Navbar";
 import RutaProtegida from "./assets/routes/RutaProtegida";
 import { ToastContainer, useToast } from "./assets/components/Toast";
@@ -34,9 +34,8 @@ const App: React.FC = () => {
   // Hook para mostrar mensajes flotantes
   const showToast = useToast();
 
-  // ==============================
-  // 🔹 Actualizar contador carrito
-  // ==============================
+
+  //Actualizar contador carrito
   React.useEffect(() => {
     const actualizarCarrito = () => {
       try {
@@ -53,16 +52,12 @@ const App: React.FC = () => {
     return () => window.removeEventListener("storage", actualizarCarrito);
   }, []);
 
-  // ==============================
-  // 🔹 Render principal
-  // ==============================
+  //Render principal
   return (
     <>
       <Navbar carritoCount={carritoCount} />
 
-      {/* ==========================
-          RUTAS PRINCIPALES
-      =========================== */}
+      {/*RUTAS PRINCIPALES*/}
       <Routes>
         {/* Inicio */}
         <Route path="/" element={<Home />} />
@@ -128,9 +123,7 @@ const App: React.FC = () => {
         />
       </Routes>
 
-      {/* ==========================
-          TOASTS GLOBALES
-      =========================== */}
+      {/*TOASTS*/}
       <ToastContainer />
     </>
   );

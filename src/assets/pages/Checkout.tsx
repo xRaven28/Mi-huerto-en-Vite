@@ -55,7 +55,7 @@ const Checkout: React.FC = () => {
       fecha.getMonth() + 1
     ).padStart(2, "0")}${String(fecha.getDate()).padStart(2, "0")}-${fecha.getTime()}`;
 
-    // Aplicar descuentos en productos si existen
+    //Aplicar descuentos en productos si existen
     const productosConDescuento = carrito.map((p) => {
       const precioFinal =
         p.oferta && p.descuento
@@ -64,7 +64,7 @@ const Checkout: React.FC = () => {
       return { ...p, precioFinal };
     });
 
-    // Crear boleta
+    //Crear boleta
     const nuevaBoleta = {
       codigo,
       cliente: form.nombre,
@@ -75,13 +75,12 @@ const Checkout: React.FC = () => {
       fecha: fecha.toLocaleString("es-CL"),
     };
 
-    // Guardar boleta en historial global
+    //Guardar boleta en historial global
     const historial = JSON.parse(localStorage.getItem(HIST) || "[]");
     historial.push(nuevaBoleta);
     localStorage.setItem(HIST, JSON.stringify(historial));
 
-    /*
-      Asociar compra al usuario actual*/
+    /*Asociar compra al usuario actual*/
     const usuarioActualRaw = localStorage.getItem("usuarioActual");
     const usuariosRaw = localStorage.getItem("usuarios");
 
@@ -89,7 +88,7 @@ const Checkout: React.FC = () => {
       const usuarioActual = JSON.parse(usuarioActualRaw);
       const usuarios = JSON.parse(usuariosRaw);
 
-      // Buscar por correo exacto
+      //Buscar por correo exacto
       const idx = usuarios.findIndex(
         (u: any) =>
           u.correo?.trim().toLowerCase() === usuarioActual.correo?.trim().toLowerCase()
@@ -110,7 +109,7 @@ const Checkout: React.FC = () => {
           })),
         };
 
-        // Asegurar que no se dupliquen boletas
+        //Asegurar que no se dupliquen boletas
         const yaExiste = usuarios[idx].compras?.some(
           (c: any) => c.codigo === nuevaCompra.codigo
         );
@@ -119,7 +118,7 @@ const Checkout: React.FC = () => {
           usuarios[idx].compras.push(nuevaCompra);
         }
 
-        // Guardar cambios
+        //Guardar cambios
         localStorage.setItem("usuarios", JSON.stringify(usuarios));
         localStorage.setItem("usuarioActual", JSON.stringify(usuarios[idx]));
       } else {

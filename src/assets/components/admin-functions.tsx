@@ -154,7 +154,6 @@ export const TablaUsuarios: React.FC = () => {
   }, []);
 
   const verComprasUsuario = (correo: string) => {
-    // Esta función se manejaría en el componente padre
     console.log('Ver compras de:', correo);
   };
 
