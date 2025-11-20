@@ -73,6 +73,7 @@ const Checkout: React.FC = () => {
       productos: productosConDescuento,
       total: calcularTotal(),
       fecha: fecha.toLocaleString("es-CL"),
+      estado: "PREPARANDO"
     };
 
     //Guardar boleta en historial global
@@ -101,6 +102,7 @@ const Checkout: React.FC = () => {
           total: nuevaBoleta.total,
           metodoPago: nuevaBoleta.metodoPago,
           codigo: nuevaBoleta.codigo,
+          estado: nuevaBoleta.estado, 
           productos: nuevaBoleta.productos.map((p: any) => ({
             name: p.name,
             precio: p.precioFinal ?? p.precio,
@@ -150,13 +152,13 @@ const Checkout: React.FC = () => {
       <h3>Detalle de compra:</h3>
       <ul>
         ${boleta.productos
-          .map(
-            (p: ProductoCarrito & { precioFinal?: number }) =>
-              `<li>${p.name} x${p.cantidad || 1} - $${(
-                (p.precioFinal ?? p.precio) * (p.cantidad || 1)
-              ).toLocaleString("es-CL")}</li>`
-          )
-          .join("")}
+        .map(
+          (p: ProductoCarrito & { precioFinal?: number }) =>
+            `<li>${p.name} x${p.cantidad || 1} - $${(
+              (p.precioFinal ?? p.precio) * (p.cantidad || 1)
+            ).toLocaleString("es-CL")}</li>`
+        )
+        .join("")}
       </ul>
       <h3>Total: $${boleta.total.toLocaleString("es-CL")}</h3>
     `;

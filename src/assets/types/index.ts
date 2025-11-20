@@ -48,6 +48,7 @@ export interface Compra {
   fecha: string;
   total: number;
   productos: ProductoCarrito[];
+  estado?: "PREPARANDO" | "EN_DESPACHO" | "ENTREGADO"; 
 }
 
 export interface Receta {

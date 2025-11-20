@@ -2,21 +2,22 @@ import React, { useEffect, useState } from "react";
 
 const MisPedidos: React.FC = () => {
   const [pedidos, setPedidos] = useState<any[]>([]);
-
   useEffect(() => {
+    const usuarioActualRaw = localStorage.getItem("usuarioActual");
     const historial = JSON.parse(localStorage.getItem("historialCompras") || "[]");
-    setPedidos(historial.reverse()); 
+    if (!usuarioActualRaw) {
+      setPedidos([]);
+      return;
+    }
+    const usuario = JSON.parse(usuarioActualRaw);
+    if (usuario.rol === "Administrador") {
+      setPedidos(historial.reverse());
+      return;
+    }
+    const filtrados = historial.filter((p: any) => p.cliente === usuario.nombre);
+    setPedidos(filtrados.reverse());
   }, []);
 
-  if (pedidos.length === 0) {
-    return (
-      <main className="container py-5 text-center">
-        <div className="alert alert-warning shadow-sm">
-          Aún no tienes pedidos registrados 🛒
-        </div>
-      </main>
-    );
-  }
 
   const descargarPDF = (pedido: any) => {
     const contenido = `
@@ -30,13 +31,13 @@ const MisPedidos: React.FC = () => {
       <h3>Detalle de compra:</h3>
       <ul>
         ${pedido.productos
-          .map(
-            (p: any) =>
-              `<li>${p.name} x${p.cantidad || 1} - $${(
-                p.precio * (p.cantidad || 1)
-              ).toLocaleString("es-CL")}</li>`
-          )
-          .join("")}
+        .map(
+          (p: any) =>
+            `<li>${p.name} x${p.cantidad || 1} - $${(
+              p.precio * (p.cantidad || 1)
+            ).toLocaleString("es-CL")}</li>`
+        )
+        .join("")}
       </ul>
       <h3>Total: $${pedido.total.toLocaleString("es-CL")}</h3>
     `;
@@ -72,6 +73,15 @@ const MisPedidos: React.FC = () => {
             <p><strong>Fecha:</strong> {pedido.fecha}</p>
             <p><strong>Total:</strong> ${pedido.total.toLocaleString("es-CL")}</p>
             <p><strong>Método de pago:</strong> {pedido.metodoPago}</p>
+            <p>
+              <strong>Estado:</strong>{" "}
+              <span className={`badge px-3 py-2 estado-${(pedido.estado || "PREPARANDO").toLowerCase()}`}>
+                {(pedido.estado || "PREPARANDO") === "PREPARANDO" && "Preparando"}
+                {(pedido.estado || "PREPARANDO") === "EN_DESPACHO" && "En despacho"}
+                {(pedido.estado || "PREPARANDO") === "ENTREGADO" && "Entregado"}
+              </span>
+            </p>
+
 
             <details className="mt-2">
               <summary className="text-primary mb-2">Ver detalle</summary>

@@ -925,3 +925,7 @@ section h2 {
 .table-responsive {
   transition: none !important;
 }
+.estado-preparando { background-color: #ffb84d; color: #fff; }
+.estado-en_despacho { background-color: #4d9dff; color: #fff; }
+.estado-entregado { background-color: #4caf50; color: #fff; }
+
