@@ -6,18 +6,10 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import { Producto, Usuario, HistorialAccion } from "../types";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import StarRating from "../components/StarRating";
 import AdminEstadisticas from "../components/AdminEstadisticas";
+import StarRating from "../components/StarRating";
 
-/*Componente principal*/
+// COMPONENTE PRINCIPAL
 const Admin: React.FC = () => {
   const {
     productos,
@@ -39,6 +31,7 @@ const Admin: React.FC = () => {
     useState<Usuario | null>(null);
 
   const [modalCrearCuentaOpen, setModalCrearCuentaOpen] = useState(false);
+
   const [nuevoNombre, setNuevoNombre] = useState("");
   const [nuevoCorreo, setNuevoCorreo] = useState("");
   const [nuevoRut, setNuevoRut] = useState("");
@@ -53,7 +46,7 @@ const Admin: React.FC = () => {
   const [porcentajeOferta, setPorcentajeOferta] = useState<number>(20);
   const [editData, setEditData] = useState<Partial<Producto>>({});
 
-  const { usuario, esAdmin } = useAuth();
+  const { usuario, esAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const showToast = useToast();
 
@@ -63,30 +56,22 @@ const Admin: React.FC = () => {
   const [historialCuentas, setHistorialCuentas] = useState<HistorialAccion[]>(
     []
   );
+
   const [modalDetalleCompra, setModalDetalleCompra] = useState<any | null>(
     null
   );
 
-  const productosValorados = productos
-    .filter((p) => p.valoraciones && p.valoraciones.length > 0)
-    .map((p) => ({
-      name: p.name,
-      promedio:
-        p.valoraciones!.reduce((acc, v) => acc + v.estrellas, 0) /
-        p.valoraciones!.length,
-    }));
-
-  /*Protección de acceso*/
+  // ================== PROTECCIÓN ==================
   useEffect(() => {
     if (!usuario) {
-      navigate("/micuenta");
+      navigate("/mi-cuenta");
     } else if (!esAdmin) {
-      showToast(`No tienes permisos para acceder al panel de administrador`);
+      showToast("No tienes permisos para acceder al panel de administrador");
       navigate("/");
     }
   }, [usuario, esAdmin, navigate, showToast]);
 
-  /*Cargar usuarios e historial*/
+  // ========= CARGAR USUARIOS E HISTORIAL =========
   useEffect(() => {
     const usuariosLS = JSON.parse(localStorage.getItem("usuarios") || "[]");
     setUsuarios(usuariosLS);
@@ -102,7 +87,77 @@ const Admin: React.FC = () => {
     setHistorialCuentas(accionesCuentas.reverse());
   }, []);
 
-  /*Guardar usuarios*/
+  // ================== SIDEBAR =====================
+  const Sidebar = () => (
+    <aside className="admin-sidebar">
+      {/* INFO ADMIN */}
+      <div className="admin-user-box">
+        <div className="admin-avatar">
+          <span>👤</span>
+        </div>
+        <p className="admin-name">{usuario?.nombre || "Administrador"}</p>
+      </div>
+
+      <hr className="admin-separator" />
+
+      {/* SECCIONES */}
+      <button
+        className={seccionActual === "menu" ? "active" : ""}
+        onClick={() => setSeccionActual("menu")}
+      >
+        🏠 Inicio
+      </button>
+
+      <button
+        className={seccionActual === "productos" ? "active" : ""}
+        onClick={() => setSeccionActual("productos")}
+      >
+        🥕 Productos
+      </button>
+
+      <button
+        className={seccionActual === "cuentas" ? "active" : ""}
+        onClick={() => setSeccionActual("cuentas")}
+      >
+        👤 Cuentas
+      </button>
+
+      <button
+        className={seccionActual === "estadisticas" ? "active" : ""}
+        onClick={() => setSeccionActual("estadisticas")}
+      >
+        📊 Estadísticas
+      </button>
+
+      <button
+        className={seccionActual === "historial" ? "active" : ""}
+        onClick={() => setSeccionActual("historial")}
+      >
+        📜 Historial
+      </button>
+
+      <hr className="admin-separator" />
+
+      {/* IR A TIENDA */}
+      <button className="btn-admin-secondary" onClick={() => navigate("/")}>
+        🛒 Ir a la Tienda
+      </button>
+
+      {/* CERRAR SESIÓN */}
+      <button
+        className="btn-admin-danger"
+        onClick={() => {
+          logout();
+          navigate("/");
+        }}
+      >
+        🚪 Cerrar Sesión
+      </button>
+    </aside>
+  );
+
+  // ========= HELPERS DE USUARIOS / HISTORIAL =========
+
   const guardarUsuarios = (nuevos: Usuario[], accion?: string) => {
     setUsuarios(nuevos);
     localStorage.setItem("usuarios", JSON.stringify(nuevos));
@@ -122,7 +177,6 @@ const Admin: React.FC = () => {
     }
   };
 
-  /*Registrar acción de producto*/
   const registrarAccionProducto = (accion: string) => {
     const registro: HistorialAccion = {
       fecha: new Date().toLocaleString(),
@@ -133,26 +187,18 @@ const Admin: React.FC = () => {
       localStorage.getItem("historialProductos") || "[]"
     );
     historialPrevio.push(registro);
-    localStorage.setItem(
-      "historialProductos",
-      JSON.stringify(historialPrevio)
-    );
+    localStorage.setItem("historialProductos", JSON.stringify(historialPrevio));
     setHistorialProductos(historialPrevio.reverse());
   };
 
-  /*Productos base*/
-  const productosFiltrados = productos.filter(
-    (p) =>
-      p.name.toLowerCase().includes(filtroProductos.toLowerCase()) ||
-      p.categoria.toLowerCase().includes(filtroProductos.toLowerCase())
-  );
-
+  // ============ PRODUCTOS: CRUD / OFERTAS ============
   const handleAgregar = async (p: Omit<Producto, "id">) => {
     await agregarProducto(p);
     registrarAccionProducto(`Agregó el producto "${p.name}"`);
-    showToast(`Producto agregado correctamente`);
+    showToast("Producto agregado correctamente");
   };
 
+  /* Habilitar / Deshabilitar producto */
   const handleToggleProducto = async (id: number) => {
     const p = productos.find((x) => x.id === id);
     if (!p) return;
@@ -166,21 +212,18 @@ const Admin: React.FC = () => {
     localStorage.setItem("productos", JSON.stringify(nuevos));
 
     registrarAccionProducto(
-      `${actualizado.habilitado ? "Habilitó" : "Inhabilitó"} el producto "${
-        p.name
+      `${actualizado.habilitado ? "Habilitó" : "Inhabilitó"} el producto "${p.name
       }"`
     );
     showToast(
-      `Producto "${p.name}" ${
-        p.habilitado ? "inhabilitado" : "habilitado"
+      `Producto "${p.name}" ${p.habilitado ? "inhabilitado" : "habilitado"
       } correctamente.`
     );
   };
 
-  /*Ofertas*/
   const abrirModalOferta = (producto: Producto) => {
     if (!producto.habilitado) {
-      showToast(`No puedes poner en oferta un producto inhabilitado`);
+      showToast("No puedes poner en oferta un producto inhabilitado");
       return;
     }
     setProductoSeleccionado(producto);
@@ -190,28 +233,30 @@ const Admin: React.FC = () => {
 
   const guardarOferta = async () => {
     if (!productoSeleccionado) return;
-    const actualizado = {
+
+    const actualizado: Producto = {
       ...productoSeleccionado,
       oferta: true,
       descuento: porcentajeOferta,
     };
+
     await actualizarProducto(actualizado);
+
     const nuevos = productos.map((p) =>
       p.id === actualizado.id ? actualizado : p
     );
     localStorage.setItem("productos", JSON.stringify(nuevos));
-    setModalOfertaOpen(false);
+
     registrarAccionProducto(
       `Puso en oferta "${actualizado.name}" con ${porcentajeOferta}%`
     );
     showToast(
       `${actualizado.name} ahora tiene un ${porcentajeOferta}% de descuento.`
     );
+    setModalOfertaOpen(false);
   };
 
   const quitarOferta = async (producto: Producto) => {
-    console.log(`Eliminando oferta del producto: ${producto.name}`);
-
     const actualizado = { ...producto, oferta: false, descuento: 0 };
     await actualizarProducto(actualizado);
 
@@ -221,11 +266,9 @@ const Admin: React.FC = () => {
     localStorage.setItem("productos", JSON.stringify(nuevos));
 
     registrarAccionProducto(`Quitó la oferta de "${producto.name}"`);
-    console.log(` Oferta eliminada para "${producto.name}"`);
     showToast(`${producto.name} ya no está en oferta.`);
   };
 
-  /*Editar producto*/
   const abrirModalEditar = (producto: Producto) => {
     setProductoSeleccionado(producto);
     setEditData({ ...producto });
@@ -234,15 +277,22 @@ const Admin: React.FC = () => {
 
   const guardarEdicion = async () => {
     if (!productoSeleccionado) return;
-    const actualizado = { ...productoSeleccionado, ...editData };
+
+    const actualizado: Producto = {
+      ...productoSeleccionado,
+      ...editData,
+    };
+
     await actualizarProducto(actualizado);
+
     const nuevos = productos.map((p) =>
       p.id === actualizado.id ? actualizado : p
     );
     localStorage.setItem("productos", JSON.stringify(nuevos));
+
     registrarAccionProducto(`Editó el producto "${actualizado.name}"`);
-    setModalEditarOpen(false);
     showToast(`Producto "${actualizado.name}" editado correctamente.`);
+    setModalEditarOpen(false);
   };
 
   const handleEliminarProducto = async (id: number) => {
@@ -252,12 +302,11 @@ const Admin: React.FC = () => {
     registrarAccionProducto(`Eliminó el producto "${prod?.name}"`);
   };
 
-  /* Cambiar estado de compra */
+  // ========== COMPRAS: CAMBIAR ESTADO / DETALLE ==========
   const cambiarEstadoCompra = (
     codigo: string,
     estado: "PREPARANDO" | "EN_DESPACHO" | "ENTREGADO"
   ) => {
-    // Actualizar en historial global
     const historial = JSON.parse(
       localStorage.getItem("historialCompras") || "[]"
     );
@@ -269,7 +318,6 @@ const Admin: React.FC = () => {
       JSON.stringify(actualizadoHistorial)
     );
 
-    // Actualizar en usuarios
     const usuariosLS = JSON.parse(localStorage.getItem("usuarios") || "[]");
     const updUsuarios = usuariosLS.map((u: any) => ({
       ...u,
@@ -280,7 +328,6 @@ const Admin: React.FC = () => {
     localStorage.setItem("usuarios", JSON.stringify(updUsuarios));
     setUsuarios(updUsuarios);
 
-    // Refrescar usuarioSeleccionado en pantalla
     if (usuarioSeleccionado) {
       const actualizadoUsuario = {
         ...usuarioSeleccionado,
@@ -288,7 +335,6 @@ const Admin: React.FC = () => {
           c.codigo === codigo ? { ...c, estado } : c
         ),
       } as Usuario;
-
       setUsuarioSeleccionado(actualizadoUsuario);
     }
 
@@ -302,42 +348,52 @@ const Admin: React.FC = () => {
     });
   };
 
-  /*Render principal*/
+  // ============= FILTRO DE PRODUCTOS =============
+  const productosFiltrados = productos.filter(
+    (p) =>
+      p.name.toLowerCase().includes(filtroProductos.toLowerCase()) ||
+      p.categoria?.toLowerCase().includes(filtroProductos.toLowerCase())
+  );
+
+  // ================== RENDER ======================
   return (
-    <div>
-      <main className="container py-5" style={{ marginTop: 80 }}>
+    <div className="admin-container">
+      <Sidebar />
+
+      <main className="admin-content">
+        {/* ========== DASHBOARD ========== */}
         {seccionActual === "menu" && (
-          <section className="text-center">
-            <h2>Bienvenido, Administrador</h2>
-            <div className="d-flex justify-content-center gap-3 mt-4">
-              <button
-                className="btn btn-success"
-                onClick={() => setSeccionActual("productos")}
-              >
-                Gestionar Productos
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => setSeccionActual("cuentas")}
-              >
-                Gestionar Cuentas
-              </button>
-              <button
-                className="btn btn-warning"
-                onClick={() => setSeccionActual("historial")}
-              >
-                Ver Historial
-              </button>
+          <section className="admin-cards">
+
+            <div className="admin-card-box admin-card-small" style={{ borderLeftColor: "#4CAF50" }}>
+              <h4>{usuarios.length}</h4>
+              <p>Usuarios registrados</p>
             </div>
+
+            <div className="admin-card-box admin-card-small" style={{ borderLeftColor: "#2E7D32" }}>
+              <h4>{productos.length}</h4>
+              <p>Productos activos</p>
+            </div>
+
+            <div
+              className="admin-card-box admin-card-small admin-card-link"
+              onClick={() => navigate("/")}
+              style={{ borderLeftColor: "#FFD600", cursor: "pointer" }}
+            >
+              <h4>🛒</h4>
+              <p>Ir a la Tienda</p>
+            </div>
+
           </section>
         )}
 
-        {/*GESTIÓN DE PRODUCTOS*/}
+        {/* ========== GESTIÓN DE PRODUCTOS ========== */}
         {seccionActual === "productos" && (
           <section>
             <h2 className="text-center mb-4">
               Panel Administrador - Productos
             </h2>
+
             <div className="d-flex gap-2 mb-3">
               <input
                 className="form-control w-50"
@@ -352,16 +408,10 @@ const Admin: React.FC = () => {
                 Agregar Producto
               </button>
               <button
-                className="btn btn-warning text-white"
-                onClick={() => setSeccionActual("estadisticas")}
-              >
-                Ver Estadísticas
-              </button>
-              <button
                 className="btn btn-secondary"
                 onClick={() => setSeccionActual("menu")}
               >
-                Volver
+                Volver al inicio
               </button>
             </div>
 
@@ -399,9 +449,8 @@ const Admin: React.FC = () => {
                         </td>
                         <td>
                           <span
-                            className={`badge ${
-                              producto.habilitado ? "bg-success" : "bg-danger"
-                            }`}
+                            className={`badge ${producto.habilitado ? "bg-success" : "bg-danger"
+                              }`}
                           >
                             {producto.habilitado
                               ? "Habilitado"
@@ -420,6 +469,7 @@ const Admin: React.FC = () => {
                               ? "Inhabilitar"
                               : "Habilitar"}
                           </button>
+
                           {!producto.oferta ? (
                             <button
                               className="btn btn-warning btn-sm me-1"
@@ -435,12 +485,14 @@ const Admin: React.FC = () => {
                               Quitar Oferta
                             </button>
                           )}
+
                           <button
                             className="btn btn-info btn-sm me-1"
                             onClick={() => abrirModalEditar(producto)}
                           >
                             Editar
                           </button>
+
                           <button
                             className="btn btn-danger btn-sm"
                             onClick={() =>
@@ -459,16 +511,17 @@ const Admin: React.FC = () => {
           </section>
         )}
 
-        {/*ESTADÍSTICAS DE PRODUCTOS */}
+        {/* ========== ESTADÍSTICAS ========== */}
         {seccionActual === "estadisticas" && (
           <section>
             <h2 className="text-center mb-4">Estadísticas de Productos</h2>
+
             <div className="d-flex gap-2 mb-3">
               <button
                 className="btn btn-secondary"
-                onClick={() => setSeccionActual("productos")}
+                onClick={() => setSeccionActual("menu")}
               >
-                Volver a Productos
+                Volver al inicio
               </button>
             </div>
 
@@ -476,18 +529,19 @@ const Admin: React.FC = () => {
           </section>
         )}
 
-        {/* GESTIÓN DE USUARIOS*/}
+        {/* ========== GESTIÓN DE USUARIOS ========== */}
         {seccionActual === "cuentas" && (
           <section>
             <h2 className="text-center mb-4">
-              Panel Administrador -Gestión de Cuentas
+              Panel Administrador - Gestión de Cuentas
             </h2>
+
             <div className="d-flex justify-content-between align-items-center mb-3">
               <button
                 className="btn btn-outline-secondary"
                 onClick={() => setSeccionActual("menu")}
               >
-                ⬅ Volver
+                ⬅ Volver al inicio
               </button>
 
               <button
@@ -525,9 +579,8 @@ const Admin: React.FC = () => {
                           <td>{u.rol || "Cliente"}</td>
                           <td>
                             <span
-                              className={`badge ${
-                                u.bloqueado ? "bg-danger" : "bg-success"
-                              }`}
+                              className={`badge ${u.bloqueado ? "bg-danger" : "bg-success"
+                                }`}
                             >
                               {u.bloqueado ? "Bloqueado" : "Activo"}
                             </span>
@@ -535,9 +588,8 @@ const Admin: React.FC = () => {
                           <td>
                             <div className="d-flex justify-content-center gap-1">
                               <button
-                                className={`btn btn-sm ${
-                                  u.bloqueado ? "btn-success" : "btn-warning"
-                                }`}
+                                className={`btn btn-sm ${u.bloqueado ? "btn-success" : "btn-warning"
+                                  }`}
                                 onClick={() => {
                                   const nuevos = usuarios.map((usr) =>
                                     usr.id === u.id
@@ -546,8 +598,7 @@ const Admin: React.FC = () => {
                                   );
                                   guardarUsuarios(
                                     nuevos,
-                                    `${
-                                      u.bloqueado ? "Desbloqueó" : "Bloqueó"
+                                    `${u.bloqueado ? "Desbloqueó" : "Bloqueó"
                                     } a ${u.nombre}`
                                   );
                                 }}
@@ -588,7 +639,7 @@ const Admin: React.FC = () => {
               </div>
             )}
 
-            {/* Modal Crear Cuenta */}
+            {/* MODAL CREAR CUENTA */}
             {modalCrearCuentaOpen && (
               <div
                 className="modal fade show"
@@ -738,16 +789,17 @@ const Admin: React.FC = () => {
           </section>
         )}
 
-        {/*HISTORIAL SEPARADO*/}
+        {/* ========== HISTORIAL GENERAL ========== */}
         {seccionActual === "historial" && (
           <section>
             <h2 className="text-center mb-4">Historial de Actividades</h2>
+
             <div className="d-flex gap-2 mb-3">
               <button
                 className="btn btn-secondary"
                 onClick={() => setSeccionActual("menu")}
               >
-                Volver
+                Volver al inicio
               </button>
             </div>
 
@@ -773,7 +825,7 @@ const Admin: React.FC = () => {
             </ul>
 
             <div className="tab-content">
-              {/* Historial Productos */}
+              {/* Productos */}
               <div className="tab-pane fade show active" id="histProductos">
                 {historialProductos.length === 0 ? (
                   <p className="text-center text-muted">
@@ -803,7 +855,7 @@ const Admin: React.FC = () => {
                 )}
               </div>
 
-              {/* Historial Cuentas */}
+              {/* Cuentas */}
               <div className="tab-pane fade" id="histCuentas">
                 {historialCuentas.length === 0 ? (
                   <p className="text-center text-muted">
@@ -836,7 +888,7 @@ const Admin: React.FC = () => {
           </section>
         )}
 
-        {/*MODAL DETALLES USUARIO*/}
+        {/* ========== MODAL DETALLE USUARIO ========== */}
         {usuarioSeleccionado && (
           <div
             className="modal fade show"
@@ -845,9 +897,11 @@ const Admin: React.FC = () => {
               backgroundColor: "rgba(0,0,0,0.6)",
             }}
           >
-            <div className="modal-dialog modal-xl modal-dialog-centered">
-              <div className="modal-content shadow-lg border-0">
-                <div className="modal-header bg-success text-white">
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+              <div className="modal-content modal-admin-usuario shadow-lg border-0">
+
+                {/* HEADER */}
+                <div className="modal-header">
                   <h5 className="modal-title">
                     Detalles del Usuario — {usuarioSeleccionado.nombre}
                   </h5>
@@ -857,6 +911,7 @@ const Admin: React.FC = () => {
                   ></button>
                 </div>
 
+                {/* BODY */}
                 <div className="modal-body">
                   <ul className="nav nav-tabs mb-3" role="tablist">
                     <li className="nav-item">
@@ -889,61 +944,39 @@ const Admin: React.FC = () => {
                   </ul>
 
                   <div className="tab-content">
-                    <div className="tab-pane fade show active" id="resumen">
-                      <p>
-                        <strong>Correo:</strong> {usuarioSeleccionado.correo}
-                      </p>
-                      <p>
-                        <strong>RUT:</strong>{" "}
-                        {usuarioSeleccionado.rut || "No especificado"}
-                      </p>
-                      <p>
-                        <strong>Dirección:</strong>{" "}
-                        {usuarioSeleccionado.direccion || "No especificada"}
-                      </p>
-                      <p>
-                        <strong>Teléfono:</strong>{" "}
-                        {usuarioSeleccionado.telefono || "No especificado"}
-                      </p>
 
-                      <p>
-                        <strong>Rol:</strong> {usuarioSeleccionado.rol}
-                      </p>
+                    {/* TAB RESUMEN */}
+                    <div className="tab-pane fade show active" id="resumen">
+                      <p><strong>Correo:</strong> {usuarioSeleccionado.correo}</p>
+                      <p><strong>RUT:</strong> {usuarioSeleccionado.rut || "No especificado"}</p>
+                      <p><strong>Dirección:</strong> {usuarioSeleccionado.direccion || "No especificada"}</p>
+                      <p><strong>Teléfono:</strong> {usuarioSeleccionado.telefono || "No especificado"}</p>
+                      <p><strong>Rol:</strong> {usuarioSeleccionado.rol}</p>
+
                       <p>
                         <strong>Estado:</strong>{" "}
                         <span
-                          className={`badge ${
-                            usuarioSeleccionado.bloqueado
-                              ? "bg-danger"
-                              : "bg-success"
-                          }`}
+                          className={`badge ${usuarioSeleccionado.bloqueado ? "bg-danger" : "bg-success"}`}
                         >
-                          {usuarioSeleccionado.bloqueado
-                            ? "Bloqueado"
-                            : "Activo"}
+                          {usuarioSeleccionado.bloqueado ? "Bloqueado" : "Activo"}
                         </span>
                       </p>
+
                       <hr />
+
+                      <p><strong>Total de compras:</strong> {usuarioSeleccionado.compras?.length || 0}</p>
                       <p>
-                        <strong>Total de compras:</strong>{" "}
-                        {usuarioSeleccionado.compras?.length || 0}
-                      </p>
-                      <p>
-                        <strong>Total gastado:</strong>{" "}
-                        $
+                        <strong>Total gastado:</strong> $
                         {usuarioSeleccionado.compras
-                          ?.reduce(
-                            (acc: number, c: any) => acc + c.total,
-                            0
-                          )
+                          ?.reduce((acc: number, c: any) => acc + c.total, 0)
                           .toLocaleString("es-CL") || 0}
                       </p>
                     </div>
 
+                    {/* TAB COMPRAS */}
                     <div className="tab-pane fade" id="compras">
-                      {usuarioSeleccionado.compras &&
-                      usuarioSeleccionado.compras.length > 0 ? (
-                        <table className="table table-hover table-bordered text-center align-middle shadow-sm">
+                      {usuarioSeleccionado.compras && usuarioSeleccionado.compras.length > 0 ? (
+                        <table className="table table-hover text-center align-middle shadow-sm">
                           <thead className="table-success">
                             <tr>
                               <th>Boleta</th>
@@ -960,47 +993,25 @@ const Admin: React.FC = () => {
                                 <td>{compra.codigo}</td>
                                 <td>{compra.fecha}</td>
                                 <td>{compra.metodoPago}</td>
+                                <td>${compra.total.toLocaleString("es-CL")}</td>
                                 <td>
-                                  $
-                                  {compra.total.toLocaleString(
-                                    "es-CL"
-                                  )}
-                                </td>
-                                <td>
-                                  <span
-                                    className={`badge estado-${(
-                                      compra.estado || "PREPARANDO"
-                                    ).toLowerCase()}`}
-                                  >
-                                    {(compra.estado ||
-                                      "PREPARANDO") === "PREPARANDO" &&
-                                      "Preparando"}
-                                    {(compra.estado ||
-                                      "PREPARANDO") === "EN_DESPACHO" &&
-                                      "En despacho"}
-                                    {(compra.estado ||
-                                      "PREPARANDO") === "ENTREGADO" &&
-                                      "Entregado"}
+                                  <span className={`badge estado-${(compra.estado || "PREPARANDO").toLowerCase()}`}>
+                                    {(compra.estado || "PREPARANDO") === "PREPARANDO" && "Preparando"}
+                                    {(compra.estado || "PREPARANDO") === "EN_DESPACHO" && "En despacho"}
+                                    {(compra.estado || "PREPARANDO") === "ENTREGADO" && "Entregado"}
                                   </span>
                                 </td>
                                 <td>
                                   <button
                                     className="btn btn-sm btn-outline-info me-1"
-                                    onClick={() =>
-                                      mostrarDetalleCompra(compra)
-                                    }
+                                    onClick={() => mostrarDetalleCompra(compra)}
                                   >
                                     Ver Detalle
                                   </button>
                                   {compra.estado !== "EN_DESPACHO" && (
                                     <button
                                       className="btn btn-sm btn-outline-warning me-1"
-                                      onClick={() =>
-                                        cambiarEstadoCompra(
-                                          compra.codigo,
-                                          "EN_DESPACHO"
-                                        )
-                                      }
+                                      onClick={() => cambiarEstadoCompra(compra.codigo, "EN_DESPACHO")}
                                     >
                                       En despacho
                                     </button>
@@ -1008,12 +1019,7 @@ const Admin: React.FC = () => {
                                   {compra.estado !== "ENTREGADO" && (
                                     <button
                                       className="btn btn-sm btn-outline-success"
-                                      onClick={() =>
-                                        cambiarEstadoCompra(
-                                          compra.codigo,
-                                          "ENTREGADO"
-                                        )
-                                      }
+                                      onClick={() => cambiarEstadoCompra(compra.codigo, "ENTREGADO")}
                                     >
                                       ✔️ Entregado
                                     </button>
@@ -1024,99 +1030,72 @@ const Admin: React.FC = () => {
                           </tbody>
                         </table>
                       ) : (
-                        <p className="text-center text-muted mt-3">
-                          No hay compras registradas.
-                        </p>
+                        <p className="text-center text-muted mt-3">No hay compras registradas.</p>
                       )}
                     </div>
 
+                    {/* TAB ESTADÍSTICAS */}
                     <div className="tab-pane fade" id="estadisticas">
                       <div className="card p-3 shadow-sm">
-                        {usuarioSeleccionado.compras &&
-                        usuarioSeleccionado.compras.length > 0 ? (
+                        {usuarioSeleccionado.compras && usuarioSeleccionado.compras.length > 0 ? (
                           <>
                             <p>
-                              <strong>Promedio de gasto por compra:</strong>{" "}
-                              $
+                              <strong>Promedio de gasto:</strong> $
                               {Math.round(
                                 usuarioSeleccionado.compras.reduce(
                                   (acc: number, c: any) => acc + c.total,
                                   0
-                                ) /
-                                  usuarioSeleccionado.compras.length
+                                ) / usuarioSeleccionado.compras.length
                               ).toLocaleString("es-CL")}
                             </p>
                             <p>
                               <strong>Productos comprados:</strong>{" "}
                               {usuarioSeleccionado.compras
                                 .flatMap((c: any) => c.productos)
-                                .reduce(
-                                  (acc: number, p: any) =>
-                                    acc + p.cantidad,
-                                  0
-                                )}
+                                .reduce((acc: number, p: any) => acc + p.cantidad, 0)}
                             </p>
                             <p>
                               <strong>Última compra:</strong>{" "}
-                              {
-                                usuarioSeleccionado.compras[
-                                  usuarioSeleccionado.compras.length - 1
-                                ].fecha
-                              }
+                              {usuarioSeleccionado.compras[usuarioSeleccionado.compras.length - 1].fecha}
                             </p>
                           </>
                         ) : (
-                          <p className="text-center text-muted">
-                            No hay datos para mostrar estadísticas.
-                          </p>
+                          <p className="text-center text-muted">No hay datos para mostrar estadísticas.</p>
                         )}
                       </div>
                     </div>
+
                   </div>
                 </div>
 
+                {/* FOOTER */}
                 <div className="modal-footer">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setUsuarioSeleccionado(null)}
-                  >
+                  <button className="btn btn-secondary" onClick={() => setUsuarioSeleccionado(null)}>
                     Cerrar
                   </button>
                 </div>
+
               </div>
             </div>
           </div>
         )}
-      </main>
 
-      {/* MODALES DE PRODUCTOS */}
-      <ModalAgregarProducto
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onGuardar={handleAgregar}
-      />
+        {/* ===== MODAL OFERTA ===== */}
+        {modalOfertaOpen && productoSeleccionado && (
+          <div className="modal-overlay-fixed">
+            <div className="modal-content modal-admin-usuario shadow-lg" style={{ maxWidth: "420px" }}>
 
-      {/* Modal Oferta */}
-      {modalOfertaOpen && productoSeleccionado && (
-        <div
-          className="modal fade show"
-          style={{
-            display: "block",
-            backgroundColor: "rgba(0,0,0,0.6)",
-          }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content shadow-lg">
-              <div className="modal-header bg-success text-white">
+              <div className="modal-header">
                 <h5 className="modal-title">Agregar Oferta</h5>
                 <button
                   className="btn-close btn-close-white"
                   onClick={() => setModalOfertaOpen(false)}
                 ></button>
               </div>
+
               <div className="modal-body text-center">
                 <p className="fw-semibold">{productoSeleccionado.name}</p>
-                <label>Porcentaje de descuento:</label>
+                <label className="fw-semibold mb-2">Porcentaje:</label>
                 <input
                   type="number"
                   className="form-control text-center w-50 mx-auto"
@@ -1124,11 +1103,10 @@ const Admin: React.FC = () => {
                   max={90}
                   step={5}
                   value={porcentajeOferta}
-                  onChange={(e) =>
-                    setPorcentajeOferta(Number(e.target.value))
-                  }
+                  onChange={(e) => setPorcentajeOferta(Number(e.target.value))}
                 />
               </div>
+
               <div className="modal-footer">
                 <button
                   className="btn btn-secondary"
@@ -1140,168 +1118,167 @@ const Admin: React.FC = () => {
                   Guardar
                 </button>
               </div>
+
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/*Modal Editar*/}
-      {modalEditarOpen && productoSeleccionado && (
-        <div
-          className="modal fade show"
-          style={{
-            display: "block",
-            backgroundColor: "rgba(0,0,0,0.6)",
-          }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content shadow-lg">
-              <div className="modal-header bg-info text-white">
-                <h5 className="modal-title">Editar Producto</h5>
-                <button
-                  className="btn-close btn-close-white"
-                  onClick={() => setModalEditarOpen(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <label>Nombre</label>
-                <input
-                  className="form-control mb-2"
-                  value={editData.name || ""}
-                  onChange={(e) =>
-                    setEditData({ ...editData, name: e.target.value })
-                  }
-                />
-                <label>Precio</label>
-                <input
-                  type="number"
-                  className="form-control mb-2"
-                  value={editData.precio || 0}
-                  onChange={(e) =>
-                    setEditData({
-                      ...editData,
-                      precio: Number(e.target.value),
-                    })
-                  }
-                />
-                <label>Descripción</label>
-                <textarea
-                  className="form-control mb-2"
-                  value={editData.desc || ""}
-                  onChange={(e) =>
-                    setEditData({ ...editData, desc: e.target.value })
-                  }
-                />
-                <label>Categoría</label>
-                <input
-                  className="form-control mb-2"
-                  value={editData.categoria || ""}
-                  onChange={(e) =>
-                    setEditData({
-                      ...editData,
-                      categoria: e.target.value,
-                    })
-                  }
-                />
-                <label>URL Imagen</label>
-                <input
-                  className="form-control mb-2"
-                  value={editData.img || ""}
-                  onChange={(e) =>
-                    setEditData({ ...editData, img: e.target.value })
-                  }
-                />
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setModalEditarOpen(false)}
-                >
-                  Cancelar
-                </button>
-                <button
-                  className="btn btn-info text-white"
-                  onClick={guardarEdicion}
-                >
-                  Guardar Cambios
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DETALLE DE COMPRA */}
-      {modalDetalleCompra && (
-        <div
-          className="modal fade show"
-          style={{
-            display: "block",
-            backgroundColor: "rgba(0,0,0,0.6)",
-          }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg">
-              <div className="modal-header bg-primary text-white">
-                <h5 className="mb-0">🧾 Detalle de Compra</h5>
-                <button
-                  className="btn-close btn-close-white"
-                  onClick={() => setModalDetalleCompra(null)}
-                ></button>
-              </div>
-
-              <div className="modal-body">
-                <p className="fw-semibold text-center mb-2">
-                  #{modalDetalleCompra?.codigo}
-                </p>
-
-                <ul className="list-group mb-3">
-                  {modalDetalleCompra.productos.map(
-                    (p: any, i: number) => (
-                      <li
-                        key={i}
-                        className="list-group-item d-flex justify-content-between"
-                      >
-                        <span>{p.name}</span>{" "}
-                        <strong>x{p.cantidad}</strong>
-                      </li>
-                    )
-                  )}
-                </ul>
-
-                <div className="card p-3 shadow-sm bg-light">
-                  <p className="mb-1">
-                    <strong>Total:</strong>{" "}
-                    $
-                    {modalDetalleCompra.total?.toLocaleString(
-                      "es-CL"
-                    )}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Método de pago:</strong>{" "}
-                    {modalDetalleCompra.metodoPago}
-                  </p>
-                  <p className="mb-0">
-                    <strong>Estado:</strong>{" "}
-                    <span className="badge bg-info text-dark">
-                      {modalDetalleCompra.estado || "PREPARANDO"}
-                    </span>
-                  </p>
+        {/* ===== MODAL EDITAR PRODUCTO ===== */}
+        {modalEditarOpen && productoSeleccionado && (
+          <div
+            className="modal fade show"
+            style={{ display: "block", backgroundColor: "rgba(0,0,0,0.6)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content shadow-lg">
+                <div className="modal-header bg-info text-white">
+                  <h5 className="modal-title">Editar Producto</h5>
+                  <button
+                    className="btn-close btn-close-white"
+                    onClick={() => setModalEditarOpen(false)}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <label>Nombre</label>
+                  <input
+                    className="form-control mb-2"
+                    value={editData.name || ""}
+                    onChange={(e) =>
+                      setEditData({ ...editData, name: e.target.value })
+                    }
+                  />
+                  <label>Precio</label>
+                  <input
+                    type="number"
+                    className="form-control mb-2"
+                    value={editData.precio || 0}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        precio: Number(e.target.value),
+                      })
+                    }
+                  />
+                  <label>Descripción</label>
+                  <textarea
+                    className="form-control mb-2"
+                    value={editData.desc || ""}
+                    onChange={(e) =>
+                      setEditData({ ...editData, desc: e.target.value })
+                    }
+                  />
+                  <label>Categoría</label>
+                  <input
+                    className="form-control mb-2"
+                    value={editData.categoria || ""}
+                    onChange={(e) =>
+                      setEditData({ ...editData, categoria: e.target.value })
+                    }
+                  />
+                  <label>URL Imagen</label>
+                  <input
+                    className="form-control mb-2"
+                    value={editData.img || ""}
+                    onChange={(e) =>
+                      setEditData({ ...editData, img: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setModalEditarOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="btn btn-info text-white"
+                    onClick={guardarEdicion}
+                  >
+                    Guardar Cambios
+                  </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
 
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setModalDetalleCompra(null)}
-                >
-                  Cerrar
-                </button>
+        {/* ===== MODAL DETALLE DE COMPRA ===== */}
+        {modalDetalleCompra && (
+          <div
+            className="modal fade show"
+            style={{ display: "block", backgroundColor: "rgba(0,0,0,0.6)" }}
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content border-0 shadow-lg">
+                <div className="modal-header bg-primary text-white">
+                  <h5 className="mb-0">🧾 Detalle de Compra</h5>
+                  <button
+                    className="btn-close btn-close-white"
+                    onClick={() => setModalDetalleCompra(null)}
+                  ></button>
+                </div>
+
+                <div className="modal-body">
+                  <p className="fw-semibold text-center mb-2">
+                    #{modalDetalleCompra?.codigo}
+                  </p>
+
+                  <ul className="list-group mb-3">
+                    {modalDetalleCompra.productos.map(
+                      (p: any, i: number) => (
+                        <li
+                          key={i}
+                          className="list-group-item d-flex justify-content-between"
+                        >
+                          <span>{p.name}</span>{" "}
+                          <strong>x{p.cantidad}</strong>
+                        </li>
+                      )
+                    )}
+                  </ul>
+
+                  <div className="card p-3 shadow-sm bg-light">
+                    <p className="mb-1">
+                      <strong>Total:</strong>{" "}
+                      $
+                      {modalDetalleCompra.total?.toLocaleString(
+                        "es-CL"
+                      )}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Método de pago:</strong>{" "}
+                      {modalDetalleCompra.metodoPago}
+                    </p>
+                    <p className="mb-0">
+                      <strong>Estado:</strong>{" "}
+                      <span className="badge bg-info text-dark">
+                        {modalDetalleCompra.estado || "PREPARANDO"}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setModalDetalleCompra(null)}
+                  >
+                    Cerrar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
+
+      {/* MODAL AGREGAR PRODUCTO */}
+      <ModalAgregarProducto
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onGuardar={handleAgregar}
+      />
     </div>
   );
 };

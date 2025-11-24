@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 //Páginas principales
 import Home from "./assets/pages/Home";
@@ -31,9 +31,12 @@ const App: React.FC = () => {
   const { usuario } = useAuth();
   const [carritoCount, setCarritoCount] = React.useState<number>(0);
 
+  // Nuevo: para ocultar el navbar en /admin
+  const location = useLocation();
+  const ocultarNavbar = location.pathname.startsWith("/admin");
+
   // Hook para mostrar mensajes flotantes
   const showToast = useToast();
-
 
   //Actualizar contador carrito
   React.useEffect(() => {
@@ -55,7 +58,7 @@ const App: React.FC = () => {
   //Render principal
   return (
     <>
-      <Navbar carritoCount={carritoCount} />
+      {!ocultarNavbar && <Navbar carritoCount={carritoCount} />}
 
       {/*RUTAS PRINCIPALES*/}
       <Routes>
