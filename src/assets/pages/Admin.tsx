@@ -105,35 +105,35 @@ const Admin: React.FC = () => {
         className={seccionActual === "menu" ? "active" : ""}
         onClick={() => setSeccionActual("menu")}
       >
-        🏠 Inicio
+        Inicio
       </button>
 
       <button
         className={seccionActual === "productos" ? "active" : ""}
         onClick={() => setSeccionActual("productos")}
       >
-        🥕 Productos
+        Productos
       </button>
 
       <button
         className={seccionActual === "cuentas" ? "active" : ""}
         onClick={() => setSeccionActual("cuentas")}
       >
-        👤 Cuentas
+        Cuentas
       </button>
 
       <button
         className={seccionActual === "estadisticas" ? "active" : ""}
         onClick={() => setSeccionActual("estadisticas")}
       >
-        📊 Estadísticas
+        Estadísticas
       </button>
 
       <button
         className={seccionActual === "historial" ? "active" : ""}
         onClick={() => setSeccionActual("historial")}
       >
-        📜 Historial
+        Historial
       </button>
 
       <hr className="admin-separator" />
@@ -151,7 +151,7 @@ const Admin: React.FC = () => {
           navigate("/");
         }}
       >
-        🚪 Cerrar Sesión
+        Cerrar Sesión
       </button>
     </aside>
   );
@@ -391,7 +391,7 @@ const Admin: React.FC = () => {
         {seccionActual === "productos" && (
           <section>
             <h2 className="text-center mb-4">
-              Panel Administrador - Productos
+              Gestión de Productos
             </h2>
 
             <div className="d-flex gap-2 mb-3">
@@ -533,7 +533,7 @@ const Admin: React.FC = () => {
         {seccionActual === "cuentas" && (
           <section>
             <h2 className="text-center mb-4">
-              Panel Administrador - Gestión de Cuentas
+              Gestión de Cuentas
             </h2>
 
             <div className="d-flex justify-content-between align-items-center mb-3">
