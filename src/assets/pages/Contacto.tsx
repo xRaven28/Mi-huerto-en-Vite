@@ -1,0 +1,90 @@
+import React, { useState } from "react";
+import { useToast } from "../components/Toast";
+
+const Contacto: React.FC = () => {
+  const [form, setForm] = useState({
+    nombre: "",
+    correo: "",
+    telefono: "",
+    mensaje: "",
+  });
+  const showToast = useToast();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const mensajes = JSON.parse(localStorage.getItem("mensajes_contacto") || "[]");
+    mensajes.push({ ...form, fecha: new Date().toISOString() });
+    localStorage.setItem("mensajes_contacto", JSON.stringify(mensajes));
+
+    showToast(`Gracias por contactarnos, te responderemos pronto.`);
+    setForm({ nombre: "", correo: "", telefono: "", mensaje: "" });
+  };
+
+
+  return (
+    <main className="container my-5 py-5">
+      <div
+        className="bg-white shadow rounded-4 p-5 mx-auto"
+        style={{ maxWidth: "700px" }}
+      >
+        <h2 className="text-center mb-4">
+          <i className="bi bi-envelope me-2"></i> Contáctanos
+        </h2>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label fw-bold">Nombre</label>
+            <input
+              className="form-control"
+              placeholder="Tu nombre completo"
+              value={form.nombre}
+              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-bold">Correo</label>
+            <input
+              type="email"
+              className="form-control"
+              placeholder="tucorreo@ejemplo.com"
+              value={form.correo}
+              onChange={(e) => setForm({ ...form, correo: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-bold">Teléfono (opcional)</label>
+            <input
+              className="form-control"
+              placeholder="+56 9 1234 5678"
+              value={form.telefono}
+              onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-bold">Mensaje</label>
+            <textarea
+              className="form-control"
+              rows={4}
+              placeholder="Escribe tu mensaje aquí..."
+              value={form.mensaje}
+              onChange={(e) => setForm({ ...form, mensaje: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="text-center">
+            <button className="btn btn-success px-4" type="submit">
+              Enviar Mensaje
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  );
+};
+
+export default Contacto;
