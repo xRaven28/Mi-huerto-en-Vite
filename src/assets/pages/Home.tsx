@@ -65,7 +65,7 @@ const Home: React.FC = () => {
   const testimonios = [
     {
       nombre: "María González",
-      texto: "Los productos son frescos y de excelente calidad. Siempre llegan a tiempo y en perfectas condiciones.",
+      texto: "Los productos son frescos y de excelente calidad. Siempre llegan a tiempo y en perfectas condiciones.uwu",
       imagen: "/Img/maria.png",
     },
     {
