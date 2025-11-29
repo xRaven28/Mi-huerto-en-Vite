@@ -178,7 +178,7 @@ export const TablaUsuarios: React.FC = () => {
             <td>
               <button 
                 className="btn btn-info btn-sm" 
-                onClick={() => verComprasUsuario(usuario.correo || '')}
+                onClick={() => verComprasUsuario(usuario.email || '')}
               >
                 Ver Compras
               </button>

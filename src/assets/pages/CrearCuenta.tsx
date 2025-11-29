@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Usuario } from "../types";
 import { useToast } from "../components/Toast";
-
+import { registrarUsuario } from "../services/usuario.service";
 
 interface CrearCuentaProps {
   mostrarToast: (message: string, color?: string) => void;
@@ -14,18 +13,19 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
     nombre: "",
     apellido: "",
     rut: "",
-    correo: "",
+    email: "",
     telefono: "",
     direccion: "",
     password: "",
     confirmarPassword: "",
   });
+
   const [terminos, setTerminos] = useState(false);
   const [errores, setErrores] = useState<any>({});
   const showToast = useToast();
 
-  // VALIDACIONES
-  const validarEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validarEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -34,13 +34,20 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
 
   const validar = () => {
     const errs: any = {};
+
     if (!formData.nombre) errs.nombre = "El nombre es obligatorio";
     if (!formData.apellido) errs.apellido = "El apellido es obligatorio";
     if (!formData.rut) errs.rut = "El RUN es obligatorio";
-    if (!formData.correo) errs.correo = "El correo es obligatorio";
-    else if (!validarEmail(formData.correo)) errs.correo = "Correo inválido";
+    if (!formData.email) errs.email = "El correo es obligatorio";
+    else if (!validarEmail(formData.email)) errs.email = "Correo inválido";
+    if (!formData.telefono) errs.telefono = "El teléfono es obligatorio";
+    if (!formData.direccion)
+      errs.direccion = "La dirección de entrega es obligatoria";
+
     if (!formData.password) errs.password = "Contraseña requerida";
-    else if (formData.password.length < 6) errs.password = "Debe tener al menos 6 caracteres";
+    else if (formData.password.length < 6)
+      errs.password = "Debe tener al menos 6 caracteres";
+
     if (formData.password !== formData.confirmarPassword)
       errs.confirmarPassword = "Las contraseñas no coinciden";
 
@@ -48,49 +55,29 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
     return Object.keys(errs).length === 0;
   };
 
-
-  //FUNCIONES DE REGISTRO
-  const registrarUsuario = (nuevoUsuario: Usuario) => {
-    const lista = JSON.parse(localStorage.getItem("usuarios") || "[]");
-    lista.push(nuevoUsuario);
-    localStorage.setItem("usuarios", JSON.stringify(lista));
-    localStorage.setItem("usuarioActual", JSON.stringify(nuevoUsuario));
-  };
-
-  //SUBMIT PRINCIPAL
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!terminos) return mostrarToast("Debes aceptar los términos", "#dc3545");
     if (!validar()) return mostrarToast("Corrige los errores", "#dc3545");
 
-    const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
-    const existe = usuarios.find((u: any) => u.correo === formData.correo);
-    if (existe) return mostrarToast("Correo ya registrado", "#dc3545");
+    try {
+      await registrarUsuario({
+        nombre: `${formData.nombre} ${formData.apellido}`,
+        email: formData.email,
+        password: formData.password,
+        rol: "CLIENTE",
+        rut: formData.rut,
+        telefono: formData.telefono,
+        direccion: formData.direccion,
+      });
 
-    const nuevoUsuario: Usuario = {
-      id: Date.now(),
-      nombre: `${formData.nombre} ${formData.apellido}`,
-      rut: formData.rut,
-      correo: formData.correo,
-      telefono: formData.telefono,
-      direccion: formData.direccion,
-      password: formData.password,
-      confirpassword: formData.confirmarPassword,
-      rol: "Cliente",
-      compras: [],
-      fechaRegistro: new Date().toLocaleString(),
-    };
-
-    registrarUsuario(nuevoUsuario);
-    showToast(`Cuenta creada con éxito`);
-
-
-    window.dispatchEvent(new Event("storage"));
-
-    setTimeout(() => navigate("/"), 1500);
+      showToast("Cuenta creada con éxito");
+      setTimeout(() => navigate("/mi-cuenta"), 1500);
+    } catch (error) {
+      mostrarToast("El correo ya está registrado o hubo un error", "#dc3545");
+    }
   };
 
-  // RENDERIZADO DEL FORMULARIO
   return (
     <main className="container py-5 crearcuenta-page">
       <div className="row justify-content-center">
@@ -102,33 +89,51 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
               </h3>
 
               <form onSubmit={handleSubmit}>
-                {Object.keys(formData).map((key) =>
-                  key !== "confirmarPassword" ? (
-                    <div key={key} className="mb-3">
-                      <label className="form-label fw-bold text-capitalize">
-                        {key}
-                      </label>
-                      <input
-                        id={key}
-                        type={key.includes("password") ? "password" : "text"}
-                        className={`form-control ${errores[key] ? "is-invalid" : ""}`}
-                        value={(formData as any)[key]}
-                        onChange={handleChange}
-                      />
-                      {errores[key] && (
-                        <div className="invalid-feedback">{errores[key]}</div>
-                      )}
-                    </div>
-                  ) : null
-                )}
+                {[
+                  "nombre",
+                  "apellido",
+                  "rut",
+                  "email",
+                  "telefono",
+                  "direccion",
+                ].map((key) => (
+                  <div key={key} className="mb-3">
+                    <label className="form-label fw-bold text-capitalize">
+                      {key}
+                    </label>
+                    <input
+                      id={key}
+                      type={key === "email" ? "email" : "text"}
+                      className={`form-control ${errores[key] ? "is-invalid" : ""}`}
+                      value={(formData as any)[key]}
+                      onChange={handleChange}
+                    />
+                    {errores[key] && (
+                      <div className="invalid-feedback">{errores[key]}</div>
+                    )}
+                  </div>
+                ))}
+
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Contraseña</label>
+                  <input
+                    id="password"
+                    type="password"
+                    className={`form-control ${errores.password ? "is-invalid" : ""}`}
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                  {errores.password && (
+                    <div className="invalid-feedback">{errores.password}</div>
+                  )}
+                </div>
 
                 <div className="mb-3">
                   <label className="form-label fw-bold">Confirmar contraseña</label>
                   <input
                     id="confirmarPassword"
                     type="password"
-                    className={`form-control ${errores.confirmarPassword ? "is-invalid" : ""
-                      }`}
+                    className={`form-control ${errores.confirmarPassword ? "is-invalid" : ""}`}
                     value={formData.confirmarPassword}
                     onChange={handleChange}
                   />
@@ -156,6 +161,7 @@ const CrearCuenta: React.FC<CrearCuentaProps> = ({ mostrarToast }) => {
                   </button>
                 </div>
               </form>
+
             </div>
           </div>
         </div>

@@ -26,6 +26,8 @@ import Navbar from "./assets/components/Navbar";
 import RutaProtegida from "./assets/routes/RutaProtegida";
 import { ToastContainer, useToast } from "./assets/components/Toast";
 import { useAuth } from "./assets/hooks/useAuth";
+import RestablecerPassword from "./assets/pages/RestablecerPassword";
+
 
 const App: React.FC = () => {
   const { usuario } = useAuth();
@@ -79,6 +81,7 @@ const App: React.FC = () => {
           }
         />
         <Route path="/producto/:id" element={<ProductoDetalle />} />
+        <Route path="/restablecer-password" element={<RestablecerPassword />} />
 
         {/* Información */}
         <Route path="/contacto" element={<Contacto />} />

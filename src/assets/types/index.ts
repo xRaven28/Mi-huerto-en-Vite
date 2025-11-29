@@ -24,16 +24,17 @@ export interface Valoracion {
 
 
 export interface Usuario {
-  id: number;
+  id?: number;
   nombre: string;
   apellido?: string;
   rut?: string;
-  correo: string;
+  email: string;
   password: string;
   confirpassword: string,
   telefono?: string;
   direccion?: string;
   rol: string;
+  token: string;
   estado?: "Activo" | "Inactivo";
   bloqueado?: boolean;
   historial?: string[];

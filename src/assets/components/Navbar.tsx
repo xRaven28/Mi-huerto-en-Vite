@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth"; 
 
 interface NavbarProps {
   carritoCount?: number;
@@ -10,9 +10,27 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
   const [busqueda, setBusqueda] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { usuario, esAdmin, logout } = useAuth();
 
-  // Buscar productos
+  const { usuario, logout, esAdmin } = useAuth();
+
+  useEffect(() => {
+    const term = localStorage.getItem("busqueda") || "";
+    setBusqueda(term);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const nav = document.querySelector(".navbar-huerto") as HTMLElement | null;
+      if (!nav) return;
+
+      if (window.scrollY > 10) nav.classList.add("nav-scroll");
+      else nav.classList.remove("nav-scroll");
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const handleBuscar = (e: React.FormEvent) => {
     e.preventDefault();
     localStorage.setItem("busqueda", busqueda);
@@ -20,29 +38,10 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
     if (location.pathname !== "/productos") navigate("/productos");
   };
 
-  // Mantener búsqueda al recargar
-  useEffect(() => {
-    const term = localStorage.getItem("busqueda") || "";
-    setBusqueda(term);
-  }, []);
-
-  // Cerrar sesión
   const handleLogout = () => {
     logout();
     navigate("/");
   };
-
-  // Efecto de navbar transparente al hacer scroll
-  useEffect(() => {
-    const onScroll = () => {
-      const nav = document.querySelector(".navbar-huerto");
-      if (!nav) return;
-      if (window.scrollY > 10) nav.classList.add("nav-scroll");
-      else nav.classList.remove("nav-scroll");
-    };
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-huerto fixed-top shadow-sm">
@@ -77,7 +76,6 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-center">
 
-            {/* LINKS */}
             <li className="nav-item"><Link className="nav-link" to="/">Inicio</Link></li>
             <li className="nav-item"><Link className="nav-link" to="/productos">Productos</Link></li>
             <li className="nav-item"><Link className="nav-link" to="/recetas">Recetas</Link></li>
@@ -102,6 +100,7 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
             <li className="nav-item ms-3 position-relative">
               <Link className="nav-link d-flex align-items-center position-relative" to="/carrito">
                 <i className="bi bi-cart3 fs-4"></i>
+
                 {carritoCount > 0 && (
                   <span
                     className="badge rounded-pill bg-success position-absolute"
@@ -138,20 +137,43 @@ const Navbar: React.FC<NavbarProps> = ({ carritoCount = 0 }) => {
                   </button>
 
                   <ul className="dropdown-menu dropdown-menu-end shadow-sm">
+
+                    {/* ADMIN */}
                     {esAdmin ? (
                       <>
-                        <li><Link className="dropdown-item text-success fw-semibold" to="/admin"><i className="bi bi-gear me-2"></i>Panel Admin</Link></li>
+                        <li>
+                          <Link className="dropdown-item text-success fw-semibold" to="/admin">
+                            <i className="bi bi-gear me-2"></i>Panel Admin
+                          </Link>
+                        </li>
                         <li><hr className="dropdown-divider" /></li>
-                        <li><button className="dropdown-item text-danger" onClick={handleLogout}><i className="bi bi-box-arrow-right me-2"></i>Cerrar sesión</button></li>
+                        <li>
+                          <button className="dropdown-item text-danger" onClick={handleLogout}>
+                            <i className="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                          </button>
+                        </li>
                       </>
                     ) : (
                       <>
-                        <li><Link className="dropdown-item" to="/mi-perfil"><i className="bi bi-person-lines-fill me-2"></i>Mi perfil</Link></li>
-                        <li><Link className="dropdown-item" to="/mis-pedidos"><i className="bi bi-bag-check me-2"></i>Mis pedidos</Link></li>
+                        <li>
+                          <Link className="dropdown-item" to="/mi-perfil">
+                            <i className="bi bi-person-lines-fill me-2"></i>Mi perfil
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/mis-pedidos">
+                            <i className="bi bi-bag-check me-2"></i>Mis pedidos
+                          </Link>
+                        </li>
                         <li><hr className="dropdown-divider" /></li>
-                        <li><button className="dropdown-item text-danger" onClick={handleLogout}><i className="bi bi-box-arrow-right me-2"></i>Cerrar sesión</button></li>
+                        <li>
+                          <button className="dropdown-item text-danger" onClick={handleLogout}>
+                            <i className="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                          </button>
+                        </li>
                       </>
                     )}
+
                   </ul>
                 </div>
               ) : (

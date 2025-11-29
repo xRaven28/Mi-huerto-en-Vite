@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { useProductos } from "../hooks/useProductos";
+import { getProductos } from "../services/producto.service";  // <<--- 🔥 NUEVO
 import type { Producto } from "../types";
 import StarRating from "../components/StarRating";
-
 
 /*Tipos y helpers*/
 interface ProductosProps {
@@ -51,7 +50,7 @@ const useImageSrc = (img?: string) => {
   return { src, onError };
 };
 
-/* Clasifica categoría */
+/*Clasifica categoría */
 const toCategoryKey = (c: string) => {
   const s = c.toLowerCase();
   if (s.includes("fruta")) return "frutas";
@@ -98,9 +97,7 @@ const ProductoCard: React.FC<{
             <StarRating value={promedio} readOnly size={18} />
             <small className="text-muted">
               {valoraciones.length > 0
-                ? `(${valoraciones.length} valoración${
-                    valoraciones.length > 1 ? "es" : ""
-                  })`
+                ? `(${valoraciones.length} valoración${valoraciones.length > 1 ? "es" : ""})`
                 : "Sin valoraciones aún"}
             </small>
           </div>
@@ -134,16 +131,24 @@ const ProductoCard: React.FC<{
   );
 };
 
-
 /*Componente principal Productos*/
 const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
-  const { productos, loading, getProductosCliente } = useProductos();
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
   const [categoria, setCategoria] = useState("todos");
   const [orden, setOrden] = useState("relevancia");
   const [busqueda, setBusqueda] = useState("");
   const [productosFiltrados, setProductosFiltrados] = useState<Producto[]>([]);
   const [paginaActual, setPaginaActual] = useState(1);
   const productosPorPagina = 9;
+
+  /* Cargar datos desde la API */
+  useEffect(() => {
+    getProductos()
+      .then((res) => setProductos(res.data))
+      .catch(() => mostrarToast("Error cargando productos", "#dc3545"))
+      .finally(() => setLoading(false));
+  }, [mostrarToast]);
 
   /*Sincroniza búsqueda */
   useEffect(() => {
@@ -159,7 +164,9 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   /* Filtrado y orden */
   useEffect(() => {
     try {
-      let filtered = getProductosCliente(busqueda).filter((p) => p.habilitado);
+      let filtered = productos.filter((p) =>
+        p.name.toLowerCase().includes(busqueda)
+      ).filter((p) => p.habilitado);
 
       if (categoria !== "todos") {
         filtered = filtered.filter(
@@ -175,14 +182,10 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
           filtered = [...filtered].sort((a, b) => b.precio - a.precio);
           break;
         case "nombre-asc":
-          filtered = [...filtered].sort((a, b) =>
-            a.name.localeCompare(b.name)
-          );
+          filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
           break;
         case "nombre-desc":
-          filtered = [...filtered].sort((a, b) =>
-            b.name.localeCompare(a.name)
-          );
+          filtered = [...filtered].sort((a, b) => b.name.localeCompare(a.name));
           break;
         default:
           filtered = [...filtered].sort(() => Math.random() - 0.5);
@@ -193,7 +196,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
     } catch (error) {
       console.error("Error filtrando productos:", error);
     }
-  }, [productos, busqueda, categoria, orden, getProductosCliente]);
+  }, [productos, busqueda, categoria, orden]);
 
   /* Agregar al carrito */
   const handleAddToCart = useCallback(
@@ -208,7 +211,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
 
         onAddToCart();
         window.dispatchEvent(new Event("storage"));
-      } catch (e) {
+      } catch {
         mostrarToast("Error al agregar producto", "#dc3545");
       }
     },
@@ -312,56 +315,6 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
           </div>
         )}
       </main>
-
-      {/*FOOTER */}
-      <footer className="footer-custom text-white pt-5 pb-3 mt-5 w-100">
-        <div className="container">
-          <div className="row px-5">
-            <div className="col-md-4 mb-3">
-              <h5>Contacto</h5>
-              <p>Email: contacto@huertohogar.cl</p>
-              <p>Tel: +56 9 1234 5678</p>
-              <p>Dirección: Calle Ejemplo 123, Concepción, Chile</p>
-            </div>
-
-            <div className="col-md-4 mb-3">
-              <h5>Enlaces útiles</h5>
-              <ul className="list-unstyled">
-                <li><a href="/" className="text-white text-decoration-none">Inicio</a></li>
-                <li><a href="/productos" className="text-white text-decoration-none">Productos</a></li>
-                <li><a href="/recetas" className="text-white text-decoration-none">Recetas</a></li>
-                <li>
-                  <a
-                    href="https://github.com/xRaven28/HuertoHogar.git"
-                    className="text-white text-decoration-none"
-                    target="_blank"
-                  >
-                    GitHub de esta página
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="col-md-4 mb-3">
-              <h5>Síguenos</h5>
-              <a href="#" className="text-white d-block mb-1">
-                <i className="bi bi-facebook"></i> Facebook
-              </a>
-              <a href="#" className="text-white d-block mb-1">
-                <i className="bi bi-instagram"></i> Instagram
-              </a>
-              <a href="#" className="text-white d-block">
-                <i className="bi bi-whatsapp"></i> WhatsApp
-              </a>
-            </div>
-          </div>
-
-          <hr className="bg-white mx-5" />
-          <p className="text-center mb-0 small">
-            &copy; 2025 Huerto Hogar. Todos los derechos reservados.
-          </p>
-        </div>
-      </footer>
     </>
   );
 };

@@ -8,16 +8,14 @@ interface RutaProtegidaProps {
 }
 
 const RutaProtegida: React.FC<RutaProtegidaProps> = ({ element, adminOnly }) => {
-  const { usuario } = useAuth();
-
-
+  const { usuario, esAdmin } = useAuth();
   const modoInvitado = localStorage.getItem("modoInvitado") === "true";
 
   if (!usuario && !modoInvitado) {
     return <Navigate to="/mi-cuenta" replace />;
   }
 
-  if (adminOnly && usuario?.rol !== "admin") {
+  if (adminOnly && !esAdmin) {
     return <Navigate to="/" replace />;
   }
 

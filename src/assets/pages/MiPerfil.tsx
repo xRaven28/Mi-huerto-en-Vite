@@ -1,17 +1,23 @@
+// src/assets/pages/MiPerfil.tsx
 import React, { useState, useEffect } from "react";
 import { useToast } from "../components/Toast";
-
+import { actualizarUsuario } from "../services/usuario.service";
 
 const MiPerfil: React.FC = () => {
   const [usuario, setUsuario] = useState<any>(null);
-  const [form, setForm] = useState({ nombre: "", direccion: "", telefono: "" });
+
+  const [form, setForm] = useState({
+    nombre: "",
+    direccion: "",
+    telefono: "",
+  });
+
   const showToast = useToast();
 
-
   useEffect(() => {
-    const userData = localStorage.getItem("usuarioActual");
-    if (userData) {
-      const user = JSON.parse(userData);
+    const raw = localStorage.getItem("usuarioActual");
+    if (raw) {
+      const user = JSON.parse(raw);
       setUsuario(user);
       setForm({
         nombre: user.nombre || "",
@@ -21,28 +27,32 @@ const MiPerfil: React.FC = () => {
     }
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!usuario) return;
-    const updatedUser = { ...usuario, ...form };
-    setUsuario(updatedUser);
-    localStorage.setItem("usuarioActual", JSON.stringify(updatedUser));
 
-    // Actualiza también la lista general de usuarios
-    const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
-    const idx = usuarios.findIndex((u: any) => u.correo === usuario.correo);
-    if (idx >= 0) usuarios[idx] = updatedUser;
-    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+    try {
+      const actualizado = await actualizarUsuario(usuario.id, {
+        nombre: form.nombre,
+        direccion: form.direccion,
+        telefono: form.telefono,
+        rut: usuario.rut,      // 👈 mantener RUN
+        rol: usuario.rol,      // 👈 mantener rol (ADMIN/CLIENTE)
+      });
 
-    showToast("Tus datos fueron actualizados correctamente", "exito");
+      localStorage.setItem("usuarioActual", JSON.stringify(actualizado));
+      setUsuario(actualizado);
 
+      showToast("Tus datos fueron actualizados correctamente ✔");
+
+    } catch (error) {
+      showToast("Error al guardar los cambios ❌", "error");
+    }
   };
 
   if (!usuario) {
     return (
-      <main className="container py-5 text-center">
-        <div className="alert alert-danger shadow-sm">
-          No hay sesión activa.
-        </div>
+      <main className="container py-5 text-center" style={{ paddingTop: "120px" }}>
+        <div className="alert alert-danger shadow-sm">No hay sesión activa.</div>
       </main>
     );
   }
@@ -81,7 +91,7 @@ const MiPerfil: React.FC = () => {
 
         <div className="mb-3">
           <label className="form-label">Correo electrónico</label>
-          <input className="form-control" value={usuario.correo} disabled />
+          <input className="form-control" value={usuario.email} disabled />
         </div>
 
         <div className="mb-3">
