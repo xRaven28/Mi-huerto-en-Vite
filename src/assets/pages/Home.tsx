@@ -1,26 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useToast } from "../components/Toast";
+import { getProductos } from "../services/producto.service";
+import type { Producto } from "../types";
+
 const Home: React.FC = () => {
   const [usuario, setUsuario] = useState<any>(null);
-  const [ofertas, setOfertas] = useState<any[]>([]);
+  const [ofertas, setOfertas] = useState<Producto[]>([]);
   const [indiceCarrusel, setIndiceCarrusel] = useState(0);
+  const [loading, setLoading] = useState(true);
   const showToast = useToast();
 
-  //Cargar usuario activo
+
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem("usuarioActivo");
     if (usuarioGuardado) setUsuario(JSON.parse(usuarioGuardado));
   }, []);
 
-  //Cargar ofertas desde localStorage
   useEffect(() => {
-    const productosGuardados = localStorage.getItem("productos");
-    if (productosGuardados) {
+    const cargarOfertas = async () => {
       try {
-        const productos = JSON.parse(productosGuardados);
+        setLoading(true);
+        const response = await getProductos();
+        const productos = response.data;
+
         const seleccion = productos
-          .filter((p: any) => p.habilitado && p.oferta)
-          .map((p: any) => ({
+          .filter((p: Producto) => p.habilitado && p.oferta)
+          .map((p: Producto) => ({
             ...p,
             precio: Number(p.precio) || 0,
             descuento: Number(p.descuento) || 0,
@@ -28,14 +33,37 @@ const Home: React.FC = () => {
           }))
           .sort(() => Math.random() - 0.5)
           .slice(0, 6);
+
         setOfertas(seleccion);
       } catch (e) {
-        console.error("Error leyendo productos:", e);
+        console.error("Error cargando ofertas desde API:", e);
+        try {
+          const productosGuardados = localStorage.getItem("productos");
+          if (productosGuardados) {
+            const productos = JSON.parse(productosGuardados);
+            const seleccion = productos
+              .filter((p: any) => p.habilitado && p.oferta)
+              .map((p: any) => ({
+                ...p,
+                precio: Number(p.precio) || 0,
+                descuento: Number(p.descuento) || 0,
+                img: p.img || "/img/placeholder.jpg",
+              }))
+              .sort(() => Math.random() - 0.5)
+              .slice(0, 6);
+            setOfertas(seleccion);
+          }
+        } catch (error) {
+          console.error("Error en fallback:", error);
+        }
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    cargarOfertas();
   }, []);
 
-  //Carrusel automático
   const imagenes = ["/Img/Inicio_1.jpg", "/Img/Frutaindex2.png", "/Img/Frutaindex3.jpeg"];
 
   useEffect(() => {
@@ -45,8 +73,8 @@ const Home: React.FC = () => {
     return () => clearInterval(intervalo);
   }, [imagenes.length]);
 
-  //Agregar producto al carrito
-  const agregarAlCarrito = (producto: any) => {
+
+  const agregarAlCarrito = (producto: Producto) => {
     try {
       const carrito = JSON.parse(localStorage.getItem("carrito") || "[]");
       const idx = carrito.findIndex((p: any) => p.id === producto.id);
@@ -55,13 +83,16 @@ const Home: React.FC = () => {
       localStorage.setItem("carrito", JSON.stringify(carrito));
       window.dispatchEvent(new Event("storage"));
 
-      showToast(`${producto.name} agregado al carrito`); 
+      showToast(`${producto.name} agregado al carrito`);
     } catch (error) {
       showToast("Error al agregar producto");
     }
   };
 
-  //Testimonios
+  const calcularPrecioOferta = (precio: number, descuento: number) => {
+    return Math.round(precio * (1 - descuento / 100));
+  };
+
   const testimonios = [
     {
       nombre: "María González",
@@ -82,7 +113,6 @@ const Home: React.FC = () => {
 
   return (
     <main className="home-page">
-      {/*Carrusel */}
       <div className="carousel-container">
         <img
           src={imagenes[indiceCarrusel]}
@@ -94,10 +124,8 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/*Sección principal */}
       <div className="container py-5">
         <div className="row g-4 align-items-stretch">
-          {/* Consejo del día */}
           <div className="col-lg-4 d-flex flex-column">
             <h2 className="text-center mb-4">🌱 Consejos del Día</h2>
             <div className="card text-white shadow-sm border-0">
@@ -115,13 +143,19 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/*Ofertas */}
           <div className="col-lg-8">
             <h2 className="text-center mb-4">🔥 Ofertas de la Semana</h2>
-            <div className="row g-4">
-              {ofertas.length > 0 ? (
-                ofertas.map((p) => (
+
+            {loading ? (
+              <div className="text-center">
+                <div className="spinner-border text-success" role="status">
+                  <span className="visually-hidden">Cargando ofertas...</span>
+                </div>
+                <p className="mt-2">Cargando ofertas...</p>
+              </div>
+            ) : ofertas.length > 0 ? (
+              <div className="row g-4">
+                {ofertas.map((p) => (
                   <div key={p.id} className="col-md-4">
                     <div className="card h-100 shadow-sm border-0 position-relative oferta-card">
                       <span className="badge bg-danger position-absolute top-0 start-0 m-2">
@@ -148,9 +182,7 @@ const Home: React.FC = () => {
                           </span>
                           <span className="text-danger fw-bold">
                             $
-                            {Math.round(p.precio * (1 - (p.descuento || 0) / 100)).toLocaleString(
-                              "es-CL"
-                            )}
+                            {calcularPrecioOferta(p.precio, p.descuento!).toLocaleString("es-CL")}
                           </span>
                         </p>
                         <button
@@ -162,15 +194,13 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-center text-muted">No hay ofertas disponibles.</p>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted">No hay ofertas disponibles.</p>
+            )}
           </div>
         </div>
-
-        {/*Testimonios */}
         <section className="py-5 bg-light mt-5 rounded-3">
           <h2 className="text-center mb-4 text-success">💬 Qué dicen nuestros clientes</h2>
           <div className="row text-center g-4">
@@ -193,9 +223,7 @@ const Home: React.FC = () => {
           </div>
         </section>
       </div>
-
-      {/*FOOTER */}
-      <footer className="footer-custom text-white pt-5 pb-3 mt-5 w-100">
+      <footer className="footer-custom text-white pt-4 pb-2 mt-5 w-100">
         <div className="container">
           <div className="row px-5">
             <div className="col-md-4 mb-3">
@@ -208,15 +236,9 @@ const Home: React.FC = () => {
             <div className="col-md-4 mb-3">
               <h5>Enlaces útiles</h5>
               <ul className="list-unstyled">
-                <li>
-                  <a href="/" className="text-white text-decoration-none">Inicio</a>
-                </li>
-                <li>
-                  <a href="/productos" className="text-white text-decoration-none">Productos</a>
-                </li>
-                <li>
-                  <a href="/recetas" className="text-white text-decoration-none">Recetas</a>
-                </li>
+                <li><a href="/" className="text-white text-decoration-none">Inicio</a></li>
+                <li><a href="/productos" className="text-white text-decoration-none">Productos</a></li>
+                <li><a href="/recetas" className="text-white text-decoration-none">Recetas</a></li>
                 <li>
                   <a
                     href="https://github.com/xRaven28/HuertoHogar.git"
@@ -231,15 +253,9 @@ const Home: React.FC = () => {
 
             <div className="col-md-4 mb-3">
               <h5>Síguenos</h5>
-              <a href="#" className="text-white d-block mb-1">
-                <i className="bi bi-facebook"></i> Facebook
-              </a>
-              <a href="#" className="text-white d-block mb-1">
-                <i className="bi bi-instagram"></i> Instagram
-              </a>
-              <a href="#" className="text-white d-block">
-                <i className="bi bi-whatsapp"></i> WhatsApp
-              </a>
+              <a href="#" className="text-white d-block mb-1"><i className="bi bi-facebook"></i> Facebook</a>
+              <a href="#" className="text-white d-block mb-1"><i className="bi bi-instagram"></i> Instagram</a>
+              <a href="#" className="text-white d-block"><i className="bi bi-whatsapp"></i> WhatsApp</a>
             </div>
           </div>
 

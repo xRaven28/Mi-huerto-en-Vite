@@ -1166,3 +1166,166 @@ body {
   box-shadow: none !important;
 }
 
+/* ============================
+   MODALES PERSONALIZADOS - ADMIN
+   ============================ */
+.modal-overlay-fixed {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 9999 !important;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white !important;
+  border-radius: 16px !important;
+  padding: 25px !important;
+  max-width: 500px !important;
+  width: 90% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+  border: none !important;
+  position: relative !important;
+}
+
+/* Modal específico para ofertas */
+.modal-oferta-content {
+  background: white !important;
+  border-radius: 16px !important;
+  padding: 30px !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  text-align: center !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+  border: none !important;
+}
+
+.modal-oferta-title {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  color: var(--verde-oscuro) !important;
+  margin-bottom: 20px !important;
+  text-align: center !important;
+}
+
+.oferta-product-name {
+  font-weight: 600 !important;
+  color: var(--verde-principal) !important;
+  margin-bottom: 25px !important;
+  font-size: 1.1rem !important;
+  background: rgba(147, 166, 78, 0.1) !important;
+  padding: 10px 15px !important;
+  border-radius: 10px !important;
+  border-left: 4px solid var(--verde-principal) !important;
+}
+
+.porcentaje-input {
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  border: 2px solid var(--verde-principal) !important;
+  border-radius: 10px !important;
+  padding: 12px !important;
+  margin: 15px auto !important;
+  width: 120px !important;
+  background: rgba(147, 166, 78, 0.05) !important;
+  transition: all 0.3s ease !important;
+}
+
+.porcentaje-input:focus {
+  border-color: var(--verde-secundario) !important;
+  box-shadow: 0 0 0 0.3rem rgba(147, 166, 78, 0.25) !important;
+  background: white !important;
+  transform: scale(1.05) !important;
+}
+
+.modal-content .form-label {
+  font-weight: 600 !important;
+  color: var(--gris-oscuro) !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+.modal-content .form-control {
+  border: 1px solid var(--gris-borde) !important;
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  font-size: 1rem !important;
+  transition: all 0.3s ease !important;
+  width: 100% !important;
+}
+
+.modal-content .form-control:focus {
+  border-color: var(--verde-principal) !important;
+  box-shadow: 0 0 0 0.2rem rgba(147, 166, 78, 0.25) !important;
+}
+
+.modal-content .btn {
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+}
+
+.modal-content .btn-success {
+  background: linear-gradient(135deg, var(--verde-principal), var(--verde-secundario)) !important;
+  color: white !important;
+}
+
+.modal-content .btn-success:hover {
+  background: linear-gradient(135deg, var(--verde-secundario), var(--verde-oscuro)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(147, 166, 78, 0.4) !important;
+}
+
+.modal-content .btn-secondary {
+  background: var(--gris-suave) !important;
+  color: var(--gris-oscuro) !important;
+  border: 1px solid var(--gris-borde) !important;
+}
+
+.modal-content .btn-secondary:hover {
+  background: var(--gris-borde) !important;
+  transform: translateY(-1px) !important;
+}
+
+.modal-content .text-muted {
+  font-size: 0.85rem !important;
+  color: var(--texto-suave) !important;
+  margin-top: 5px !important;
+  display: block !important;
+}
+
+.modal-content .d-flex.justify-content-center,
+.modal-content .text-end,
+.modal-content .d-flex.gap-3 {
+  margin-top: 25px !important;
+}
+
+.modal-overlay-fixed * {
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 576px) {
+  .modal-content,
+  .modal-oferta-content {
+    width: 95% !important;
+    padding: 20px !important;
+    margin: 10px !important;
+  }
+  
+  .porcentaje-input {
+    width: 100px !important;
+    font-size: 1.1rem !important;
+  }
+}

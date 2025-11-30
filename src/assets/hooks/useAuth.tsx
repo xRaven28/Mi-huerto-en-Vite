@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { loginUsuario } from "../services/usuario.service";
-import type { Usuario } from "../types"; // importa tu interfaz real
+import type { Usuario } from "../types";
 
 interface AuthContextType {
   usuario: Usuario | null;
@@ -19,7 +19,6 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
 
-  // 🔄 Cargar usuario desde localStorage
   useEffect(() => {
     const raw = localStorage.getItem("usuarioActual");
     if (raw) {
@@ -29,41 +28,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  // 🔐 LOGIN
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const data = await loginUsuario({ email, password });
 
-      // Mapear LO QUE SÍ devuelve el backend
       const usuarioLogin: Usuario = {
+        id: data.id,
         nombre: data.nombre,
         email: data.email,
         rol: data.rol?.toUpperCase() || "CLIENTE",
+        rut: data.rut,
+        telefono: data.telefono,
+        direccion: data.direccion,
+        bloqueado: data.bloqueado ?? false,
+        compras: data.compras || [],
         token: data.token,
-
-        // Campos opcionales de tu interfaz ↓
-        id: undefined,
-        apellido: undefined,
-        rut: undefined,
         password: "",
         confirpassword: "",
-        telefono: undefined,
-        direccion: undefined,
         estado: "Activo",
-        bloqueado: false,
-        historial: [],
-        compras: [],
-        fechaRegistro: undefined,
+
+        apellido: data.apellido || "",
+        historial: data.historial || [],
+        fechaRegistro: data.fechaRegistro || "",
       };
 
-      // Guardar
       localStorage.setItem("usuarioActual", JSON.stringify(usuarioLogin));
       localStorage.setItem("token", data.token);
 
       setUsuario(usuarioLogin);
 
       return true;
-    } catch {
+    } catch (error) {
+      console.error("Error en login:", error);
       return false;
     }
   };
