@@ -1166,9 +1166,6 @@ body {
   box-shadow: none !important;
 }
 
-/* ============================
-   MODALES PERSONALIZADOS - ADMIN
-   ============================ */
 .modal-overlay-fixed {
   position: fixed !important;
   top: 0 !important;
@@ -1328,4 +1325,127 @@ body {
     width: 100px !important;
     font-size: 1.1rem !important;
   }
+}
+.estado-preparando {
+  background: #ffc107;
+  color: black;
+}
+.estado-en_despacho {
+  background: #0d6efd;
+  color: white;
+}
+.estado-entregado {
+  background: #198754;
+  color: white;
+}
+/* ===========================
+   TABLA DE COMPRAS EN ADMIN
+   =========================== */
+.admin-compras-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-compras-table th {
+  background-color: #d9efd8;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px;
+}
+
+.admin-compras-table td {
+  text-align: center;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+/* Estado badge */
+.badge {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: white;
+}
+
+.estado-preparando {
+  background-color: #e9b400;
+}
+
+.estado-en_despacho,
+.estado-en_camino {
+  background-color: #00a2ff;
+}
+
+.estado-entregado {
+  background-color: #1e9e1e;
+}
+
+.estado-cancelado {
+  background-color: #cc0000;
+}
+
+/* Select de estado */
+.estado-select {
+  width: 120px;
+  font-size: 13px;
+  padding: 5px;
+  border-radius: 6px;
+  border: 1px solid #cccccc;
+}
+
+/* Botón de ver detalle */
+.btn-detalle {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.table-container {
+  max-height: 480px;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.table-container::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #79c98c;
+  border-radius: 4px;
+}
+/* ESTADOS DE PEDIDO EN MIS PEDIDOS */
+.mis-pedidos-estado {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* PREPARANDO */
+.estado-preparando {
+  background-color: #ffc107;
+  color: #000;
+}
+
+/* EN CAMINO */
+.estado-en_camino,
+.estado-en_despacho {
+  background-color: #17a2b8;
+  color: #fff;
+}
+
+/* ENTREGADO */
+.estado-entregado {
+  background-color: #28a745;
+  color: #fff;
+}
+
+/* CANCELADO */
+.estado-cancelado {
+  background-color: #dc3545;
+  color: #fff;
 }

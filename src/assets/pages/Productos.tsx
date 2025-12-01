@@ -1,18 +1,16 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { getProductos } from "../services/producto.service";  // <<--- 🔥 NUEVO
+import { getProductos } from "../services/producto.service";
+import { CarritoService } from "../services/carrito";
 import type { Producto } from "../types";
 import StarRating from "../components/StarRating";
 
-/*Tipos y helpers*/
+/* Tipos y props */
 interface ProductosProps {
   onAddToCart: () => void;
   mostrarToast: (message: string, color?: string) => void;
   usuario: any;
 }
-
-type ProductoCarrito = Producto & { cantidad: number };
-const STORAGE_KEY = "carrito";
 
 const stripDiacritics = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -50,7 +48,7 @@ const useImageSrc = (img?: string) => {
   return { src, onError };
 };
 
-/*Clasifica categoría */
+/* Categoría para CSS */
 const toCategoryKey = (c: string) => {
   const s = c.toLowerCase();
   if (s.includes("fruta")) return "frutas";
@@ -60,7 +58,7 @@ const toCategoryKey = (c: string) => {
   return "otros";
 };
 
-/*Tarjeta individual de producto*/
+/* Tarjeta de producto */
 const ProductoCard: React.FC<{
   producto: Producto;
   onAdd: (p: Producto) => void;
@@ -93,11 +91,14 @@ const ProductoCard: React.FC<{
 
         <div className="hh-body text-center">
           <h5 className="hh-title">{producto.name}</h5>
+
           <div className="mb-2 d-flex justify-content-center align-items-center flex-column">
             <StarRating value={promedio} readOnly size={18} />
             <small className="text-muted">
               {valoraciones.length > 0
-                ? `(${valoraciones.length} valoración${valoraciones.length > 1 ? "es" : ""})`
+                ? `(${valoraciones.length} valoración${
+                    valoraciones.length > 1 ? "es" : ""
+                  })`
                 : "Sin valoraciones aún"}
             </small>
           </div>
@@ -121,6 +122,8 @@ const ProductoCard: React.FC<{
             <Link to={`/producto/${producto.id}`} className="btn btn-ver">
               <i className="bi bi-eye"></i> Ver
             </Link>
+
+            {/* BOTÓN AÑADIR AL CARRITO */}
             <button className="btn btn-anadir" onClick={() => onAdd(producto)}>
               <i className="bi bi-cart-plus"></i> Añadir
             </button>
@@ -131,7 +134,6 @@ const ProductoCard: React.FC<{
   );
 };
 
-/*Componente principal Productos*/
 const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,9 +142,10 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   const [busqueda, setBusqueda] = useState("");
   const [productosFiltrados, setProductosFiltrados] = useState<Producto[]>([]);
   const [paginaActual, setPaginaActual] = useState(1);
+
   const productosPorPagina = 9;
 
-  /* Cargar datos desde la API */
+  /* Cargar desde API */
   useEffect(() => {
     getProductos()
       .then((res) => setProductos(res.data))
@@ -150,7 +153,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
       .finally(() => setLoading(false));
   }, [mostrarToast]);
 
-  /*Sincroniza búsqueda */
+  /* Sincronizar búsqueda */
   useEffect(() => {
     const actualizarBusqueda = () => {
       const term = (localStorage.getItem("busqueda") || "").toLowerCase();
@@ -161,12 +164,12 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
     return () => window.removeEventListener("storage", actualizarBusqueda);
   }, []);
 
-  /* Filtrado y orden */
+  /* Filtrar productos */
   useEffect(() => {
     try {
-      let filtered = productos.filter((p) =>
-        p.name.toLowerCase().includes(busqueda)
-      ).filter((p) => p.habilitado);
+      let filtered = productos
+        .filter((p) => p.name.toLowerCase().includes(busqueda))
+        .filter((p) => p.habilitado);
 
       if (categoria !== "todos") {
         filtered = filtered.filter(
@@ -182,11 +185,16 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
           filtered = [...filtered].sort((a, b) => b.precio - a.precio);
           break;
         case "nombre-asc":
-          filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+          filtered = [...filtered].sort((a, b) =>
+            a.name.localeCompare(b.name)
+          );
           break;
         case "nombre-desc":
-          filtered = [...filtered].sort((a, b) => b.name.localeCompare(a.name));
+          filtered = [...filtered].sort((a, b) =>
+            b.name.localeCompare(a.name)
+          );
           break;
+
         default:
           filtered = [...filtered].sort(() => Math.random() - 0.5);
       }
@@ -202,16 +210,10 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   const handleAddToCart = useCallback(
     (producto: Producto) => {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY) || "[]";
-        const carrito: ProductoCarrito[] = JSON.parse(raw);
-        const idx = carrito.findIndex((p) => p.id === producto.id);
-        if (idx >= 0) carrito[idx].cantidad += 1;
-        else carrito.push({ ...producto, cantidad: 1 });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(carrito));
-
+        CarritoService.agregar(producto); // ←🔥 REEMPLAZA TODO EL MANEJO MANUAL
         onAddToCart();
-        window.dispatchEvent(new Event("storage"));
-      } catch {
+        mostrarToast("Producto agregado al carrito", "#28a745");
+      } catch (err) {
         mostrarToast("Error al agregar producto", "#dc3545");
       }
     },
@@ -237,14 +239,18 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
     );
   }
 
-  /*Render principal*/
+  /* Render principal */
   return (
     <>
-      <main className="container py-5 productos-page" style={{ marginTop: "100px" }}>
+      <main
+        className="container py-5 productos-page"
+        style={{ marginTop: "100px" }}
+      >
         <h2 className="text-center mb-4">
           <i className="bi bi-cart3 me-2"></i> Todos los Productos
         </h2>
 
+        {/* Filtros */}
         <div className="row mb-4 align-items-center text-center">
           <div className="col-md-6 mb-2">
             <select
@@ -276,7 +282,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
           </div>
         </div>
 
-        {/*Lista de productos */}
+        {/* Lista de productos */}
         <div className="row gy-4 mt-4">
           {productosPagina
             .filter((p) => p && p.id && p.img)
@@ -285,14 +291,16 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
             ))}
         </div>
 
-        {/*Paginación */}
+        {/* Paginación */}
         {totalPaginas > 1 && (
           <div className="d-flex justify-content-center mt-4">
             <ul className="pagination">
               {Array.from({ length: totalPaginas }).map((_, i) => (
                 <li
                   key={i}
-                  className={`page-item ${paginaActual === i + 1 ? "active" : ""}`}
+                  className={`page-item ${
+                    paginaActual === i + 1 ? "active" : ""
+                  }`}
                 >
                   <button
                     className="page-link"
@@ -306,7 +314,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
           </div>
         )}
 
-        {/*Sin resultados */}
+        {/* Sin resultados */}
         {productosFiltrados.length === 0 && !loading && (
           <div className="text-center mt-4">
             <div className="alert alert-warning">

@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { ProductoCarrito } from "../types";
 import { useToast } from "../components/Toast";
 import { useAuth } from "../hooks/useAuth";
-
-const KEY = "carrito";
-const HIST = "historialCompras";
+import { crearCompra } from "../services/compras.service";
+import { useNavigate } from "react-router-dom";
+import { CarritoService } from "../services/carrito";
 
 const Checkout: React.FC = () => {
-  const { usuario } = useAuth(); // ✔ DETECTAR USUARIO LOGUEADO
+  const { usuario } = useAuth();
   const [carrito, setCarrito] = useState<ProductoCarrito[]>([]);
   const [boleta, setBoleta] = useState<any | null>(null);
-
+  const [procesando, setProcesando] = useState(false);
   const [form, setForm] = useState({
     nombre: "",
     direccion: "",
@@ -19,20 +19,15 @@ const Checkout: React.FC = () => {
   });
 
   const showToast = useToast();
+  const navigate = useNavigate();
 
-  // ================================
-  // CARGAR CARRITO + DATOS DEL USUARIO
-  // ================================
+  // ============================
+  // CARGAR CARRITO Y DATOS
+  // ============================
   useEffect(() => {
-    // Cargar carrito
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const data = JSON.parse(raw) as ProductoCarrito[];
-      setCarrito(data);
-      if (data.length === 0) alert("Tu carrito está vacío");
-    }
+    const data = CarritoService.obtener();
+    setCarrito(data);
 
-    // Autorrellenar datos si hay sesión activa
     if (usuario) {
       setForm({
         nombre: usuario.nombre || "",
@@ -43,156 +38,124 @@ const Checkout: React.FC = () => {
     }
   }, [usuario]);
 
-  // ================================
-  // CALCULAR TOTAL
-  // ================================
   const calcularTotal = () =>
     carrito.reduce((t, p) => {
-      const precioFinal =
-        p.oferta && p.descuento
-          ? Math.round(p.precio * (1 - p.descuento / 100))
-          : p.precio;
+      const descuento = p.descuento ?? 0;
+      const precioFinal = p.oferta
+        ? Math.round(p.precio * (1 - descuento / 100))
+        : p.precio;
 
       return t + precioFinal * (p.cantidad || 1);
     }, 0);
 
-  // ================================
-  // FINALIZAR COMPRA
-  // ================================
-  const handleCheckoutSubmit = (e: React.FormEvent) => {
+  // ============================
+  // SUBMIT CHECKOUT
+  // ============================
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setProcesando(true);
 
-    if (!form.nombre || !form.direccion || !form.metodoPago) {
-      showToast("Por favor completa todos los campos antes de continuar", "error");
-      return;
-    }
+    try {
+      if (!usuario) {
+        showToast("Debes iniciar sesión", "error");
+        return;
+      }
 
-    const fecha = new Date();
-    const codigo = `HH-${fecha.getFullYear()}${String(
-      fecha.getMonth() + 1
-    ).padStart(2, "0")}${String(fecha.getDate()).padStart(2, "0")}-${fecha.getTime()}`;
+      if (carrito.length === 0) {
+        showToast("El carrito está vacío", "error");
+        return;
+      }
 
-    // Aplicar descuentos si existen
-    const productosConDescuento = carrito.map((p) => {
-      const precioFinal =
-        p.oferta && p.descuento
-          ? Math.round(p.precio * (p.descuento ? 1 - p.descuento / 100 : 1))
-          : p.precio;
-      return { ...p, precioFinal };
-    });
+      if (!form.metodoPago) {
+        showToast("Selecciona un método de pago", "error");
+        return;
+      }
 
-    // Crear boleta
-    const nuevaBoleta = {
-      codigo,
-      cliente: form.nombre,
-      direccion: form.direccion,
-      telefono: form.telefono,
-      metodoPago: form.metodoPago,
-      productos: productosConDescuento,
-      total: calcularTotal(),
-      fecha: fecha.toLocaleString("es-CL"),
-      estado: "PREPARANDO",
-    };
+      const fecha = new Date();
+      const codigo = `HH-${fecha.getFullYear()}${String(
+        fecha.getMonth() + 1
+      ).padStart(2, "0")}${String(fecha.getDate()).padStart(
+        2,
+        "0"
+      )}-${fecha.getTime()}`;
 
-    // Guardar historial
-    const historial = JSON.parse(localStorage.getItem(HIST) || "[]");
-    historial.push(nuevaBoleta);
-    localStorage.setItem(HIST, JSON.stringify(historial));
+      const compraPayload = {
+        codigo,
+        metodoPago: form.metodoPago,
+        total: calcularTotal(),
+        usuario: { id: usuario.id },
+        items: carrito.map((p) => {
+          const descuento = p.descuento ?? 0;
+          const precioFinal = p.oferta
+            ? Math.round(p.precio * (1 - descuento / 100))
+            : p.precio;
 
-    // Limpiar carrito
-    localStorage.removeItem(KEY);
+          return {
+            productoId: p.id,
+            nombre: p.name,
+            cantidad: p.cantidad || 1,
+            precio: precioFinal,
+          };
+        }),
+      };
 
-    // Si NO hay usuario logueado, limpiar modo invitado
-    if (!usuario) localStorage.removeItem("modoInvitado");
+      console.log("🛒 Carrito antes de enviar:", carrito);
+      console.log("📦 Items generados:", compraPayload.items);
 
-    setCarrito([]);
-    setBoleta(nuevaBoleta);
-  };
+      const compraGuardada = await crearCompra(compraPayload);
 
-  // ================================
-  // DESCARGAR PDF
-  // ================================
-  const descargarPDF = () => {
-    if (!boleta) return;
+      if (!compraGuardada) {
+        showToast("Error al registrar la compra", "error");
+        return;
+      }
 
-    const contenido = `
-      <h2>HuertoHogar - Boleta de Compra</h2>
-      <p><strong>N° Boleta:</strong> ${boleta.codigo}</p>
-      <p><strong>Cliente:</strong> ${boleta.cliente}</p>
-      <p><strong>Dirección:</strong> ${boleta.direccion}</p>
-      <p><strong>Teléfono:</strong> ${boleta.telefono}</p>
-      <p><strong>Método de pago:</strong> ${boleta.metodoPago}</p>
-      <p><strong>Fecha:</strong> ${boleta.fecha}</p>
-      <hr>
-      <h3>Detalle de compra:</h3>
-      <ul>
-        ${boleta.productos
-          .map(
-            (p: ProductoCarrito & { precioFinal?: number }) =>
-              `<li>${p.name} x${p.cantidad || 1} - $${(
-                (p.precioFinal ?? p.precio) * (p.cantidad || 1)
-              ).toLocaleString("es-CL")}</li>`
-          )
-          .join("")}
-      </ul>
-      <h3>Total: $${boleta.total.toLocaleString("es-CL")}</h3>
-    `;
+      const nuevaBoleta = {
+        ...compraGuardada,
+        fecha: fecha.toLocaleString("es-CL"),
+      };
 
-    const ventana = window.open("", "_blank");
-    if (ventana) {
-      ventana.document.write(
-        `<html><head><title>Boleta ${boleta.codigo}</title></head><body>${contenido}</body></html>`
-      );
-      ventana.document.close();
-      ventana.print();
+      CarritoService.limpiar();
+      setCarrito([]);
+      setBoleta(nuevaBoleta);
+      showToast("Compra realizada", "exito");
+    } catch (err: any) {
+      console.error("Error registrando compra:", err);
+      showToast(err.message || "Error al procesar compra", "error");
+    } finally {
+      setProcesando(false);
     }
   };
 
-  // ================================
-  // VISTA DE BOLETA FINAL
-  // ================================
+  // ============================
+  // MOSTRAR BOLETA
+  // ============================
   if (boleta) {
     return (
-      <main className="container py-5 mt-5 checkout-page">
-        <div className="card p-4 shadow-sm border-success-subtle">
-          <h3 className="text-center text-success mb-4">✅ Compra realizada</h3>
+      <main className="container py-5 mt-5">
+        <h3 className="text-success text-center mb-4">✔ Compra realizada</h3>
 
-          <p><strong>N° Boleta:</strong> {boleta.codigo}</p>
-          <p><strong>Cliente:</strong> {boleta.cliente}</p>
-          <p><strong>Dirección:</strong> {boleta.direccion}</p>
-          <p><strong>Teléfono:</strong> {boleta.telefono}</p>
-          <p><strong>Método de pago:</strong> {boleta.metodoPago}</p>
+        <div className="card p-4 shadow-sm">
+          <p><strong>Código:</strong> {boleta.codigo}</p>
           <p><strong>Fecha:</strong> {boleta.fecha}</p>
 
           <hr />
 
-          <h5 className="text-center mb-4">🛒 Detalle de compra</h5>
-          <ul className="list-group mb-4">
-            {boleta.productos.map((p: any, i: number) => (
-              <li
-                key={i}
-                className="list-group-item d-flex justify-content-between align-items-center"
-              >
-                <span>
-                  {p.name} <small className="text-muted">x{p.cantidad}</small>
-                </span>
-                <span className="fw-bold text-success">
-                  ${((p.precioFinal ?? p.precio) * p.cantidad).toLocaleString("es-CL")}
-                </span>
+          <h5>Productos:</h5>
+          <ul>
+            {boleta.items.map((p: any, i: number) => (
+              <li key={i}>
+                {p.nombre} — {p.cantidad} x ${p.precio.toLocaleString("es-CL")}
               </li>
             ))}
           </ul>
 
-          <h4 className="text-end text-success mb-3">
+          <h4 className="text-end mt-3 text-success">
             Total: ${boleta.total.toLocaleString("es-CL")}
           </h4>
 
-          <div className="text-center mt-3">
-            <button className="btn btn-outline-success me-2" onClick={descargarPDF}>
-              Descargar Boleta (PDF)
-            </button>
-            <button className="btn btn-outline-secondary" onClick={() => window.print()}>
-              Imprimir
+          <div className="text-center mt-4">
+            <button className="btn btn-primary" onClick={() => navigate("/productos")}>
+              Seguir comprando
             </button>
           </div>
         </div>
@@ -200,108 +163,117 @@ const Checkout: React.FC = () => {
     );
   }
 
-  // ================================
+  // ============================
   // CARRITO VACÍO
-  // ================================
+  // ============================
   if (carrito.length === 0) {
     return (
-      <main className="container py-5 checkout-page">
-        <div className="alert alert-warning text-center">Tu carrito está vacío</div>
+      <main className="container py-5">
+        <h4 className="text-center">Tu carrito está vacío</h4>
+        <div className="text-center mt-3">
+          <button className="btn btn-success" onClick={() => navigate("/productos")}>
+            Ir a productos
+          </button>
+        </div>
       </main>
     );
   }
 
-  // ================================
-  // FORMULARIO DE COMPRA
-  // ================================
+  // ============================
+  // FORMULARIO NORMAL
+  // ============================
   return (
-    <main className="container" style={{ paddingTop: "95px", paddingBottom: "60px" }}>
+    <main className="container py-5">
+      <h2 className="text-center mb-4">Finalizar Compra</h2>
+
       <div className="row justify-content-center">
-
-        {/* FORMULARIO DEL COMPRADOR */}
-        <div className="col-md-6">
-          <h4>Datos del comprador</h4>
-
-          <form onSubmit={handleCheckoutSubmit}>
-            <div className="mb-3">
-              <label className="form-label">Nombre completo</label>
-              <input
-                className="form-control"
-                value={form.nombre}
-                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                required
-              />
+        {/* RESUMEN */}
+        <div className="col-md-4 mb-4">
+          <div className="card">
+            <div className="card-header bg-success text-white">🛒 Resumen</div>
+            <div className="card-body">
+              {carrito.map((p, i) => (
+                <div key={i} className="d-flex justify-content-between mb-2">
+                  <span>{p.name} x{p.cantidad}</span>
+                  <span>
+                    ${(p.precio * p.cantidad).toLocaleString("es-CL")}
+                  </span>
+                </div>
+              ))}
+              <hr />
+              <h4 className="text-end text-success">
+                Total: ${calcularTotal().toLocaleString("es-CL")}
+              </h4>
             </div>
-
-            <div className="mb-3">
-              <label className="form-label">Dirección de envío</label>
-              <input
-                className="form-control"
-                value={form.direccion}
-                onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Teléfono</label>
-              <input
-                className="form-control"
-                value={form.telefono}
-                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Método de pago</label>
-              <select
-                className="form-select"
-                value={form.metodoPago}
-                onChange={(e) => setForm({ ...form, metodoPago: e.target.value })}
-                required
-              >
-                <option value="">Seleccione...</option>
-                <option value="tarjeta">Tarjeta</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="efectivo">Efectivo</option>
-              </select>
-            </div>
-
-            <button className="btn btn-success w-100" type="submit">
-              Finalizar compra
-            </button>
-          </form>
-        </div>
-
-        {/* RESUMEN DEL PEDIDO */}
-        <div className="col-md-6">
-          <div className="card p-4 shadow-sm">
-            <h4>Resumen del pedido</h4>
-
-            <div className="border rounded p-3 bg-light">
-              {carrito.map((p, i) => {
-                const precioFinal =
-                  p.oferta && p.descuento
-                    ? Math.round(p.precio * (1 - p.descuento / 100))
-                    : p.precio;
-                const subtotal = precioFinal * (p.cantidad || 1);
-
-                return (
-                  <div key={i} className="d-flex justify-content-between border-bottom py-2">
-                    <span>{p.name} x{p.cantidad}</span>
-                    <span>${subtotal.toLocaleString("es-CL")}</span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <h4 className="mt-3 text-end text-success">
-              Total: ${calcularTotal().toLocaleString("es-CL")}
-            </h4>
           </div>
         </div>
 
+        {/* FORMULARIO */}
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-header bg-primary text-white">👤 Tus datos</div>
+            <div className="card-body">
+              <form onSubmit={handleCheckoutSubmit}>
+                <div className="mb-3">
+                  <label>Nombre *</label>
+                  <input
+                    className="form-control"
+                    value={form.nombre}
+                    onChange={(e) =>
+                      setForm({ ...form, nombre: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label>Dirección *</label>
+                  <input
+                    className="form-control"
+                    value={form.direccion}
+                    onChange={(e) =>
+                      setForm({ ...form, direccion: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label>Teléfono *</label>
+                  <input
+                    className="form-control"
+                    value={form.telefono}
+                    onChange={(e) =>
+                      setForm({ ...form, telefono: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label>Método de pago *</label>
+                  <select
+                    className="form-select"
+                    value={form.metodoPago}
+                    onChange={(e) =>
+                      setForm({ ...form, metodoPago: e.target.value })
+                    }
+                  >
+                    <option value="">Seleccione método</option>
+                    <option value="EFECTIVO">Efectivo</option>
+                    <option value="DEBITO">Débito</option>
+                    <option value="CREDITO">Crédito</option>
+                  </select>
+                </div>
+
+                <button
+                  className="btn btn-success w-100"
+                  type="submit"
+                  disabled={procesando}
+                >
+                  {procesando ? "Procesando..." : "Finalizar compra"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );

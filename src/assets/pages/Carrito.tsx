@@ -5,11 +5,22 @@ import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/Toast";
 import { useNavigate} from "react-router-dom";
 
+// Función de validación del carrito
+const validarCarrito = (carrito: ProductoCarrito[]) => {
+  return carrito.filter(item => 
+    item.id && 
+    item.name && 
+    item.precio > 0 && 
+    (item.cantidad || 1) > 0
+  );
+};
+
 const Carrito: React.FC = () => {
   const [carrito, setCarrito] = useState<ProductoCarrito[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [procesando, setProcesando] = useState(false);
 
   const { usuario } = useAuth();
   const showToast = useToast();
@@ -24,17 +35,19 @@ const Carrito: React.FC = () => {
 
   //Cargar carrito inicial
   useEffect(() => {
-    const data = CarritoService.obtenerCarrito();
-    setCarrito(data);
-    calcularTotal(data);
+    const data = CarritoService.obtener();
+    const carritoValidado = validarCarrito(data);
+    setCarrito(carritoValidado);
+    calcularTotal(carritoValidado);
     setLoading(false);
   }, []);
 
   //Guardar carrito actualizado
   const guardarCarrito = (nuevo: ProductoCarrito[]) => {
-    setCarrito(nuevo);
-    CarritoService.guardarCarrito(nuevo);
-    calcularTotal(nuevo);
+    const carritoValidado = validarCarrito(nuevo);
+    setCarrito(carritoValidado);
+    CarritoService.guardar(carritoValidado);
+    calcularTotal(carritoValidado);
   };
 
   //Calcular total general
@@ -52,24 +65,43 @@ const Carrito: React.FC = () => {
   //Actualizar cantidad
   const actualizarCantidad = (id: number, nuevaCantidad: number) => {
     if (nuevaCantidad < 1) return;
-    const nuevoCarrito = carrito.map((p) =>
-      p.id === id ? { ...p, cantidad: nuevaCantidad } : p
-    );
-    guardarCarrito(nuevoCarrito);
+    
+    setProcesando(true);
+    try {
+      const nuevoCarrito = carrito.map((p) =>
+        p.id === id ? { ...p, cantidad: nuevaCantidad } : p
+      );
+      guardarCarrito(nuevoCarrito);
+    } catch (error) {
+      console.error("Error actualizando cantidad:", error);
+      showToast("Error actualizando cantidad", "error");
+    } finally {
+      setProcesando(false);
+    }
   };
 
   //Eliminar producto
   const eliminarProducto = (id: number) => {
-    const eliminado = carrito.find((p) => p.id === id);
-    const nuevoCarrito = carrito.filter((p) => p.id !== id);
-    guardarCarrito(nuevoCarrito);
-    showToast(`🗑️ ${eliminado?.name} fue eliminado del carrito`, "error");
+    setProcesando(true);
+    try {
+      const eliminado = carrito.find((p) => p.id === id);
+      const nuevoCarrito = carrito.filter((p) => p.id !== id);
+      guardarCarrito(nuevoCarrito);
+      showToast(`🗑️ ${eliminado?.name} fue eliminado del carrito`, "error");
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+      showToast("Error eliminando producto", "error");
+    } finally {
+      setProcesando(false);
+    }
   };
 
   //Lógica de pago
   const handlePagar = () => {
-    if (carrito.length === 0) {
-      showToast("Tu carrito está vacío", "error");
+    const carritoValidado = validarCarrito(carrito);
+    
+    if (carritoValidado.length === 0) {
+      showToast("Tu carrito está vacío o contiene items inválidos", "error");
       return;
     }
 
@@ -83,17 +115,46 @@ const Carrito: React.FC = () => {
 
   //Continuar como invitado
   const continuarInvitado = () => {
-    localStorage.setItem("modoInvitado", "true");
-    setMostrarModal(false);
-    showToast("Continuando como invitado...", "info");
-    setTimeout(() => navigate("/checkout"), 300);
+    setProcesando(true);
+    try {
+      localStorage.setItem("modoInvitado", "true");
+      setMostrarModal(false);
+      showToast("Continuando como invitado...", "info");
+      setTimeout(() => navigate("/checkout"), 300);
+    } catch (error) {
+      console.error("Error continuando como invitado:", error);
+      showToast("Error al continuar", "error");
+    } finally {
+      setProcesando(false);
+    }
+  };
+
+  //Vaciar carrito completo
+  const vaciarCarrito = () => {
+    if (!window.confirm("¿Está seguro de vaciar todo el carrito?")) return;
+    
+    setProcesando(true);
+    try {
+      CarritoService.limpiar();
+      setCarrito([]);
+      setTotal(0);
+      showToast("Carrito vaciado", "error");
+    } catch (error) {
+      console.error("Error vaciando carrito:", error);
+      showToast("Error vaciando carrito", "error");
+    } finally {
+      setProcesando(false);
+    }
   };
 
   //Loading
   if (loading)
     return (
       <div className="container text-center py-5">
-        <div className="spinner-border text-success" role="status" />
+        <div className="spinner-border text-success" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+        <p className="mt-2">Cargando carrito...</p>
       </div>
     );
 
@@ -119,6 +180,17 @@ const Carrito: React.FC = () => {
   return (
     <main className="container carrito-page" style={{ paddingTop: "120px" }}>
       <h2 className="text-center mb-4">🛒 Carrito de Compras</h2>
+
+      {/* Botón vaciar carrito */}
+      <div className="d-flex justify-content-end mb-3">
+        <button
+          className="btn btn-outline-danger btn-sm"
+          onClick={vaciarCarrito}
+          disabled={procesando}
+        >
+          {procesando ? "Procesando..." : "🗑️ Vaciar Carrito"}
+        </button>
+      </div>
 
       <div className="table-responsive shadow-sm">
         <table className="table table-bordered align-middle">
@@ -176,7 +248,7 @@ const Carrito: React.FC = () => {
                         onClick={() =>
                           actualizarCantidad(p.id, (p.cantidad || 1) - 1)
                         }
-                        disabled={(p.cantidad || 1) <= 1}
+                        disabled={(p.cantidad || 1) <= 1 || procesando}
                       >
                         -
                       </button>
@@ -186,6 +258,7 @@ const Carrito: React.FC = () => {
                         onClick={() =>
                           actualizarCantidad(p.id, (p.cantidad || 1) + 1)
                         }
+                        disabled={procesando}
                       >
                         +
                       </button>
@@ -212,6 +285,7 @@ const Carrito: React.FC = () => {
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={() => eliminarProducto(p.id)}
+                      disabled={procesando}
                     >
                       <i className="bi bi-trash"></i>
                     </button>
@@ -230,8 +304,13 @@ const Carrito: React.FC = () => {
             ${total.toLocaleString("es-CL")}
           </span>
         </h4>
-        <button className="btn btn-success mt-3" onClick={handlePagar}>
-          <i className="bi bi-credit-card me-2"></i>Pagar ahora
+        <button 
+          className="btn btn-success mt-3" 
+          onClick={handlePagar}
+          disabled={procesando}
+        >
+          <i className="bi bi-credit-card me-2"></i>
+          {procesando ? "Procesando..." : "Pagar ahora"}
         </button>
       </div>
 
@@ -253,24 +332,28 @@ const Carrito: React.FC = () => {
               <button
                 className="btn btn-success fw-bold"
                 onClick={() => navigate("/mi-cuenta")}
+                disabled={procesando}
               >
                 <i className="bi bi-box-arrow-in-right me-2"></i> Iniciar sesión
               </button>
               <button
                 className="btn btn-outline-success fw-bold"
                 onClick={() => navigate("/crear-cuenta")}
+                disabled={procesando}
               >
                 <i className="bi bi-person-plus me-2"></i> Crear cuenta
               </button>
               <button
                 className="btn btn-secondary fw-bold"
                 onClick={continuarInvitado}
+                disabled={procesando}
               >
                 <i className="bi bi-person-check me-2"></i> Continuar como invitado
               </button>
               <button
                 className="btn btn-outline-danger mt-2"
                 onClick={() => setMostrarModal(false)}
+                disabled={procesando}
               >
                 Cancelar
               </button>

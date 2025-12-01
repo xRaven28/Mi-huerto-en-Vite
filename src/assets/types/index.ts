@@ -15,13 +15,13 @@ export interface Producto {
 export interface ProductoCarrito extends Producto {
   cantidad: number;
 }
+
 export interface Valoracion {
   usuario: string;
   estrellas: number;
   comentario: string;
   fecha: string;
 }
-
 
 export interface Usuario {
   id?: number;
@@ -30,7 +30,7 @@ export interface Usuario {
   rut?: string;
   email: string;
   password: string;
-  confirpassword: string,
+  confirpassword: string;
   telefono?: string;
   direccion?: string;
   rol: string;
@@ -42,15 +42,27 @@ export interface Usuario {
   fechaRegistro?: string;
 }
 
-
 export interface Compra {
-  id: number;
-  rutUsuario: string;
+  id?: number;
+  codigo: string;
   fecha: string;
   total: number;
-  productos: ProductoCarrito[];
-  estado?: "PREPARANDO" | "EN_DESPACHO" | "ENTREGADO"; 
+  estado: string;
+  metodoPago: string;
+  usuario?: Usuario;
+  items: ItemCompra[];
 }
+
+export interface ItemCompra {
+  id?: number;
+  productoId: number;
+  nombre: string;
+  cantidad: number;
+  precio: number;
+  compra?: Compra;
+}
+
+export type EstadoCompra = "PREPARANDO" | "EN_CAMINO" | "ENTREGADO" | "CANCELADO";
 
 export interface Receta {
   titulo: string;
@@ -76,6 +88,7 @@ export interface FormularioRegistro {
   password: string;
   confirmarPassword: string;
 }
+
 export interface HistorialAccion {
   fecha: string;
   accion: string;

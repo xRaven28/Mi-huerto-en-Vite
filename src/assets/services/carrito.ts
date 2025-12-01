@@ -1,34 +1,79 @@
-import { ProductoCarrito } from '../types/index';
+import { Producto, ProductoCarrito } from "../types";
+
+const STORAGE_KEY = "carrito";
 
 export const CarritoService = {
-    obtenerCarrito(): ProductoCarrito[] {
-        try {
-            const carrito = localStorage.getItem('carrito');
-            return carrito ? JSON.parse(carrito) : [];
-        } catch (error) {
-            console.error('Error obteniendo carrito:', error);
-            return [];
-        }
-    },
+  obtener(): ProductoCarrito[] {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const carrito = raw ? JSON.parse(raw) : [];
 
-    guardarCarrito(carrito: ProductoCarrito[]): void {
-        try {
-            localStorage.setItem('carrito', JSON.stringify(carrito));
-        } catch (error) {
-            console.error('Error guardando carrito:', error);
-        }
-    },
-
-    limpiarCarrito(): void {
-        try {
-            localStorage.removeItem('carrito');
-        } catch (error) {
-            console.error('Error limpiando carrito:', error);
-        }
-    },
-
-    obtenerCantidadTotal(): number {
-        const carrito = this.obtenerCarrito();
-        return carrito.reduce((total, item) => total + (item.cantidad || 1), 0);
+      return carrito.map((item: any) => ({
+        ...item,
+        cantidad: item.cantidad ?? 1,
+      }));
+    } catch (error) {
+      console.error("Error leyendo carrito:", error);
+      return [];
     }
+  },
+
+  guardar(carrito: ProductoCarrito[]) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(carrito));
+    } catch (error) {
+      console.error("Error guardando carrito:", error);
+    }
+  },
+
+  agregar(producto: Producto) {
+    const carrito = this.obtener();
+    const idx = carrito.findIndex((p) => p.id === producto.id);
+
+    if (idx >= 0) {
+      carrito[idx].cantidad = (carrito[idx].cantidad ?? 0) + 1;
+    } else {
+      carrito.push({
+        ...producto,
+        cantidad: 1,
+      });
+    }
+
+    this.guardar(carrito);
+    window.dispatchEvent(new Event("storage"));
+  },
+
+  quitar(id: number) {
+    const carrito = this.obtener().filter((p) => p.id !== id);
+    this.guardar(carrito);
+  },
+
+  limpiar() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      window.dispatchEvent(new Event("storage"));
+    } catch (error) {
+      console.error("Error limpiando carrito:", error);
+    }
+  },
+
+  actualizarCantidad(id: number, cantidad: number) {
+    const carrito = this.obtener();
+    const idx = carrito.findIndex((p) => p.id === id);
+
+    if (idx >= 0) {
+      carrito[idx].cantidad = cantidad < 1 ? 1 : cantidad;
+      this.guardar(carrito);
+    }
+  },
+
+  cantidadTotal() {
+    const carrito = this.obtener();
+    return carrito.reduce((t, p) => t + (p.cantidad ?? 1), 0);
+  },
+
+  totalPrecio() {
+    const carrito = this.obtener();
+    return carrito.reduce((t, p) => t + p.precio * (p.cantidad ?? 1), 0);
+  },
 };
