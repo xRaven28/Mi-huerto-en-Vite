@@ -1449,3 +1449,13 @@ body {
   background-color: #dc3545;
   color: #fff;
 }
+.admin-sidebar {
+  width: 260px;
+  padding: 20px;
+  position: fixed;     
+  top: 0;
+  left: 0;
+  bottom: 0;           
+  overflow-y: auto;   
+  z-index: 1000;
+}

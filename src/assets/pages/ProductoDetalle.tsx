@@ -5,15 +5,13 @@ import type { Producto } from "../types";
 import StarRating from "../components/StarRating";
 import { useToast } from "../components/Toast";
 
-
-/*Función auxiliar para limpiar rutas de imagen*/
+/* Función auxiliar para limpiar rutas de imagen */
 const getImagePath = (img: string): string => {
   if (!img) return "/Img/placeholder.jpg";
   const clean = img.replace(/^\/?(img|Img)\//, "").trim();
   return `/Img/${clean}`;
 };
 
-/*Componente principal*/
 const DetalleProducto: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { productos } = useProductos();
@@ -24,7 +22,7 @@ const DetalleProducto: React.FC = () => {
   const [comentario, setComentario] = useState("");
   const showToast = useToast();
 
-  /*Cargar producto y similares*/
+  /* Cargar producto y similares */
   useEffect(() => {
     if (productos.length > 0 && id) {
       const prod = productos.find((p) => String(p.id) === id);
@@ -40,22 +38,22 @@ const DetalleProducto: React.FC = () => {
           )
           .sort(() => Math.random() - 0.5)
           .slice(0, 4);
+
         setSimilares(relacionados);
       }
     }
   }, [productos, id]);
 
+  /* Enviar valoración */
   const handleSubmitValoracion = () => {
     if (!rating) {
       showToast("Selecciona una cantidad de estrellas.");
-      console.log("Intento de comentar sin seleccionar estrellas.");
       return;
     }
 
     const usuarioActual = JSON.parse(localStorage.getItem("usuarioActual") || "{}");
     if (!usuarioActual?.nombre) {
       showToast("Debes iniciar sesión para comentar.");
-      console.log("Intento de comentar sin iniciar sesión.");
       return;
     }
 
@@ -73,26 +71,37 @@ const DetalleProducto: React.FC = () => {
 
     localStorage.setItem("productos", JSON.stringify(nuevosProductos));
     setProducto({ ...producto!, valoraciones: nuevasValoraciones });
+
     setComentario("");
     setRating(0);
-
     showToast("✅ ¡Gracias por tu opinión!");
-    console.log("Comentario agregado correctamente:", nuevaValoracion);
   };
 
-  /*Agregar al carrito*/
+  /* Agregar al carrito con control de stock real */
   const agregarAlCarrito = (producto: Producto, cantidad: number) => {
     const raw = localStorage.getItem("carrito") || "[]";
     const carrito = JSON.parse(raw);
+
     const idx = carrito.findIndex((p: any) => p.id === producto.id);
-    if (idx >= 0) carrito[idx].cantidad += cantidad;
+    const enCarrito = idx >= 0 ? carrito[idx].cantidad : 0;
+
+    const nuevoTotal = enCarrito + cantidad;
+
+    if (nuevoTotal > producto.stock) {
+      showToast(`Solo quedan ${producto.stock} unidades disponibles.`);
+      return;
+    }
+
+    if (idx >= 0) carrito[idx].cantidad = nuevoTotal;
     else carrito.push({ ...producto, cantidad });
+
     localStorage.setItem("carrito", JSON.stringify(carrito));
     window.dispatchEvent(new Event("storage"));
+
     showToast(`✅ ${producto.name} agregado al carrito`);
   };
 
-  /*Render condicional*/
+  /* Render condicional si no hay producto */
   if (!productos.length) {
     return (
       <div className="text-center py-5">
@@ -120,33 +129,30 @@ const DetalleProducto: React.FC = () => {
     ? Math.round(producto.precio * (1 - (producto.descuento || 0) / 100))
     : producto.precio;
 
-  /*Render principal*/
   return (
     <>
       <main className="container py-5 detalle-producto-page" style={{ marginTop: "90px" }}>
         <div className="row align-items-center bg-white shadow-sm rounded-4 p-4">
+          {/* Imagen */}
           <div className="col-md-6 text-center mb-4 mb-md-0 position-relative">
             {producto.oferta && (
               <span className="hh-badge position-absolute top-0 start-0 m-3 bg-danger text-white px-2 py-1 rounded">
                 {producto.descuento}% OFF
               </span>
             )}
+
             <img
               src={getImagePath(producto.img)}
               alt={producto.name}
               className="img-fluid rounded-4 shadow-sm"
-              style={{
-                maxHeight: "360px",
-                objectFit: "contain",
-                backgroundColor: "#fff",
-              }}
+              style={{ maxHeight: "360px", objectFit: "contain", backgroundColor: "#fff" }}
               onError={(e) =>
                 ((e.target as HTMLImageElement).src = "/img/placeholder.jpg")
               }
             />
           </div>
 
-          {/* Detalles */}
+          {/* Información */}
           <div className="col-md-6">
             <h2 className="fw-bold mb-2 text-dark">{producto.name}</h2>
             <p className="text-uppercase text-muted mb-2">{producto.categoria}</p>
@@ -168,14 +174,20 @@ const DetalleProducto: React.FC = () => {
 
             <p className="mb-4 text-secondary">{producto.desc}</p>
 
-            {/* Cantidad */}
+            {/* Cantidad controlada por stock */}
             <div className="d-flex align-items-center mb-3">
               <label className="me-2 fw-semibold">Cantidad:</label>
               <input
                 type="number"
                 min={1}
+                max={producto.stock}
                 value={cantidad}
-                onChange={(e) => setCantidad(Math.max(1, Number(e.target.value)))}
+                onChange={(e) => {
+                  let v = Number(e.target.value);
+                  if (v < 1) v = 1;
+                  if (v > producto.stock) v = producto.stock;
+                  setCantidad(v);
+                }}
                 className="form-control"
                 style={{ width: "100px" }}
               />
@@ -189,6 +201,7 @@ const DetalleProducto: React.FC = () => {
               >
                 <i className="bi bi-cart-plus me-2"></i> Añadir al carrito
               </button>
+
               <Link to="/productos" className="btn btn-outline-success px-4">
                 <i className="bi bi-arrow-left me-2"></i> Volver
               </Link>
@@ -196,7 +209,7 @@ const DetalleProducto: React.FC = () => {
           </div>
         </div>
 
-        {/*PRODUCTOS SIMILARES*/}
+        {/* Productos similares */}
         <section className="mt-5">
           <h4 className="fw-bold text-center mb-4" style={{ color: "#3A4137" }}>
             Productos similares
@@ -224,7 +237,6 @@ const DetalleProducto: React.FC = () => {
                   <div className="hh-body text-center">
                     <h6 className="hh-title">{p.name}</h6>
 
-                    {/*Mostrar promedio de estrellas si hay valoraciones */}
                     {p.valoraciones?.length ? (
                       <StarRating
                         value={
@@ -245,10 +257,7 @@ const DetalleProducto: React.FC = () => {
                             ${p.precio.toLocaleString("es-CL")}
                           </span>
                           <span className="text-danger fw-bold">
-                            $
-                            {Math.round(
-                              p.precio * (1 - (p.descuento || 0) / 100)
-                            ).toLocaleString("es-CL")}
+                            ${Math.round(p.precio * (1 - (p.descuento || 0) / 100)).toLocaleString("es-CL")}
                           </span>
                         </>
                       ) : (
@@ -260,6 +269,7 @@ const DetalleProducto: React.FC = () => {
                       <Link to={`/producto/${p.id}`} className="btn btn-ver">
                         <i className="bi bi-eye me-1"></i> Ver
                       </Link>
+
                       <button className="btn btn-anadir" onClick={() => agregarAlCarrito(p, 1)}>
                         <i className="bi bi-cart-plus me-1"></i> Añadir
                       </button>
@@ -270,11 +280,12 @@ const DetalleProducto: React.FC = () => {
             ))}
           </div>
         </section>
-        {/*OPINIONES DE CLIENTES*/}
+
+        {/* Opiniones */}
         <section className="mt-5">
           <h4 className="fw-bold text-success mb-3">Opiniones de clientes</h4>
 
-          {producto.valoraciones && producto.valoraciones.length > 0 ? (
+          {producto.valoraciones?.length ? (
             producto.valoraciones.map((v, i) => (
               <div key={i} className="card mb-3 shadow-sm border-0 p-3">
                 <div className="d-flex justify-content-between">
@@ -294,6 +305,7 @@ const DetalleProducto: React.FC = () => {
           <div className="card mt-4 shadow-sm border-0 p-3">
             <h5 className="text-success">Deja tu opinión</h5>
             <StarRating value={rating} onChange={setRating} />
+
             <textarea
               className="form-control mt-3"
               rows={3}
@@ -301,17 +313,15 @@ const DetalleProducto: React.FC = () => {
               value={comentario}
               onChange={(e) => setComentario(e.target.value)}
             />
-            <button
-              className="btn btn-success mt-3"
-              onClick={handleSubmitValoracion}
-            >
+
+            <button className="btn btn-success mt-3" onClick={handleSubmitValoracion}>
               Enviar valoración
             </button>
           </div>
         </section>
       </main>
 
-      {/*FOOTER*/}
+      {/* Footer */}
       <footer className="footer-custom text-white pt-4 pb-2 mt-5 w-100">
         <div className="container">
           <div className="row px-5">

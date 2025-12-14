@@ -3,14 +3,14 @@ import { ProductoCarrito } from "../types";
 import { CarritoService } from "../services/carrito";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/Toast";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Función de validación del carrito
 const validarCarrito = (carrito: ProductoCarrito[]) => {
-  return carrito.filter(item => 
-    item.id && 
-    item.name && 
-    item.precio > 0 && 
+  return carrito.filter(item =>
+    item.id &&
+    item.name &&
+    item.precio > 0 &&
     (item.cantidad || 1) > 0
   );
 };
@@ -30,7 +30,7 @@ const Carrito: React.FC = () => {
   try {
     navigate = useNavigate();
   } catch {
-    navigate = (() => {}) as any;
+    navigate = (() => { }) as any;
   }
 
   //Cargar carrito inicial
@@ -65,7 +65,7 @@ const Carrito: React.FC = () => {
   //Actualizar cantidad
   const actualizarCantidad = (id: number, nuevaCantidad: number) => {
     if (nuevaCantidad < 1) return;
-    
+
     setProcesando(true);
     try {
       const nuevoCarrito = carrito.map((p) =>
@@ -99,7 +99,7 @@ const Carrito: React.FC = () => {
   //Lógica de pago
   const handlePagar = () => {
     const carritoValidado = validarCarrito(carrito);
-    
+
     if (carritoValidado.length === 0) {
       showToast("Tu carrito está vacío o contiene items inválidos", "error");
       return;
@@ -132,7 +132,7 @@ const Carrito: React.FC = () => {
   //Vaciar carrito completo
   const vaciarCarrito = () => {
     if (!window.confirm("¿Está seguro de vaciar todo el carrito?")) return;
-    
+
     setProcesando(true);
     try {
       CarritoService.limpiar();
@@ -236,8 +236,8 @@ const Carrito: React.FC = () => {
                         borderRadius: "8px",
                       }}
                       onError={(e) =>
-                        ((e.target as HTMLImageElement).src =
-                          "/img/placeholder.jpg")
+                      ((e.target as HTMLImageElement).src =
+                        "/img/placeholder.jpg")
                       }
                     />
                   </td>
@@ -245,9 +245,11 @@ const Carrito: React.FC = () => {
                     <div className="d-flex align-items-center justify-content-center gap-2">
                       <button
                         className="btn btn-outline-secondary btn-sm"
-                        onClick={() =>
-                          actualizarCantidad(p.id, (p.cantidad || 1) - 1)
-                        }
+                        onClick={() => {
+                          CarritoService.actualizarCantidad(p.id, (p.cantidad || 1) - 1);
+                          setCarrito(CarritoService.obtener());
+                        }}
+
                         disabled={(p.cantidad || 1) <= 1 || procesando}
                       >
                         -
@@ -255,9 +257,11 @@ const Carrito: React.FC = () => {
                       <span className="mx-2">{p.cantidad || 1}</span>
                       <button
                         className="btn btn-outline-secondary btn-sm"
-                        onClick={() =>
-                          actualizarCantidad(p.id, (p.cantidad || 1) + 1)
-                        }
+                        onClick={() => {
+                          CarritoService.actualizarCantidad(p.id, (p.cantidad || 1) + 1);
+                          setCarrito(CarritoService.obtener());
+                        }}
+
                         disabled={procesando}
                       >
                         +
@@ -304,8 +308,8 @@ const Carrito: React.FC = () => {
             ${total.toLocaleString("es-CL")}
           </span>
         </h4>
-        <button 
-          className="btn btn-success mt-3" 
+        <button
+          className="btn btn-success mt-3"
           onClick={handlePagar}
           disabled={procesando}
         >

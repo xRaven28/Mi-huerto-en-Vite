@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {BarChart,Bar,XAxis,YAxis,Tooltip,ResponsiveContainer,CartesianGrid,Legend,} from "recharts";
 import type { Producto } from "../types";
 
-/*Componente de estadísticas de productos reales */
 interface Props {
   productos: Producto[];
 }
@@ -15,14 +14,12 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
   useEffect(() => {
     if (!productos || productos.length === 0) return;
 
-    /*LEER COMPRAS REALES DESDE LOCALSTORAGE*/
     const rawCompras =
       localStorage.getItem("historialCompras") ||
       localStorage.getItem("compras") ||
       "[]";
     const compras = JSON.parse(rawCompras);
 
-    // Crear un contador de ventas reales por ID
     const contador: Record<number, number> = {};
 
     compras.forEach((compra: any) => {
@@ -35,7 +32,6 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
       }
     });
 
-    // Combinar productos con ventas reales
     const vendidosConCantidad = productos.map((p) => ({
       ...p,
       ventas: contador[p.id] || 0,
@@ -43,7 +39,7 @@ const AdminEstadisticas: React.FC<Props> = ({ productos }) => {
 
     /*FILTRAR POR MES ACTUAL*/
     const ahora = new Date();
-    const mesActual = ahora.getMonth(); // 0 = enero
+    const mesActual = ahora.getMonth(); 
     const añoActual = ahora.getFullYear();
 
     const comprasDelMes = compras.filter((c: any) => {

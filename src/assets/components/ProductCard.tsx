@@ -45,6 +45,7 @@ export const ModalAgregarProducto: React.FC<Props> = ({ isOpen, onClose, onGuard
       oferta: false,
       descuento: 0,
       valoraciones: [],
+      stock:50,
     };
 
     onGuardar(nuevo);

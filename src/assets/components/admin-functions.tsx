@@ -30,17 +30,18 @@ export const ModalAgregarProducto: React.FC<ModalAgregarProps> = ({
       return;
     }
 
-    const nuevoProducto: Omit<Producto, 'id'> = {
+    const nuevosProductos: Omit<Producto, 'id'> = {
       name: formData.nombre,
       precio: precio,
       desc: formData.descripcion,
       compania: formData.compania,
       categoria: 'otros',
       img: 'img/default.png',
+      stock:50,
       habilitado: formData.habilitado
     };
 
-    onGuardar(nuevoProducto);
+    onGuardar(nuevosProductos);
     
     setFormData({
       nombre: '',

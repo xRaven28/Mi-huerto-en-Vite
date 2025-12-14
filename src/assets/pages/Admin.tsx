@@ -23,6 +23,7 @@ import {
 import {
   obtenerComprasPorUsuario,
   actualizarEstadoCompra,
+  obtenerCompras,
 } from "../services/compras.service";
 
 // Tipos extras
@@ -323,7 +324,6 @@ const Admin: React.FC = () => {
   // ELIMINAR CUENTA
   // ==========================
   const eliminarCuenta = async (u: Usuario) => {
-    // NUEVO: Confirmación mejorada
     if (!window.confirm(`¿Está seguro de eliminar a ${u.nombre}? Esta acción no se puede deshacer.`)) return;
 
     try {
@@ -376,7 +376,6 @@ const Admin: React.FC = () => {
   };
 
   const handleEliminarProducto = async (id: number) => {
-    // NUEVO: Confirmación mejorada
     if (!window.confirm("¿Está seguro de eliminar este producto? Esta acción no se puede deshacer.")) return;
 
     const prod = productos.find((x) => x.id === id);
@@ -393,9 +392,7 @@ const Admin: React.FC = () => {
     }
   };
 
-  // ==========================
   // COMPRAS DESDE BACKEND
-  // ==========================
   const verDetalleUsuario = async (u: Usuario) => {
     try {
       setProcesando(true);
@@ -411,6 +408,7 @@ const Admin: React.FC = () => {
       setProcesando(false);
     }
   };
+
 
   const cambiarEstadoCompra = async (compra: Compra, estado: EstadoCompra) => {
     try {
@@ -449,11 +447,10 @@ const Admin: React.FC = () => {
     setModalDetalleCompra(compra);
   };
 
-  // ==========================
+
   // SIDEBAR
-  // ==========================
   const [seccionActual, setSeccionActual] = useState<
-    "menu" | "productos" | "estadisticas" | "cuentas" | "historial" | "contacto" | "valoraciones"
+    "menu" | "productos" | "estadisticas" | "cuentas" | "historial" | "contacto" | "valoraciones" | "pedidos"
   >("menu");
 
   const Sidebar = () => (
@@ -468,13 +465,10 @@ const Admin: React.FC = () => {
       <button onClick={() => setSeccionActual("menu")}>Inicio</button>
       <button onClick={() => setSeccionActual("productos")}>Productos</button>
       <button onClick={() => setSeccionActual("cuentas")}>Cuentas</button>
-      <button onClick={() => setSeccionActual("estadisticas")}>
-        Estadísticas
-      </button>
+      <button onClick={() => setSeccionActual("pedidos")}>Pedidos</button>
+      <button onClick={() => setSeccionActual("estadisticas")}>Estadísticas</button>
       <button onClick={() => setSeccionActual("historial")}>Historial</button>
-      <button onClick={() => setSeccionActual("valoraciones")}>
-        Valoraciones
-      </button>
+      <button onClick={() => setSeccionActual("valoraciones")}>Valoraciones</button>
       <button onClick={() => setSeccionActual("contacto")}>Mensajes</button>
 
       <hr />
@@ -495,6 +489,15 @@ const Admin: React.FC = () => {
     </aside>
   );
 
+  // ==========================
+  // ESTADO DE TODAS LAS COMPRAS
+  // ==========================
+  const [todasLasCompras, setTodasLasCompras] = useState<Compra[]>([]);
+
+  useEffect(() => {
+    obtenerCompras().then((data) => setTodasLasCompras(data.reverse()));
+  }, []);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [filtroProductos, setFiltroProductos] = useState("");
 
@@ -512,9 +515,8 @@ const Admin: React.FC = () => {
       <Sidebar />
 
       <main className="admin-content">
-        {/* ==========================
-            DASHBOARD
-        ========================== */}
+
+
         {seccionActual === "menu" && (
           <section className="admin-cards">
             <div className="admin-card-box admin-card-small">
@@ -540,6 +542,7 @@ const Admin: React.FC = () => {
               <p>Ir a la tienda</p>
             </div>
           </section>
+
         )}
 
         {/* ==========================
@@ -647,6 +650,98 @@ const Admin: React.FC = () => {
             <AdminEstadisticas productos={productosEstadistica} />
           </section>
         )}
+        {/* ==========================
+    PEDIDOS
+========================== */}
+        {seccionActual === "pedidos" && (
+          <section>
+            <h2 className="text-center mb-4">Gestión de Pedidos</h2>
+
+            {todasLasCompras.length === 0 ? (
+              <p className="text-center text-muted">
+                No hay pedidos registrados.
+              </p>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-bordered text-center align-middle shadow-sm">
+                  <thead className="table-success">
+                    <tr>
+                      <th>Código</th>
+                      <th>Fecha</th>
+                      <th>Cliente</th>
+                      <th>Total</th>
+                      <th>Estado actual</th>
+                      <th>Cambiar estado</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {todasLasCompras.map((c) => (
+                      <tr key={c.id}>
+                        <td>{c.codigo}</td>
+                        <td>{c.fecha?.replace("T", " ")}</td>
+                        <td>{c.usuario?.nombre || "—"}</td>
+                        <td>${c.total.toLocaleString("es-CL")}</td>
+
+                        {/* ESTADO ACTUAL */}
+                        <td>
+                          <span
+                            className={`badge estado-${(c.estado || "PREPARANDO").toLowerCase()}`}
+                          >
+                            {c.estado || "PREPARANDO"}
+                          </span>
+                        </td>
+
+                        {/* CAMBIAR ESTADO */}
+                        <td>
+                          <select
+                            className="form-select form-select-sm"
+                            value={c.estado || "PREPARANDO"}
+                            disabled={procesando}
+                            onChange={async (e) => {
+                              const nuevoEstado = e.target.value as EstadoCompra;
+
+                              try {
+                                setProcesando(true);
+                                const actualizada = await actualizarEstadoCompra(
+                                  c.id!,
+                                  nuevoEstado
+                                );
+
+                                // Actualizar lista local
+                                setTodasLasCompras((prev) =>
+                                  prev.map((p) =>
+                                    p.id === actualizada.id ? actualizada : p
+                                  )
+                                );
+
+                                registrarAccionCuenta(
+                                  `Actualizó pedido ${c.codigo} → ${nuevoEstado}`
+                                );
+
+                                showToast("Estado del pedido actualizado");
+                              } catch {
+                                showToast("Error actualizando pedido", "error");
+                              } finally {
+                                setProcesando(false);
+                              }
+                            }}
+                          >
+                            <option value="PREPARANDO">Preparando</option>
+                            <option value="EN_CAMINO">En camino</option>
+                            <option value="ENTREGADO">Entregado</option>
+                            <option value="CANCELADO">Cancelado</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+
 
         {/* ==========================
             GESTIÓN DE USUARIOS
@@ -1296,7 +1391,6 @@ const Admin: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL DETALLE DE COMPRA */}
       {/* MODAL DETALLE DE COMPRA */}
       {modalDetalleCompra && (
         <div className="modal-overlay-fixed">

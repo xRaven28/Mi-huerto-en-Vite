@@ -29,7 +29,7 @@ const RestablecerPassword: React.FC = () => {
     try {
       await cambiarPasswordEmail({
         email: form.email,
-        nuevaPassword: form.nueva,  // ✔ lo que espera tu backend
+        newPassword: form.nueva, 
       });
 
       showToast("Contraseña actualizada correctamente ✔");

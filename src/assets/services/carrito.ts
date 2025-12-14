@@ -36,6 +36,7 @@ export const CarritoService = {
       carrito.push({
         ...producto,
         cantidad: 1,
+        stock: producto.stock ?? 0
       });
     }
 
@@ -60,12 +61,22 @@ export const CarritoService = {
   actualizarCantidad(id: number, cantidad: number) {
     const carrito = this.obtener();
     const idx = carrito.findIndex((p) => p.id === id);
+    if (idx < 0) return;
 
-    if (idx >= 0) {
-      carrito[idx].cantidad = cantidad < 1 ? 1 : cantidad;
-      this.guardar(carrito);
+    const producto = carrito[idx];
+
+    if (cantidad > producto.stock) {
+      carrito[idx].cantidad = producto.stock;
+      alert(`Solo quedan ${producto.stock} unidades disponibles.`);
+    } else if (cantidad < 1) {
+      carrito[idx].cantidad = 1;
+    } else {
+      carrito[idx].cantidad = cantidad;
     }
+
+    this.guardar(carrito);
   },
+
 
   cantidadTotal() {
     const carrito = this.obtener();

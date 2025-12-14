@@ -10,6 +10,7 @@ export interface Producto {
   valoraciones?: Valoracion[];
   oferta?: boolean;
   descuento?: number;
+  stock: number;
 }
 
 export interface ProductoCarrito extends Producto {

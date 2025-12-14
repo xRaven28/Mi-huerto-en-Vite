@@ -210,7 +210,7 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   const handleAddToCart = useCallback(
     (producto: Producto) => {
       try {
-        CarritoService.agregar(producto); // ←🔥 REEMPLAZA TODO EL MANEJO MANUAL
+        CarritoService.agregar(producto); 
         onAddToCart();
         mostrarToast("Producto agregado al carrito", "#28a745");
       } catch (err) {
