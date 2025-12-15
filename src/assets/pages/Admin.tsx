@@ -298,27 +298,37 @@ const Admin: React.FC = () => {
     }
   };
 
-  // ==========================
-  // BLOQUEAR / DESBLOQUEAR USUARIO
-  // ==========================
   const cambiarEstadoUsuario = async (u: Usuario) => {
-    try {
-      setProcesando(true);
-      await actualizarUsuario(u.id!, { ...u, bloqueado: !u.bloqueado });
+  try {
+    setProcesando(true);
 
-      registrarAccionCuenta(
-        `${u.bloqueado ? "Desbloqueó" : "Bloqueó"} a ${u.nombre}`
-      );
+    await actualizarUsuario(u.id!, {
+      bloqueado: !u.bloqueado,
+    });
 
-      showToast(u.bloqueado ? "Usuario desbloqueado" : "Usuario bloqueado");
+    setUsuarios((prev) =>
+      prev.map((user) =>
+        user.id === u.id
+          ? { ...user, bloqueado: !user.bloqueado }
+          : user
+      )
+    );
 
-      cargarUsuarios();
-    } catch {
-      showToast("Error actualizando usuario", "error");
-    } finally {
-      setProcesando(false);
-    }
-  };
+    registrarAccionCuenta(
+      `${u.bloqueado ? "Desbloqueó" : "Bloqueó"} a ${u.nombre || u.email}`
+    );
+
+    showToast(
+      u.bloqueado ? "Usuario desbloqueado" : "Usuario bloqueado"
+    );
+  } catch (err) {
+    console.error(err);
+    showToast("Error actualizando usuario", "error");
+  } finally {
+    setProcesando(false);
+  }
+};
+
 
   // ==========================
   // ELIMINAR CUENTA
@@ -789,14 +799,17 @@ const Admin: React.FC = () => {
                       </span>
                     </td>
                     <td>
-                      <button
-                        className={`btn btn-sm ${u.bloqueado ? "btn-success" : "btn-warning"
-                          } me-1`}
-                        onClick={() => cambiarEstadoUsuario(u)}
-                        disabled={procesando}
-                      >
-                        {u.bloqueado ? "Desbloquear" : "Bloquear"}
-                      </button>
+                      {u.id !== usuario?.id && (
+                        <button
+                          className={`btn btn-sm ${u.bloqueado ? "btn-success" : "btn-warning"
+                            } me-1`}
+                          onClick={() => cambiarEstadoUsuario(u)}
+                          disabled={procesando}
+                        >
+                          {u.bloqueado ? "Desbloquear" : "Bloquear"}
+                        </button>
+                      )}
+
 
                       <button
                         className="btn btn-info btn-sm me-1"

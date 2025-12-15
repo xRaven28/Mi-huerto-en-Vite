@@ -207,18 +207,18 @@ const Productos: React.FC<ProductosProps> = ({ onAddToCart, mostrarToast }) => {
   }, [productos, busqueda, categoria, orden]);
 
   /* Agregar al carrito */
-  const handleAddToCart = useCallback(
-    (producto: Producto) => {
-      try {
-        CarritoService.agregar(producto); 
-        onAddToCart();
-        mostrarToast("Producto agregado al carrito", "#28a745");
-      } catch (err) {
-        mostrarToast("Error al agregar producto", "#dc3545");
-      }
-    },
-    [onAddToCart, mostrarToast]
-  );
+const handleAddToCart = useCallback(
+  (producto: Producto) => {
+    try {
+      CarritoService.agregar(producto);
+      onAddToCart(); // SOLO contador / estado global
+    } catch (err) {
+      mostrarToast("Error al agregar producto", "#dc3545");
+    }
+  },
+  [onAddToCart, mostrarToast]
+);
+
 
   /* Paginación */
   const indexOfLast = paginaActual * productosPorPagina;
