@@ -588,7 +588,8 @@ const Admin: React.FC = () => {
                     {productosFiltrados.map((p) => (
                       <tr key={p.id}>
                         <td>{p.name}</td>
-                        <td>${p.precio.toLocaleString("es-CL")}</td>
+                        <td>${(p.precio ?? 0).toLocaleString("es-CL")}</td>
+
                         <td>
                           <span
                             className={`badge ${p.habilitado ? "bg-success" : "bg-danger"
@@ -681,7 +682,7 @@ const Admin: React.FC = () => {
                         <td>{c.codigo}</td>
                         <td>{c.fecha?.replace("T", " ")}</td>
                         <td>{c.usuario?.nombre || "—"}</td>
-                        <td>${c.total.toLocaleString("es-CL")}</td>
+                        <td>${(c.total ?? 0).toLocaleString("es-CL")}</td>
 
                         {/* ESTADO ACTUAL */}
                         <td>
@@ -1253,11 +1254,12 @@ const Admin: React.FC = () => {
                     <strong>Total gastado:</strong> $
                     {(
                       (usuarioSeleccionado as any).compras?.reduce(
-                        (acc: number, c: Compra) => acc + c.total,
+                        (acc: number, c: Compra) => acc + (c.total ?? 0),
                         0
-                      ) || 0
+                      ) ?? 0
                     ).toLocaleString("es-CL")}
                   </p>
+
                 </div>
 
                 {/* TAB COMPRAS */}
@@ -1343,20 +1345,25 @@ const Admin: React.FC = () => {
                       <>
                         <p>
                           <strong>Promedio de gasto:</strong> $
-                          {Math.round(
-                            (usuarioSeleccionado as any).compras.reduce(
-                              (acc: number, c: Compra) => acc + c.total,
+                          {(() => {
+                            const compras = (usuarioSeleccionado as any).compras ?? [];
+
+                            if (compras.length === 0) return "0";
+
+                            const total = compras.reduce(
+                              (acc: number, c: Compra) => acc + (c.total ?? 0),
                               0
-                            ) /
-                            (usuarioSeleccionado as any).compras.length
-                          ).toLocaleString("es-CL")}
+                            );
+
+                            return Math.round(total / compras.length).toLocaleString("es-CL");
+                          })()}
                         </p>
 
                         <p>
                           <strong>Productos comprados:</strong>{" "}
                           {(usuarioSeleccionado as any).compras
                             .flatMap((c: Compra) => c.items || [])
-                            .reduce((acc: number, p: any) => acc + p.cantidad, 0)}
+                            .reduce((acc: number, p: any) => acc + (p.cantidad ?? 0), 0)}
                         </p>
 
                         <p>
@@ -1389,73 +1396,78 @@ const Admin: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      )
+      }
 
       {/* MODAL DETALLE DE COMPRA */}
-      {modalDetalleCompra && (
-        <div className="modal-overlay-fixed">
-          <div className="modal-content">
-            <div className="modal-header bg-primary text-white">
-              <h5 className="modal-title">🧾 Detalle de Compra</h5>
-              <button
-                className="btn-close btn-close-white"
-                onClick={() => setModalDetalleCompra(null)}
-                disabled={procesando}
-              ></button>
-            </div>
+      {
+        modalDetalleCompra && (
+          <div className="modal-overlay-fixed">
+            <div className="modal-content">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title">🧾 Detalle de Compra</h5>
+                <button
+                  className="btn-close btn-close-white"
+                  onClick={() => setModalDetalleCompra(null)}
+                  disabled={procesando}
+                ></button>
+              </div>
 
-            <div className="modal-body">
-              <p className="fw-semibold text-center mb-3">
-                #{modalDetalleCompra.codigo}
-              </p>
-
-              <ul className="list-group mb-3">
-                {(modalDetalleCompra.items || []).map((p: any, i: number) => (
-                  <li
-                    key={i}
-                    className="list-group-item d-flex justify-content-between align-items-center"
-                  >
-                    <span>{p.nombre}</span>
-
-                    <strong className="badge bg-success rounded-pill">
-                      x{p.cantidad}
-                    </strong>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="card p-3 bg-light">
-                <p className="mb-2">
-                  <strong>Total:</strong> ${modalDetalleCompra.total.toLocaleString("es-CL")}
+              <div className="modal-body">
+                <p className="fw-semibold text-center mb-3">
+                  #{modalDetalleCompra.codigo}
                 </p>
 
-                <p className="mb-2">
-                  <strong>Método de pago:</strong> {modalDetalleCompra.metodoPago}
-                </p>
+                <ul className="list-group mb-3">
+                  {(modalDetalleCompra.items || []).map((p: any, i: number) => (
+                    <li
+                      key={i}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <span>{p.nombre}</span>
 
-                <p className="mb-0">
-                  <strong>Estado:</strong>{" "}
-                  <span className="badge bg-info text-dark">
-                    {modalDetalleCompra.estado}
-                  </span>
-                </p>
+                      <strong className="badge bg-success rounded-pill">
+                        x{p.cantidad}
+                      </strong>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="card p-3 bg-light">
+                  <p className="mb-2">
+                    <strong>Total:</strong> $
+                    {(modalDetalleCompra.total ?? 0).toLocaleString("es-CL")}
+
+                  </p>
+
+                  <p className="mb-2">
+                    <strong>Método de pago:</strong> {modalDetalleCompra.metodoPago}
+                  </p>
+
+                  <p className="mb-0">
+                    <strong>Estado:</strong>{" "}
+                    <span className="badge bg-info text-dark">
+                      {modalDetalleCompra.estado}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setModalDetalleCompra(null)}
+                  disabled={procesando}
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
-
-            <div className="modal-footer">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setModalDetalleCompra(null)}
-                disabled={procesando}
-              >
-                Cerrar
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-    </div>
+    </div >
   );
 };
 
